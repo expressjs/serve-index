@@ -67,6 +67,7 @@ var mediaType = {
  * Options:
  *
  *  - `hidden` display hidden (dot) files. Defaults to false.
+ *  - `view` display mode. 'titles' and 'details' are available. Defaults to titles.
  *  - `icons`  display icons. Defaults to false.
  *  - `filter` Apply this filter function to files. Defaults to false.
  *  - `template` Optional path to html template. Defaults to a built-in template.
