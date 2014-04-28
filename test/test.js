@@ -161,6 +161,26 @@ describe('directory()', function(){
     });
   });
 
+  describe('when setting a custom stylesheet', function () {
+    var server;
+    before(function () {
+      server = createServer('test/fixtures', {'stylesheet': __dirname + '/shared/styles.css'});
+    });
+    after(function (done) {
+      server.close(done);
+    });
+
+    it('should respond with appropriate embedded styles', function (done) {
+      request(server)
+      .get('/')
+      .set('Accept', 'text/html')
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(/color: #00ff00;/)
+      .end(done);
+    });
+  });
+
   describe('when set with trailing slash', function () {
     var server;
     before(function () {

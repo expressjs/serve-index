@@ -41,7 +41,7 @@ var defaultTemplate = join(__dirname, 'public', 'directory.html');
  * Stylesheet.
  */
 
-var stylesheet = join(__dirname, 'public', 'style.css');
+var defaultStylesheet = join(__dirname, 'public', 'style.css');
 
 /**
  * Media types and the map for content negotiation.
@@ -93,7 +93,8 @@ exports = module.exports = function directory(root, options){
     , view = options.view || 'tiles'
     , filter = options.filter
     , root = normalize(root + sep)
-    , template = options.template || defaultTemplate;
+    , template = options.template || defaultTemplate
+    , stylesheet = options.stylesheet || defaultStylesheet;
 
   return function directory(req, res, next) {
     if ('GET' != req.method && 'HEAD' != req.method) return next();
@@ -131,7 +132,7 @@ exports = module.exports = function directory(root, options){
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template);
+        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
       });
     });
   };
@@ -141,7 +142,7 @@ exports = module.exports = function directory(root, options){
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template){
+exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
