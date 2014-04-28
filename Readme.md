@@ -2,7 +2,7 @@
 
 Previously `connect.directory()`.
 
-[![Build Status](https://travis-ci.org/expressjs/serve-index.png?branch=master)](https://travis-ci.org/expressjs/serve-index)
+[![Build Status](https://travis-ci.org/expressjs/serve-index.svg?branch=master)](https://travis-ci.org/expressjs/serve-index)
 
 Usage:
 
