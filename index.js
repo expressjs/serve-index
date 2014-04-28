@@ -32,16 +32,13 @@ var Negotiator = require('negotiator');
 var cache = {};
 
 /*!
- * Default template.
+ * Defaults.
  */
-
-var defaultTemplate = join(__dirname, 'public', 'directory.html');
-
-/*!
- * Stylesheet.
- */
-
-var defaultStylesheet = join(__dirname, 'public', 'style.css');
+var defaults = {
+	view: 'tiles',
+	template: join(__dirname, 'public', 'directory.html'),
+	stylesheet: join(__dirname, 'public', 'style.css')
+};
 
 /**
  * Media types and the map for content negotiation.
@@ -67,10 +64,11 @@ var mediaType = {
  * Options:
  *
  *  - `hidden` display hidden (dot) files. Defaults to false.
- *  - `view` display mode. 'titles' and 'details' are available. Defaults to titles.
+ *  - `view` display mode. 'tiles' and 'details' are available. Defaults to tiles.
  *  - `icons`  display icons. Defaults to false.
  *  - `filter` Apply this filter function to files. Defaults to false.
  *  - `template` Optional path to html template. Defaults to a built-in template.
+ *  -	`stylesheet` Optional path to css stylesheet. Defaults to built-in CSS or custom CSS if stylesheet option is provided
  *    The following tokens are replaced:
  *      - `{directory}` with the name of the directory.
  *      - `{files}` with the HTML of an unordered list of file links.
@@ -89,12 +87,14 @@ exports = module.exports = function directory(root, options){
   // root required
   if (!root) throw new Error('directory() root path required');
   var hidden = options.hidden
-    , icons = options.icons
-    , view = options.view || 'tiles'
     , filter = options.filter
-    , root = normalize(root + sep)
-    , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet;
+    , root = normalize(root + sep);
+
+  ['view', 'template', 'stylesheet'].forEach(function(key){
+  	if(options[key] === undefined) {
+  		options[key] = defaults[key];
+  	}
+  });
 
   return function directory(req, res, next) {
     if ('GET' != req.method && 'HEAD' != req.method) return next();
@@ -132,7 +132,7 @@ exports = module.exports = function directory(root, options){
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        exports[mediaType[type]](req, res, files, next, originalDir, showUp, path, options);
       });
     });
   };
@@ -142,10 +142,10 @@ exports = module.exports = function directory(root, options){
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
-  fs.readFile(template, 'utf8', function(err, str){
+exports.html = function(req, res, files, next, dir, showUp, path, options){
+  fs.readFile(options.template, 'utf8', function(err, str){
     if (err) return next(err);
-    fs.readFile(stylesheet, 'utf8', function(err, style){
+    fs.readFile(options.stylesheet, 'utf8', function(err, style){
       if (err) return next(err);
       stat(path, files, function(err, stats){
         if (err) return next(err);
@@ -153,8 +153,8 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         files.sort(fileSort);
         if (showUp) files.unshift({ name: '..' });
         str = str
-          .replace('{style}', style.concat(iconStyle(files, icons)))
-          .replace('{files}', html(files, dir, icons, view))
+          .replace('{style}', style.concat(iconStyle(files, options.icons)))
+          .replace('{files}', html(files, dir, options.icons, options.view))
           .replace('{directory}', dir)
           .replace('{linked-path}', htmlPath(dir));
         res.setHeader('Content-Type', 'text/html');
