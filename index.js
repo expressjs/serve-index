@@ -1,6 +1,6 @@
 
 /*!
- * Connect - directory
+ * Expressjs | Connect - directory
  * Copyright(c) 2011 Sencha Inc.
  * Copyright(c) 2011 TJ Holowaychuk
  * Copyright(c) 2014 Douglas Christopher Wilson
@@ -60,27 +60,13 @@ var mediaType = {
 };
 
 /**
- * Directory:
- *
  * Serve directory listings with the given `root` path.
  *
- * Options:
+ * See Readme.md for documentation of options.
  *
- *  - `hidden` display hidden (dot) files. Defaults to false.
- *  - `view` display mode. 'tiles' and 'details' are available. Defaults to tiles.
- *  - `icons`  display icons. Defaults to false.
- *  - `filter` Apply this filter function to files. Defaults to false.
- *  - `template` Optional path to html template. Defaults to a built-in template.
- *  - `stylesheet` Optional path to CSS stylesheet. Defaults to a built-in stylesheet.
- *    The following tokens are replaced:
- *      - `{directory}` with the name of the directory.
- *      - `{files}` with the HTML of an unordered list of file links.
- *      - `{linked-path}` with the HTML of a link to the directory.
- *      - `{style}` with the specified stylesheet and embedded images.
- *
- * @param {String} root
+ * @param {String} path
  * @param {Object} options
- * @return {Function}
+ * @return {Function} middleware
  * @api public
  */
 

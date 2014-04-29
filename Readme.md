@@ -1,20 +1,36 @@
-# Serve Index
+# serve-index [![Build Status](https://travis-ci.org/expressjs/serve-index.svg?branch=master)](https://travis-ci.org/expressjs/serve-index) [![NPM version](https://badge.fury.io/js/serve-index.svg)](http://badge.fury.io/js/serve-index)
 
-Previously `connect.directory()`.
+  Serves pages that contain directory listings for a given path.
 
-[![Build Status](https://travis-ci.org/expressjs/serve-index.svg?branch=master)](https://travis-ci.org/expressjs/serve-index)
-
-Usage:
+## API
 
 ```js
-var connect = require('connect');
-var serveIndex = require('serve-index');
+var express   = require('express')
+var directory = require('serve-index')
 
-var app = connect();
+var app = express()
 
-app.use(serveIndex('public/ftp', {'icons': true}));
-app.listen();
+app.use(directory('public/ftp', {'icons': true}))
+app.listen()
 ```
+
+### directory(path, options)
+
+  Returns middlware that serves an index of the directory in the given `path`.
+
+#### Options
+
+  - `hidden` - display hidden (dot) files. Defaults to `false`.
+  - `view` - display mode. `tiles` and `details` are available. Defaults to `tiles`.
+  - `icons` - display icons. Defaults to `false`.
+  - `filter` - Apply this filter function to files. Defaults to `false`.
+  - `stylesheet` - Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
+  - `template` - Optional path to an HTML template. Defaults to a built-in template.
+    - The following tokens are replaced in templates:
+    - `{directory}` with the name of the directory.
+    - `{files}` with the HTML of an unordered list of file links.
+    - `{linked-path}` with the HTML of a link to the directory.
+    - `{style}` with the specified stylesheet and embedded images.
 
 ## License
 
