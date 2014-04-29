@@ -67,15 +67,16 @@ var mediaType = {
  * Options:
  *
  *  - `hidden` display hidden (dot) files. Defaults to false.
- *  - `view` display mode. 'titles' and 'details' are available. Defaults to titles.
+ *  - `view` display mode. 'tiles' and 'details' are available. Defaults to tiles.
  *  - `icons`  display icons. Defaults to false.
  *  - `filter` Apply this filter function to files. Defaults to false.
  *  - `template` Optional path to html template. Defaults to a built-in template.
+ *  - `stylesheet` Optional path to CSS stylesheet. Defaults to a built-in stylesheet.
  *    The following tokens are replaced:
  *      - `{directory}` with the name of the directory.
  *      - `{files}` with the HTML of an unordered list of file links.
  *      - `{linked-path}` with the HTML of a link to the directory.
- *      - `{style}` with the built-in CSS and embedded images.
+ *      - `{style}` with the specified stylesheet and embedded images.
  *
  * @param {String} root
  * @param {Object} options
