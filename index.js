@@ -81,7 +81,8 @@ exports = module.exports = function directory(root, options){
     , filter = options.filter
     , root = normalize(root + sep)
     , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet;
+    , stylesheet = options.stylesheet || defaultStylesheet
+    , customOutput = options.customOutput || false;
 
   return function directory(req, res, next) {
     if ('GET' != req.method && 'HEAD' != req.method) return next();
@@ -119,7 +120,12 @@ exports = module.exports = function directory(root, options){
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        // call customOutput fn if provided
+        if (customOutput[mediaType[type]]) {
+          customOutput[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        } else {
+          exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        }
       });
     });
   };

@@ -4,6 +4,7 @@ process.env.NODE_ENV = 'test';
 var connect = require('connect');
 var request = require('supertest');
 var serveIndex = require('..');
+var fs = require('fs');
 
 describe('directory()', function(){
   describe('when given Accept: header', function () {
@@ -177,6 +178,45 @@ describe('directory()', function(){
       .expect(200)
       .expect('Content-Type', /html/)
       .expect(/color: #00ff00;/)
+      .end(done);
+    });
+  });
+
+  describe('when setting a customOutput function', function () {
+    var server;
+    before(function () {
+      server = createServer('test/fixtures',
+        { customOutput:
+          {  html:
+            function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+              fs.readFile(template, 'utf8', function(err, str){
+                if (err) return next(err);
+                var filesStr = '<h1>Custom Output</h1>';
+                filesStr += files.map(function(file){ return '<p>' + file + '</p>'});
+                str = str.replace('{files}', filesStr);
+                res.setHeader('Content-Type', 'text/html');
+                res.setHeader('Content-Length', str.length);
+                res.end(str);
+              });
+            }
+          }
+      });
+    });
+    after(function (done) {
+      server.close(done);
+    });
+
+    it('should respond with customized output', function (done) {
+      request(server)
+      .get('/')
+      .set('Accept', 'text/html')
+      .expect(200)
+      .expect('Content-Type', /html/)
+      .expect(/<h1>Custom Output<\/h1>/)
+      .expect(/<p>g# %3 o %2525 %37 dir<\/p>/)
+      .expect(/<p>users<\/p>/)
+      .expect(/<p>file #1.txt<\/p>/)
+      .expect(/<p>todo.txt<\/p>/)
       .end(done);
     });
   });
