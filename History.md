@@ -1,5 +1,5 @@
-unreleased
-==========
+1.0.3 / 2014-05-20
+==================
 
   * Fix error from non-statable files in HTML view
 
