@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Fix error from non-statable files in HTML view
+
 1.0.2 / 2014-04-28
 ==================
 

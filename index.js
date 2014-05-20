@@ -281,9 +281,12 @@ function html(files, dir, useIcons, view) {
 
     path.push(encodeURIComponent(file.name));
 
-    var date = file.name == '..' ? ''
-      : file.stat.mtime.toDateString()+' '+file.stat.mtime.toLocaleTimeString();
-    var size = isDir ? '' : file.stat.size;
+    var date = file.stat && file.name !== '..'
+      ? file.stat.mtime.toDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
+      : '';
+    var size = file.stat && !isDir
+      ? file.stat.size
+      : '';
 
     return '<li><a href="'
       + normalizeSlashes(normalize(path.join('/')))
@@ -351,7 +354,14 @@ function stat(dir, files, cb) {
 
   files.forEach(function(file){
     batch.push(function(done){
-      fs.stat(join(dir, file), done);
+      fs.stat(join(dir, file), function(err, stat){
+        if (err && err.code !== 'ENOENT') {
+          // pass ENOENT as null stat, not error
+          return done(err);
+        }
+
+        done(null, stat || null);
+      });
     });
   });
 
