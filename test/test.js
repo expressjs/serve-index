@@ -53,6 +53,18 @@ describe('directory()', function(){
       });
     });
 
+    describe('of application/x-custom-test', function() {
+      it('should respond using the custom handler', function (done) {
+        serveIndex.mediaTypes['application/x-custom-test'] = function(req, res) { res.end('successful!'); };
+        request(server)
+        .get('/')
+        .set('Accept', 'application/x-custom-test')
+        .expect(200)
+        .expect('successful!')
+        .end(done);
+      });
+    });
+
     describe('when Accept: text/html is given', function () {
       it('should respond with html', function (done) {
         request(server)
