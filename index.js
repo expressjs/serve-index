@@ -115,7 +115,7 @@ exports = module.exports = function directory(root, options){
         files.sort();
 
         // content-negotiation
-        var type = new Negotiator(req).preferredMediaType(mediaTypes);
+        var type = new Negotiator(req).mediaType(mediaTypes);
 
         // not acceptable
         if (!type) return next(createError(406));
