@@ -15,7 +15,7 @@ describe('directory()', function(){
       server.close(done);
     });
 
-    describe('of application/json', function () {
+    describe('when Accept: application/json is given', function () {
       it('should respond with json', function (done) {
         request(server)
         .get('/')
@@ -31,6 +31,25 @@ describe('directory()', function(){
           res.body.should.include('todo.txt');
           done();
         });
+      });
+
+      it('should support custom handler', function (done) {
+        var orig = serveIndex.json;
+
+        serveIndex.json = function (req, res, files) {
+          var text = files
+            .filter(function (f) { return /\.txt$/.test(f); })
+            .sort();
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ text: text }));
+          serveIndex.json = orig;
+        };
+
+        request(server)
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200, '{"text":["file #1.txt","todo.txt"]}', done);
       });
     });
 
@@ -69,6 +88,25 @@ describe('directory()', function(){
           done();
         });
       });
+
+      it('should support custom handler', function (done) {
+        var orig = serveIndex.html;
+
+        serveIndex.html = function (req, res, files) {
+          var text = files
+            .filter(function (f) { return /\.txt$/.test(f); })
+            .sort();
+          res.setHeader('Content-Type', 'text/html');
+          res.end('<b>' + text.length + ' text files</b>');
+          serveIndex.html = orig;
+        };
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect('Content-Type', /html/)
+        .expect(200, '<b>2 text files</b>', done);
+      });
     });
 
     describe('when Accept: text/plain is given', function () {
@@ -83,6 +121,25 @@ describe('directory()', function(){
         .expect(/file #1.txt/)
         .expect(/todo.txt/)
         .end(done);
+      });
+
+      it('should support custom handler', function (done) {
+        var orig = serveIndex.plain;
+
+        serveIndex.plain = function (req, res, files) {
+          var text = files
+            .filter(function (f) { return /\.txt$/.test(f); })
+            .sort();
+          res.setHeader('Content-Type', 'text/plain');
+          res.end(text.join('\n'));
+          serveIndex.plain = orig;
+        };
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/plain')
+        .expect('Content-Type', /plain/)
+        .expect(200, 'file #1.txt\ntodo.txt', done);
       });
     });
   });
