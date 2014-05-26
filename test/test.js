@@ -11,9 +11,6 @@ describe('directory()', function(){
     before(function () {
       server = createServer();
     });
-    after(function (done) {
-      server.close(done);
-    });
 
     describe('when Accept: application/json is given', function () {
       it('should respond with json', function (done) {
@@ -144,13 +141,27 @@ describe('directory()', function(){
     });
   });
 
+  describe('when a custom handler is given', function() {
+    var server;
+    before(function () {
+      server = createServer();
+      serveIndex.mediaTypes['application/x-custom-test'] = function(req, res) { res.end('successful!'); };
+    });
+
+    it('should respond using the custom handler', function (done) {
+      request(server)
+      .get('/')
+      .set('Accept', 'application/x-custom-test')
+      .expect(200)
+      .expect('successful!')
+      .end(done);
+    });
+  });
+
   describe('when navigating to other directory', function () {
     var server;
     before(function () {
       server = createServer();
-    });
-    after(function (done) {
-      server.close(done);
     });
 
     it('should respond with correct listing', function (done) {
@@ -199,9 +210,6 @@ describe('directory()', function(){
     before(function () {
       server = createServer('test/fixtures', {'template': __dirname + '/shared/template.html'});
     });
-    after(function (done) {
-      server.close(done);
-    });
 
     it('should respond with file list and testing template sentence', function (done) {
       request(server)
@@ -223,9 +231,6 @@ describe('directory()', function(){
     before(function () {
       server = createServer('test/fixtures', {'stylesheet': __dirname + '/shared/styles.css'});
     });
-    after(function (done) {
-      server.close(done);
-    });
 
     it('should respond with appropriate embedded styles', function (done) {
       request(server)
@@ -242,9 +247,6 @@ describe('directory()', function(){
     var server;
     before(function () {
       server = createServer('test/fixtures/');
-    });
-    after(function (done) {
-      server.close(done);
     });
 
     it('should respond with file list', function (done) {
@@ -268,9 +270,6 @@ describe('directory()', function(){
     var server;
     before(function () {
       server = createServer('.');
-    });
-    after(function (done) {
-      server.close(done);
     });
 
     it('should respond with file list', function (done) {

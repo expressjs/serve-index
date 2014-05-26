@@ -44,22 +44,6 @@ var defaultTemplate = join(__dirname, 'public', 'directory.html');
 var defaultStylesheet = join(__dirname, 'public', 'style.css');
 
 /**
- * Media types and the map for content negotiation.
- */
-
-var mediaTypes = [
-  'text/html',
-  'text/plain',
-  'application/json'
-];
-
-var mediaType = {
-  'text/html': 'html',
-  'text/plain': 'plain',
-  'application/json': 'json'
-};
-
-/**
  * Serve directory listings with the given `root` path.
  *
  * See Readme.md for documentation of options.
@@ -115,21 +99,31 @@ exports = module.exports = function directory(root, options){
         files.sort();
 
         // content-negotiation
-        var type = new Negotiator(req).preferredMediaType(mediaTypes);
+        var type = new Negotiator(req).mediaType(Object.keys(exports.mediaTypes));
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        exports.mediaTypes[type](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
       });
     });
   };
 };
 
 /**
+ * Media types and the map for content negotiation.
+ *
+ * This is populated later with text/html, application/json,
+ * and text/plain.
+ */
+
+exports.mediaTypes = {
+};
+
+/**
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+exports.mediaTypes['text/html'] = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
@@ -156,7 +150,7 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
  * Respond with application/json.
  */
 
-exports.json = function(req, res, files){
+exports.mediaTypes['application/json'] = function(req, res, files){
   files = JSON.stringify(files);
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Length', files.length);
@@ -167,12 +161,30 @@ exports.json = function(req, res, files){
  * Respond with text/plain.
  */
 
-exports.plain = function(req, res, files){
+exports.mediaTypes['text/plain'] = function(req, res, files){
   files = files.join('\n') + '\n';
   res.setHeader('Content-Type', 'text/plain');
   res.setHeader('Content-Length', files.length);
   res.end(files);
 };
+
+/**
+ * Keep backwards compatibility by aliasing .html, .json, and .plain
+ * to .mediaTypes[<type>]
+ */
+
+Object.defineProperty(exports, 'html', {
+  get: function() { return exports.mediaTypes['text/html']; },
+  set: function(val) { exports.mediaTypes['text/html'] = val; },
+});
+Object.defineProperty(exports, 'json', {
+  get: function() { return exports.mediaTypes['application/json']; },
+  set: function(val) { exports.mediaTypes['application/json'] = val; },
+});
+Object.defineProperty(exports, 'plain', {
+  get: function() { return exports.mediaTypes['text/plain']; },
+  set: function(val) { exports.mediaTypes['text/plain'] = val; },
+});
 
 /**
  * Generate an `Error` from the given status `code`
