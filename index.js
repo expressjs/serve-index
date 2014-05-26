@@ -123,7 +123,7 @@ exports.mediaTypes = {
  * Respond with text/html.
  */
 
-exports.mediaTypes['text/html'] = exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+exports.mediaTypes['text/html'] = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
@@ -150,7 +150,7 @@ exports.mediaTypes['text/html'] = exports.html = function(req, res, files, next,
  * Respond with application/json.
  */
 
-exports.mediaTypes['application/json'] = exports.json = function(req, res, files){
+exports.mediaTypes['application/json'] = function(req, res, files){
   files = JSON.stringify(files);
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Length', files.length);
@@ -161,12 +161,30 @@ exports.mediaTypes['application/json'] = exports.json = function(req, res, files
  * Respond with text/plain.
  */
 
-exports.mediaTypes['text/plain'] = exports.plain = function(req, res, files){
+exports.mediaTypes['text/plain'] = function(req, res, files){
   files = files.join('\n') + '\n';
   res.setHeader('Content-Type', 'text/plain');
   res.setHeader('Content-Length', files.length);
   res.end(files);
 };
+
+/**
+ * Keep backwards compatibility by aliasing .html, .json, and .plain
+ * to .mediaTypes[<type>]
+ */
+
+Object.defineProperty(exports, 'html', {
+  get: function() { return exports.mediaTypes['text/html']; },
+  set: function(val) { exports.mediaTypes['text/html'] = val; },
+});
+Object.defineProperty(exports, 'json', {
+  get: function() { return exports.mediaTypes['application/json']; },
+  set: function(val) { exports.mediaTypes['application/json'] = val; },
+});
+Object.defineProperty(exports, 'plain', {
+  get: function() { return exports.mediaTypes['text/plain']; },
+  set: function(val) { exports.mediaTypes['text/plain'] = val; },
+});
 
 /**
  * Generate an `Error` from the given status `code`
