@@ -1,6 +1,7 @@
 
 var http = require('http');
 var request = require('supertest');
+var should = require('should');
 var serveIndex = require('..');
 
 describe('directory()', function(){
