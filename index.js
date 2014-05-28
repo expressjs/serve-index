@@ -1,6 +1,6 @@
 
 /*!
- * Expressjs | Connect - directory
+ * serve-index
  * Copyright(c) 2011 Sencha Inc.
  * Copyright(c) 2011 TJ Holowaychuk
  * Copyright(c) 2014 Douglas Christopher Wilson

@@ -1,22 +1,14 @@
 
-process.env.NODE_ENV = 'test';
-
-var connect = require('connect');
+var http = require('http');
 var request = require('supertest');
 var serveIndex = require('..');
 
 describe('directory()', function(){
   describe('when given Accept: header', function () {
-    var server;
-    before(function () {
-      server = createServer();
-    });
-    after(function (done) {
-      server.close(done);
-    });
-
     describe('when Accept: application/json is given', function () {
       it('should respond with json', function (done) {
+        var server = createServer()
+
         request(server)
         .get('/')
         .set('Accept', 'application/json')
@@ -35,6 +27,7 @@ describe('directory()', function(){
 
       it('should support custom handler', function (done) {
         var orig = serveIndex.json;
+        var server = createServer()
 
         serveIndex.json = function (req, res, files) {
           var text = files
@@ -55,6 +48,8 @@ describe('directory()', function(){
 
     describe('when Accept: text/html is given', function () {
       it('should respond with html', function (done) {
+        var server = createServer()
+
         request(server)
         .get('/')
         .set('Accept', 'text/html')
@@ -68,6 +63,8 @@ describe('directory()', function(){
       });
 
       it('should sort folders first', function (done) {
+        var server = createServer()
+
         request(server)
         .get('/')
         .set('Accept', 'text/html')
@@ -91,6 +88,7 @@ describe('directory()', function(){
 
       it('should support custom handler', function (done) {
         var orig = serveIndex.html;
+        var server = createServer()
 
         serveIndex.html = function (req, res, files) {
           var text = files
@@ -111,6 +109,8 @@ describe('directory()', function(){
 
     describe('when Accept: text/plain is given', function () {
       it('should respond with text', function (done) {
+        var server = createServer()
+
         request(server)
         .get('/')
         .set('Accept', 'text/plain')
@@ -125,6 +125,7 @@ describe('directory()', function(){
 
       it('should support custom handler', function (done) {
         var orig = serveIndex.plain;
+        var server = createServer()
 
         serveIndex.plain = function (req, res, files) {
           var text = files
@@ -145,15 +146,9 @@ describe('directory()', function(){
   });
 
   describe('when navigating to other directory', function () {
-    var server;
-    before(function () {
-      server = createServer();
-    });
-    after(function (done) {
-      server.close(done);
-    });
-
     it('should respond with correct listing', function (done) {
+      var server = createServer()
+
       request(server)
       .get('/users/')
       .set('Accept', 'text/html')
@@ -165,6 +160,8 @@ describe('directory()', function(){
     });
 
     it('should work for directory with #', function (done) {
+      var server = createServer()
+
       request(server)
       .get('/%23directory/')
       .set('Accept', 'text/html')
@@ -176,6 +173,8 @@ describe('directory()', function(){
     });
 
     it('should work for directory with special chars', function (done) {
+      var server = createServer()
+
       request(server)
       .get('/g%23%20%253%20o%20%252525%20%2537%20dir/')
       .set('Accept', 'text/html')
@@ -187,6 +186,8 @@ describe('directory()', function(){
     });
 
     it('should not work for outside root', function (done) {
+      var server = createServer()
+
       request(server)
       .get('/../support/')
       .set('Accept', 'text/html')
@@ -198,9 +199,6 @@ describe('directory()', function(){
     var server;
     before(function () {
       server = createServer('test/fixtures', {'template': __dirname + '/shared/template.html'});
-    });
-    after(function (done) {
-      server.close(done);
     });
 
     it('should respond with file list and testing template sentence', function (done) {
@@ -223,9 +221,6 @@ describe('directory()', function(){
     before(function () {
       server = createServer('test/fixtures', {'stylesheet': __dirname + '/shared/styles.css'});
     });
-    after(function (done) {
-      server.close(done);
-    });
 
     it('should respond with appropriate embedded styles', function (done) {
       request(server)
@@ -242,9 +237,6 @@ describe('directory()', function(){
     var server;
     before(function () {
       server = createServer('test/fixtures/');
-    });
-    after(function (done) {
-      server.close(done);
     });
 
     it('should respond with file list', function (done) {
@@ -268,9 +260,6 @@ describe('directory()', function(){
     var server;
     before(function () {
       server = createServer('.');
-    });
-    after(function (done) {
-      server.close(done);
     });
 
     it('should respond with file list', function (done) {
@@ -298,8 +287,14 @@ describe('directory()', function(){
 });
 
 function createServer(dir, opts) {
-  var app = connect();
-  dir = dir || 'test/fixtures';
-  app.use(serveIndex(dir, opts));
-  return app.listen();
+  dir = dir || 'test/fixtures'
+
+  var _serveIndex = serveIndex(dir, opts)
+
+  return http.createServer(function (req, res) {
+    _serveIndex(req, res, function (err) {
+      res.statusCode = err ? (err.status || 500) : 404
+      res.end(err ? err.mesage : 'Not Found')
+    })
+  })
 }
