@@ -89,7 +89,7 @@ exports = module.exports = function directory(root, options){
     var url = parse(req.url)
       , dir = decodeURIComponent(url.pathname)
       , path = normalize(join(root, dir))
-      , originalUrl = parse(req.originalUrl)
+      , originalUrl = parse(req.originalUrl || req.url)
       , originalDir = decodeURIComponent(originalUrl.pathname)
       , showUp = path != root;
 
