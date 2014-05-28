@@ -221,7 +221,10 @@ describe('directory()', function(){
   describe('when setting a custom stylesheet', function () {
     var server;
     before(function () {
-      server = createServer('test/fixtures', {'stylesheet': __dirname + '/shared/styles.css'});
+      server = createServer('test/fixtures', {
+        'stylesheet': __dirname + '/shared/styles.css',
+        'template': __dirname + '/shared/template.html'
+      });
     });
     after(function (done) {
       server.close(done);
@@ -235,6 +238,16 @@ describe('directory()', function(){
       .expect('Content-Type', /html/)
       .expect(/color: #00ff00;/)
       .end(done);
+    });
+
+    it('should respond with appropriate style sheet', function (done) {
+      request(server)
+        .get('/?css%2Fcss')
+        .set('Accept', 'text/html')
+        .expect(200)
+        .expect('Content-Type', /html/)
+        .expect(/color: #00ff00;/)
+        .end(done);
     });
   });
 

@@ -44,7 +44,7 @@ var defaultTemplate = join(__dirname, 'public', 'directory.html');
 var defaultStylesheet = join(__dirname, 'public', 'style.css');
 
 /*!
- * Stylesheet.
+ * Javascript.
  */
 
 var defaultScript = join(__dirname, 'public', 'script.js');
