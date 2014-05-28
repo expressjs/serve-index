@@ -43,18 +43,28 @@ var defaultTemplate = join(__dirname, 'public', 'directory.html');
 
 var defaultStylesheet = join(__dirname, 'public', 'style.css');
 
+/*!
+ * Stylesheet.
+ */
+
+var defaultScript = join(__dirname, 'public', 'script.js');
+
 /**
  * Media types and the map for content negotiation.
  */
 
 var mediaTypes = [
+  'text/css',
   'text/html',
+  'text/javascript',
   'text/plain',
   'application/json'
 ];
 
 var mediaType = {
+  'text/css': 'css',
   'text/html': 'html',
+  'text/javascript': 'javascript',
   'text/plain': 'plain',
   'application/json': 'json'
 };
@@ -81,7 +91,8 @@ exports = module.exports = function directory(root, options){
     , filter = options.filter
     , root = normalize(root + sep)
     , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet;
+    , stylesheet = options.stylesheet || defaultStylesheet
+    , script = options.script || defaultScript;
 
   return function directory(req, res, next) {
     if ('GET' != req.method && 'HEAD' != req.method) return next();
@@ -117,9 +128,14 @@ exports = module.exports = function directory(root, options){
         // content-negotiation
         var type = new Negotiator(req).preferredMediaType(mediaTypes);
 
+        // take custom types from the url
+        // e.g /?text/css
+        var mediaTypeFromUrl = req.url.replace(/^.+\?/, '');
+        if (mediaTypes.indexOf(mediaTypeFromUrl) !== -1) type = mediaTypeFromUrl;
+
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, script);
       });
     });
   };
@@ -149,6 +165,41 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         res.end(str);
       });
     });
+  });
+};
+
+/**
+ * Respond with text/css.
+ */
+
+exports.css = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+  fs.readFile(stylesheet, 'utf8', function (err, style) {
+    if (err) return next(err);
+    stat(path, files, function (err, stats){
+      if (err) return next(err);
+      files = files.map(function (file, i){
+        return { name: file, stat: stats[i] };
+      });
+      files.sort(fileSort);
+      if (showUp) files.unshift({ name: '..' });
+      var str = style.concat(iconStyle(files, icons));
+      res.setHeader('Content-Type', 'text/css');
+      res.setHeader('Content-Length', str.length);
+      res.end(str);
+    });
+  });
+};
+
+/**
+ * Respond with text/javascript.
+ */
+
+exports.javascript = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, script){
+  fs.readFile(script, 'utf8', function (err, script){
+    if (err) return next(err);
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Content-Length', script.length);
+    res.end(script);
   });
 };
 
