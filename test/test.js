@@ -46,6 +46,42 @@ describe('serveIndex(root)', function () {
     .expect(405, done)
   })
 
+  it('should deny path will NULL byte', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/%00')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(400, done)
+  })
+
+  it('should deny path outside root', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/../')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(403, done)
+  })
+
+  it('should skip non-existent paths', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/bogus')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(404, 'Not Found', done)
+  })
+
+  it('should skip non-directories', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/nums')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(404, 'Not Found', done)
+  })
+
   describe('when given Accept: header', function () {
     describe('when Accept: application/json is given', function () {
       it('should respond with json', function (done) {
