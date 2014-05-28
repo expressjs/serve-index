@@ -129,8 +129,8 @@ exports = module.exports = function directory(root, options){
         var type = new Negotiator(req).preferredMediaType(mediaTypes);
 
         // take custom types from the url
-        // e.g /?text/css
-        var mediaTypeFromUrl = req.url.replace(/^.+\?/, '');
+        // e.g /?get=text/css
+        var mediaTypeFromUrl = req.url.replace(/^.+\?get=/, '').replace(/%2F/g, '/');
         if (mediaTypes.indexOf(mediaTypeFromUrl) !== -1) type = mediaTypeFromUrl;
 
         // not acceptable
