@@ -70,11 +70,12 @@ var mediaType = {
  * @api public
  */
 
-exports = module.exports = function directory(root, options){
+exports = module.exports = function serveIndex(root, options){
   options = options || {};
 
   // root required
-  if (!root) throw new Error('directory() root path required');
+  if (!root) throw new TypeError('serveIndex() root path required');
+
   var hidden = options.hidden
     , icons = options.icons
     , view = options.view || 'tiles'
@@ -83,7 +84,7 @@ exports = module.exports = function directory(root, options){
     , template = options.template || defaultTemplate
     , stylesheet = options.stylesheet || defaultStylesheet;
 
-  return function directory(req, res, next) {
+  return function serveIndex(req, res, next) {
     if ('GET' != req.method && 'HEAD' != req.method) return next();
 
     var url = parse(req.url)

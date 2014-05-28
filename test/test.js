@@ -4,7 +4,11 @@ var request = require('supertest');
 var should = require('should');
 var serveIndex = require('..');
 
-describe('directory()', function(){
+describe('serveIndex(root)', function () {
+  it('should require root', function () {
+    serveIndex.should.throw(/root path required/)
+  })
+
   describe('when given Accept: header', function () {
     describe('when Accept: application/json is given', function () {
       it('should respond with json', function (done) {
