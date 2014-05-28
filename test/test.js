@@ -9,6 +9,43 @@ describe('serveIndex(root)', function () {
     serveIndex.should.throw(/root path required/)
   })
 
+  it('should serve a directory index', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(200, /todo\.txt/, done)
+  })
+
+  it('should work with HEAD requests', function (done) {
+    var server = createServer()
+
+    request(server)
+    .head('/')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(200, '', done)
+  })
+
+  it('should work with OPTIONS requests', function (done) {
+    var server = createServer()
+
+    request(server)
+    .options('/')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect('Allow', 'GET, HEAD, OPTIONS')
+    .expect(200, done)
+  })
+
+  it('should deny POST requests', function (done) {
+    var server = createServer()
+
+    request(server)
+    .post('/')
+    .set('Accept', 'text/html, */*;q=0.5')
+    .expect(405, done)
+  })
+
   describe('when given Accept: header', function () {
     describe('when Accept: application/json is given', function () {
       it('should respond with json', function (done) {

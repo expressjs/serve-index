@@ -85,7 +85,12 @@ exports = module.exports = function serveIndex(root, options){
     , stylesheet = options.stylesheet || defaultStylesheet;
 
   return function serveIndex(req, res, next) {
-    if ('GET' != req.method && 'HEAD' != req.method) return next();
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      var status = 'OPTIONS' === req.method ? 200 : 405;
+      res.writeHead(status, {'Allow': 'GET, HEAD, OPTIONS'});
+      res.end();
+      return;
+    }
 
     var url = parse(req.url)
       , dir = decodeURIComponent(url.pathname)

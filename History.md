@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Properly support all HTTP methods
   * Support vanilla node.js http servers
 
 1.0.3 / 2014-05-20
