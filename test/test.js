@@ -145,7 +145,8 @@ describe('directory()', function(){
     var server;
     before(function () {
       server = createServer();
-      serveIndex.mediaTypes['application/x-custom-test'] = function(req, res) { res.end('successful!'); };
+      serveIndex.mediaType['application/x-custom-test'] = function(req, res) { res.end('successful!'); };
+      serveIndex.mediaTypes.push('application/x-custom-test');
     });
 
     it('should respond using the custom handler', function (done) {
