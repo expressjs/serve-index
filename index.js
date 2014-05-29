@@ -86,8 +86,10 @@ exports = module.exports = function serveIndex(root, options){
 
   return function serveIndex(req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
-      var status = 'OPTIONS' === req.method ? 200 : 405;
-      res.writeHead(status, {'Allow': 'GET, HEAD, OPTIONS'});
+      res.statusCode = 'OPTIONS' === req.method
+        ? 200
+        : 405;
+      res.setHeader('Allow', 'GET, HEAD, OPTIONS');
       res.end();
       return;
     }
