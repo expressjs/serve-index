@@ -4,6 +4,7 @@ unreleased
   * Fix content negotiation when no `Accept` header
   * Properly support all HTTP methods
   * Support vanilla node.js http servers
+  * Treat `ENAMETOOLONG` as code 414
 
 1.0.3 / 2014-05-20
 ==================

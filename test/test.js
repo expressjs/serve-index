@@ -75,6 +75,15 @@ describe('serveIndex(root)', function () {
     .expect(404, 'Not Found', done)
   })
 
+  it('should treat an ENAMETOOLONG as a 414', function (done) {
+    var path = Array(11000).join('foobar')
+    var server = createServer()
+
+    request(server)
+    .get('/' + path)
+    .expect(414, done)
+  })
+
   it('should skip non-directories', function (done) {
     var server = createServer()
 
@@ -373,7 +382,7 @@ function createServer(dir, opts) {
   return http.createServer(function (req, res) {
     _serveIndex(req, res, function (err) {
       res.statusCode = err ? (err.status || 500) : 404
-      res.end(err ? err.mesage : 'Not Found')
+      res.end(err ? err.message : 'Not Found')
     })
   })
 }

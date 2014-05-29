@@ -109,9 +109,16 @@ exports = module.exports = function serveIndex(root, options){
 
     // check if we have a directory
     fs.stat(path, function(err, stat){
-      if (err) return 'ENOENT' == err.code
-        ? next()
-        : next(err);
+      if (err && err.code === 'ENOENT') {
+        return next();
+      }
+
+      if (err) {
+        err.status = err.code === 'ENAMETOOLONG'
+          ? 414
+          : 500;
+        return next(err);
+      }
 
       if (!stat.isDirectory()) return next();
 
