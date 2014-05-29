@@ -9,12 +9,20 @@ describe('serveIndex(root)', function () {
     serveIndex.should.throw(/root path required/)
   })
 
+  it('should serve text/html without Accept header', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/')
+    .expect('Content-Type', 'text/html')
+    .expect(200, done)
+  })
+
   it('should serve a directory index', function (done) {
     var server = createServer()
 
     request(server)
     .get('/')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(200, /todo\.txt/, done)
   })
 
@@ -23,7 +31,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .head('/')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(200, '', done)
   })
 
@@ -32,7 +39,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .options('/')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect('Allow', 'GET, HEAD, OPTIONS')
     .expect(200, done)
   })
@@ -42,7 +48,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .post('/')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(405, done)
   })
 
@@ -51,7 +56,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .get('/%00')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(400, done)
   })
 
@@ -60,7 +64,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .get('/../')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(403, done)
   })
 
@@ -69,7 +72,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .get('/bogus')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(404, 'Not Found', done)
   })
 
@@ -78,7 +80,6 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .get('/nums')
-    .set('Accept', 'text/html, */*;q=0.5')
     .expect(404, 'Not Found', done)
   })
 

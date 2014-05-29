@@ -121,7 +121,9 @@ exports = module.exports = function serveIndex(root, options){
         files.sort();
 
         // content-negotiation
-        var type = new Negotiator(req).preferredMediaType(mediaTypes);
+        var type = req.headers.accept === undefined
+          ? mediaTypes[0]
+          : new Negotiator(req).preferredMediaType(mediaTypes);
 
         // not acceptable
         if (!type) return next(createError(406));

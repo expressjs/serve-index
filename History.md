@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Fix content negotiation when no `Accept` header
   * Properly support all HTTP methods
   * Support vanilla node.js http servers
 
