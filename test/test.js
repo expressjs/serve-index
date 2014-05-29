@@ -101,17 +101,13 @@ describe('serveIndex(root)', function () {
         request(server)
         .get('/')
         .set('Accept', 'application/json')
-        .expect(200)
         .expect('Content-Type', /json/)
-        .end(function (err, res) {
-          if (err) throw err;
-          res.body.should.include('g# %3 o %2525 %37 dir');
-          res.body.should.include('users');
-          res.body.should.include('file #1.txt');
-          res.body.should.include('nums');
-          res.body.should.include('todo.txt');
-          done();
-        });
+        .expect(/g# %3 o %2525 %37 dir/)
+        .expect(/users/)
+        .expect(/file #1\.txt/)
+        .expect(/nums/)
+        .expect(/todo\.txt/)
+        .expect(200, done)
       });
     });
 
@@ -193,7 +189,7 @@ describe('serveIndex(root)', function () {
       .get('/')
       .expect(200, function (err, res) {
         if (err) return done(err)
-        res.text.should.not.include('.hidden')
+        res.text.should.not.containEql('.hidden')
         done()
       });
     });
@@ -205,7 +201,7 @@ describe('serveIndex(root)', function () {
       .get('/')
       .expect(200, function (err, res) {
         if (err) return done(err)
-        res.text.should.not.include('.hidden')
+        res.text.should.not.containEql('.hidden')
         done()
       });
     });
@@ -215,11 +211,7 @@ describe('serveIndex(root)', function () {
 
       request(server)
       .get('/')
-      .expect(200, function (err, res) {
-        if (err) return done(err)
-        res.text.should.include('.hidden')
-        done()
-      });
+      .expect(200, /\.hidden/, done)
     });
   });
 
@@ -239,7 +231,7 @@ describe('serveIndex(root)', function () {
       .expect(200, function (err, res) {
         if (err) return done(err)
         seen.should.be.true
-        res.text.should.not.include('foo')
+        res.text.should.not.containEql('foo')
         done()
       });
     });
@@ -528,16 +520,12 @@ describe('serveIndex(root)', function () {
       request(server)
       .get('/')
       .set('Accept', 'application/json')
-      .expect(200)
       .expect('Content-Type', /json/)
-      .end(function (err, res) {
-        if (err) throw err;
-        res.body.should.include('users');
-        res.body.should.include('file #1.txt');
-        res.body.should.include('nums');
-        res.body.should.include('todo.txt');
-        done();
-      });
+      .expect(/users/)
+      .expect(/file #1\.txt/)
+      .expect(/nums/)
+      .expect(/todo\.txt/)
+      .expect(200, done)
     });
   });
 
@@ -551,15 +539,11 @@ describe('serveIndex(root)', function () {
       request(server)
       .get('/')
       .set('Accept', 'application/json')
-      .expect(200)
       .expect('Content-Type', /json/)
-      .end(function (err, res) {
-        if (err) throw err;
-        res.body.should.include('LICENSE');
-        res.body.should.include('public');
-        res.body.should.include('test');
-        done();
-      });
+      .expect(/LICENSE/)
+      .expect(/public/)
+      .expect(/test/)
+      .expect(200, done)
     });
 
     it('should not allow serving outside root', function (done) {
