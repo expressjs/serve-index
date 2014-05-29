@@ -1,5 +1,5 @@
-unreleased
-==========
+1.1.0 / 2014-05-29
+==================
 
   * Fix content negotiation when no `Accept` header
   * Properly support all HTTP methods
