@@ -14,6 +14,7 @@
  * Module dependencies.
  */
 
+var accepts = require('accepts');
 var http = require('http')
   , fs = require('fs')
   , parse = require('url').parse
@@ -23,7 +24,6 @@ var http = require('http')
   , extname = path.extname
   , join = path.join;
 var Batch = require('batch');
-var Negotiator = require('negotiator');
 
 /*!
  * Icon cache.
@@ -130,9 +130,8 @@ exports = module.exports = function serveIndex(root, options){
         files.sort();
 
         // content-negotiation
-        var type = req.headers.accept === undefined
-          ? mediaTypes[0]
-          : new Negotiator(req).preferredMediaType(mediaTypes);
+        var accept = accepts(req);
+        var type = accept.types(mediaTypes);
 
         // not acceptable
         if (!type) return next(createError(406));
