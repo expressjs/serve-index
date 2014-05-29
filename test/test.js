@@ -1,5 +1,6 @@
 
 var http = require('http');
+var fs = require('fs');
 var request = require('supertest');
 var should = require('should');
 var serveIndex = require('..');
@@ -112,26 +113,6 @@ describe('serveIndex(root)', function () {
           done();
         });
       });
-
-      it('should support custom handler', function (done) {
-        var orig = serveIndex.json;
-        var server = createServer()
-
-        serveIndex.json = function (req, res, files) {
-          var text = files
-            .filter(function (f) { return /\.txt$/.test(f); })
-            .sort();
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ text: text }));
-          serveIndex.json = orig;
-        };
-
-        request(server)
-        .get('/')
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200, '{"text":["file #1.txt","todo.txt"]}', done);
-      });
     });
 
     describe('when Accept: text/html is given', function () {
@@ -173,26 +154,6 @@ describe('serveIndex(root)', function () {
           done();
         });
       });
-
-      it('should support custom handler', function (done) {
-        var orig = serveIndex.html;
-        var server = createServer()
-
-        serveIndex.html = function (req, res, files) {
-          var text = files
-            .filter(function (f) { return /\.txt$/.test(f); })
-            .sort();
-          res.setHeader('Content-Type', 'text/html');
-          res.end('<b>' + text.length + ' text files</b>');
-          serveIndex.html = orig;
-        };
-
-        request(server)
-        .get('/')
-        .set('Accept', 'text/html')
-        .expect('Content-Type', /html/)
-        .expect(200, '<b>2 text files</b>', done);
-      });
     });
 
     describe('when Accept: text/plain is given', function () {
@@ -210,25 +171,250 @@ describe('serveIndex(root)', function () {
         .expect(/todo.txt/)
         .end(done);
       });
+    });
 
-      it('should support custom handler', function (done) {
-        var orig = serveIndex.plain;
+    describe('when Accept: application/x-bogus is given', function () {
+      it('should respond with 406', function (done) {
+        var server = createServer()
+
+        request(server)
+        .get('/')
+        .set('Accept', 'application/x-bogus')
+        .expect(406, done)
+      });
+    });
+  });
+
+  describe('with "hidden" option', function () {
+    it('should filter hidden files by default', function (done) {
+      var server = createServer()
+
+      request(server)
+      .get('/')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        res.text.should.not.include('.hidden')
+        done()
+      });
+    });
+
+    it('should filter hidden files', function (done) {
+      var server = createServer('test/fixtures', {'hidden': false})
+
+      request(server)
+      .get('/')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        res.text.should.not.include('.hidden')
+        done()
+      });
+    });
+
+    it('should not filter hidden files', function (done) {
+      var server = createServer('test/fixtures', {'hidden': true})
+
+      request(server)
+      .get('/')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        res.text.should.include('.hidden')
+        done()
+      });
+    });
+  });
+
+  describe('with "filter" option', function () {
+    it('should custom filter files', function (done) {
+      var seen = false
+      var server = createServer('test/fixtures', {'filter': filter})
+
+      function filter(name) {
+        if (name.indexOf('foo') === -1) return true
+        seen = true
+        return false
+      }
+
+      request(server)
+      .get('/')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        seen.should.be.true
+        res.text.should.not.include('foo')
+        done()
+      });
+    });
+
+    it('should filter after hidden filter', function (done) {
+      var seen = false
+      var server = createServer('test/fixtures', {'filter': filter, 'hidden': false})
+
+      function filter(name) {
+        seen = seen || name.indexOf('.') === 0
+        return true
+      }
+
+      request(server)
+      .get('/')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        seen.should.be.false
+        done()
+      });
+    });
+  });
+
+  describe('with "icons" option', function () {
+    it('should include icons for html', function (done) {
+      var server = createServer('test/fixtures', {'icons': true})
+
+      request(server)
+      .get('/')
+      .expect(/data:image\/png/)
+      .expect(/icon-default/)
+      .expect(/icon-directory/)
+      .expect(/icon-txt/)
+      .expect(200, done)
+    });
+  });
+
+  describe('when using custom handler', function () {
+    describe('exports.html', function () {
+      var orig = serveIndex.html
+      after(function () {
+        serveIndex.html = orig
+      })
+
+      it('should get called with Accept: text/html', function (done) {
+        var server = createServer()
+
+        serveIndex.html = function (req, res, files) {
+          res.setHeader('Content-Type', 'text/html');
+          res.end('called');
+        }
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200, 'called', done)
+      });
+
+      it('should get file list', function (done) {
+        var server = createServer()
+
+        serveIndex.html = function (req, res, files) {
+          var text = files
+            .filter(function (f) { return /\.txt$/.test(f) })
+            .sort()
+          res.setHeader('Content-Type', 'text/html')
+          res.end('<b>' + text.length + ' text files</b>')
+        }
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200, '<b>2 text files</b>', done)
+      });
+
+      it('should get dir name', function (done) {
+        var server = createServer()
+
+        serveIndex.html = function (req, res, files, next, dir) {
+          res.setHeader('Content-Type', 'text/html')
+          res.end('<b>' + dir + '</b>')
+        }
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, '<b>/users/</b>', done)
+      });
+
+      it('should get template path', function (done) {
+        var server = createServer()
+
+        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+          res.setHeader('Content-Type', 'text/html')
+          res.end(String(fs.existsSync(template)))
+        }
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, 'true', done)
+      });
+
+      it('should get template with tokens', function (done) {
+        var server = createServer()
+
+        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+          res.setHeader('Content-Type', 'text/html')
+          res.end(fs.readFileSync(template, 'utf8'))
+        }
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(/{directory}/)
+        .expect(/{files}/)
+        .expect(/{linked-path}/)
+        .expect(/{style}/)
+        .expect(200, done)
+      });
+
+      it('should get stylesheet path', function (done) {
+        var server = createServer()
+
+        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+          res.setHeader('Content-Type', 'text/html')
+          res.end(String(fs.existsSync(stylesheet)))
+        }
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, 'true', done)
+      });
+    });
+
+    describe('exports.plain', function () {
+      var orig = serveIndex.plain
+      after(function () {
+        serveIndex.plain = orig
+      })
+
+      it('should get called with Accept: text/plain', function (done) {
         var server = createServer()
 
         serveIndex.plain = function (req, res, files) {
-          var text = files
-            .filter(function (f) { return /\.txt$/.test(f); })
-            .sort();
           res.setHeader('Content-Type', 'text/plain');
-          res.end(text.join('\n'));
-          serveIndex.plain = orig;
-        };
+          res.end('called');
+        }
 
         request(server)
         .get('/')
         .set('Accept', 'text/plain')
-        .expect('Content-Type', /plain/)
-        .expect(200, 'file #1.txt\ntodo.txt', done);
+        .expect(200, 'called', done)
+      });
+    });
+
+    describe('exports.json', function () {
+      var orig = serveIndex.json
+      after(function () {
+        serveIndex.json = orig
+      })
+
+      it('should get called with Accept: application/json', function (done) {
+        var server = createServer()
+
+        serveIndex.json = function (req, res, files) {
+          res.setHeader('Content-Type', 'application/json');
+          res.end('"called"');
+        }
+
+        request(server)
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect(200, '"called"', done)
       });
     });
   });
@@ -289,18 +475,29 @@ describe('serveIndex(root)', function () {
       server = createServer('test/fixtures', {'template': __dirname + '/shared/template.html'});
     });
 
-    it('should respond with file list and testing template sentence', function (done) {
+    it('should respond with file list', function (done) {
       request(server)
       .get('/')
       .set('Accept', 'text/html')
-      .expect(200)
-      .expect('Content-Type', /html/)
       .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir"/)
       .expect(/<a href="\/users"/)
       .expect(/<a href="\/file%20%231.txt"/)
       .expect(/<a href="\/todo.txt"/)
-      .expect(/This is the test template/)
-      .end(done);
+      .expect(200, done)
+    });
+
+    it('should respond with testing template sentence', function (done) {
+      request(server)
+      .get('/')
+      .set('Accept', 'text/html')
+      .expect(200, /This is the test template/, done)
+    });
+
+    it('should have default styles', function (done) {
+      request(server)
+      .get('/')
+      .set('Accept', 'text/html')
+      .expect(200, /ul#files/, done)
     });
   });
 
