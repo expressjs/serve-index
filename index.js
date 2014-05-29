@@ -99,11 +99,11 @@ exports = module.exports = function directory(root, options){
         files.sort();
 
         // content-negotiation
-        var type = new Negotiator(req).mediaType(Object.keys(exports.mediaTypes));
+        var type = new Negotiator(req).mediaType(exports.mediaTypes);
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports.mediaTypes[type](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        exports.mediaType[type](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
       });
     });
   };
@@ -114,16 +114,19 @@ exports = module.exports = function directory(root, options){
  *
  * This is populated later with text/html, application/json,
  * and text/plain.
+ *
+ * For every handler in .mediaType, you must add an item to
+ * .mediaTypes, ordered by priority from highest to lowest.
  */
 
-exports.mediaTypes = {
+exports.mediaType = {
 };
 
 /**
  * Respond with text/html.
  */
 
-exports.mediaTypes['text/html'] = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+exports.mediaType['text/html'] = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
@@ -150,7 +153,7 @@ exports.mediaTypes['text/html'] = function(req, res, files, next, dir, showUp, i
  * Respond with application/json.
  */
 
-exports.mediaTypes['application/json'] = function(req, res, files){
+exports.mediaType['application/json'] = function(req, res, files){
   files = JSON.stringify(files);
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Length', files.length);
@@ -161,7 +164,7 @@ exports.mediaTypes['application/json'] = function(req, res, files){
  * Respond with text/plain.
  */
 
-exports.mediaTypes['text/plain'] = function(req, res, files){
+exports.mediaType['text/plain'] = function(req, res, files){
   files = files.join('\n') + '\n';
   res.setHeader('Content-Type', 'text/plain');
   res.setHeader('Content-Length', files.length);
@@ -174,17 +177,26 @@ exports.mediaTypes['text/plain'] = function(req, res, files){
  */
 
 Object.defineProperty(exports, 'html', {
-  get: function() { return exports.mediaTypes['text/html']; },
-  set: function(val) { exports.mediaTypes['text/html'] = val; },
+  get: function() { return exports.mediaType['text/html']; },
+  set: function(val) { exports.mediaType['text/html'] = val; },
 });
 Object.defineProperty(exports, 'json', {
-  get: function() { return exports.mediaTypes['application/json']; },
-  set: function(val) { exports.mediaTypes['application/json'] = val; },
+  get: function() { return exports.mediaType['application/json']; },
+  set: function(val) { exports.mediaType['application/json'] = val; },
 });
 Object.defineProperty(exports, 'plain', {
-  get: function() { return exports.mediaTypes['text/plain']; },
-  set: function(val) { exports.mediaTypes['text/plain'] = val; },
+  get: function() { return exports.mediaType['text/plain']; },
+  set: function(val) { exports.mediaType['text/plain'] = val; },
 });
+
+/**
+ * Set the ordered priorities for the media types
+ */
+exports.mediaTypes = [
+	'text/html',
+	'application/json',
+	'text/plain',
+];
 
 /**
  * Generate an `Error` from the given status `code`
