@@ -10,15 +10,15 @@
 
 ```js
 var express   = require('express')
-var directory = require('serve-index')
+var serveIndex = require('serve-index')
 
 var app = express()
 
-app.use(directory('public/ftp', {'icons': true}))
+app.use(serveIndex('public/ftp', {'icons': true}))
 app.listen()
 ```
 
-### directory(path, options)
+### serveIndex(path, options)
 
   Returns middlware that serves an index of the directory in the given `path`.
 
