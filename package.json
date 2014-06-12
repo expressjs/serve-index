@@ -4,13 +4,7 @@
   "version": "1.1.0",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/expressjs/serve-index.git"
-  },
-  "bugs": {
-    "url": "https://github.com/expressjs/serve-index/issues"
-  },
+  "repository": "expressjs/serve-index",
   "dependencies": {
     "accepts": "1.0.2",
     "batch": "0.5.0"
