@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": "expressjs/serve-index",
   "dependencies": {
-    "accepts": "1.0.3",
+    "accepts": "1.0.4",
     "batch": "0.5.1"
   },
   "devDependencies": {
