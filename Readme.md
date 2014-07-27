@@ -3,6 +3,7 @@
 [![NPM version](https://badge.fury.io/js/serve-index.svg)](http://badge.fury.io/js/serve-index)
 [![Build Status](https://travis-ci.org/expressjs/serve-index.svg?branch=master)](https://travis-ci.org/expressjs/serve-index)
 [![Coverage Status](https://img.shields.io/coveralls/expressjs/serve-index.svg?branch=master)](https://coveralls.io/r/expressjs/serve-index)
+[![Gittip](http://img.shields.io/gittip/dougwilson.svg)](https://www.gittip.com/dougwilson/)
 
   Serves pages that contain directory listings for a given path.
 
