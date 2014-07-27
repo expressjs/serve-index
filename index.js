@@ -160,9 +160,10 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
           .replace('{files}', html(files, dir, icons, view))
           .replace('{directory}', dir)
           .replace('{linked-path}', htmlPath(dir));
+        var buf = new Buffer(str);
         res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Content-Length', str.length);
-        res.end(str);
+        res.setHeader('Content-Length', buf.length);
+        res.end(buf);
       });
     });
   });
@@ -174,9 +175,10 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
 
 exports.json = function(req, res, files){
   files = JSON.stringify(files);
+  var buf = new Buffer(files);
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Length', files.length);
-  res.end(files);
+  res.setHeader('Content-Length', buf.length);
+  res.end(buf);
 };
 
 /**
@@ -185,9 +187,10 @@ exports.json = function(req, res, files){
 
 exports.plain = function(req, res, files){
   files = files.join('\n') + '\n';
+  var buf = new Buffer(files);
   res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Content-Length', files.length);
-  res.end(files);
+  res.setHeader('Content-Length', buf.length);
+  res.end(buf);
 };
 
 /**
