@@ -1,5 +1,5 @@
-unreleased
-==========
+1.1.5 / 2014-07-27
+==================
 
   * Fix Content-Length calculation for multi-byte file names
   * deps: accepts@~1.0.7
