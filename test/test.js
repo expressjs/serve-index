@@ -146,6 +146,7 @@ describe('serveIndex(root)', function () {
             '/foo%20bar',
             '/nums',
             '/todo.txt',
+            '/%E3%81%95%E3%81%8F%E3%82%89.txt'
           ]);
           done();
         });
@@ -304,7 +305,7 @@ describe('serveIndex(root)', function () {
         request(server)
         .get('/')
         .set('Accept', 'text/html')
-        .expect(200, '<b>2 text files</b>', done)
+        .expect(200, '<b>3 text files</b>', done)
       });
 
       it('should get dir name', function (done) {
