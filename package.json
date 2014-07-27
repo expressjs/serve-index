@@ -10,7 +10,7 @@
     "batch": "0.5.1"
   },
   "devDependencies": {
-    "istanbul": "0.2.11",
+    "istanbul": "0.3.0",
     "mocha": "~1.21.1",
     "should": "~4.0.0",
     "supertest": "~0.13.0"
