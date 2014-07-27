@@ -15,7 +15,7 @@ describe('serveIndex(root)', function () {
 
     request(server)
     .get('/')
-    .expect('Content-Type', 'text/html')
+    .expect('Content-Type', 'text/html; charset=utf-8')
     .expect(200, done)
   })
 
@@ -107,6 +107,7 @@ describe('serveIndex(root)', function () {
         .expect(/file #1\.txt/)
         .expect(/nums/)
         .expect(/todo\.txt/)
+        .expect(/さくら\.txt/)
         .expect(200, done)
       });
     });
@@ -119,11 +120,12 @@ describe('serveIndex(root)', function () {
         .get('/')
         .set('Accept', 'text/html')
         .expect(200)
-        .expect('Content-Type', /html/)
+        .expect('Content-Type', 'text/html; charset=utf-8')
         .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir"/)
         .expect(/<a href="\/users"/)
         .expect(/<a href="\/file%20%231.txt"/)
         .expect(/<a href="\/todo.txt"/)
+        .expect(/<a href="\/%E3%81%95%E3%81%8F%E3%82%89\.txt"/)
         .end(done);
       });
 
@@ -134,7 +136,7 @@ describe('serveIndex(root)', function () {
         .get('/')
         .set('Accept', 'text/html')
         .expect(200)
-        .expect('Content-Type', /html/)
+        .expect('Content-Type', 'text/html; charset=utf-8')
         .end(function (err, res) {
           if (err) throw err;
           var urls = res.text.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
@@ -146,6 +148,7 @@ describe('serveIndex(root)', function () {
             '/foo%20bar',
             '/nums',
             '/todo.txt',
+            '/%E3%81%95%E3%81%8F%E3%82%89.txt'
           ]);
           done();
         });
@@ -160,11 +163,12 @@ describe('serveIndex(root)', function () {
         .get('/')
         .set('Accept', 'text/plain')
         .expect(200)
-        .expect('Content-Type', /plain/)
+        .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect(/users/)
         .expect(/g# %3 o %2525 %37 dir/)
         .expect(/file #1.txt/)
         .expect(/todo.txt/)
+        .expect(/さくら\.txt/)
         .end(done);
       });
     });
@@ -304,7 +308,7 @@ describe('serveIndex(root)', function () {
         request(server)
         .get('/')
         .set('Accept', 'text/html')
-        .expect(200, '<b>2 text files</b>', done)
+        .expect(200, '<b>3 text files</b>', done)
       });
 
       it('should get dir name', function (done) {
@@ -419,7 +423,7 @@ describe('serveIndex(root)', function () {
       .get('/users/')
       .set('Accept', 'text/html')
       .expect(200)
-      .expect('Content-Type', /html/)
+      .expect('Content-Type', 'text/html; charset=utf-8')
       .expect(/<a href="\/users\/index.html"/)
       .expect(/<a href="\/users\/tobi.txt"/)
       .end(done);
@@ -432,7 +436,7 @@ describe('serveIndex(root)', function () {
       .get('/%23directory/')
       .set('Accept', 'text/html')
       .expect(200)
-      .expect('Content-Type', /html/)
+      .expect('Content-Type', 'text/html; charset=utf-8')
       .expect(/<a href="\/%23directory"/)
       .expect(/<a href="\/%23directory\/index.html"/)
       .end(done);
@@ -445,7 +449,7 @@ describe('serveIndex(root)', function () {
       .get('/g%23%20%253%20o%20%252525%20%2537%20dir/')
       .set('Accept', 'text/html')
       .expect(200)
-      .expect('Content-Type', /html/)
+      .expect('Content-Type', 'text/html; charset=utf-8')
       .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir"/)
       .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir\/empty.txt"/)
       .end(done);
@@ -504,7 +508,7 @@ describe('serveIndex(root)', function () {
       .get('/')
       .set('Accept', 'text/html')
       .expect(200)
-      .expect('Content-Type', /html/)
+      .expect('Content-Type', 'text/html; charset=utf-8')
       .expect(/color: #00ff00;/)
       .end(done);
     });

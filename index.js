@@ -160,9 +160,11 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
           .replace('{files}', html(files, dir, icons, view))
           .replace('{directory}', dir)
           .replace('{linked-path}', htmlPath(dir));
-        res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Content-Length', str.length);
-        res.end(str);
+
+        var buf = new Buffer(str, 'utf8');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Length', buf.length);
+        res.end(buf);
       });
     });
   });
@@ -173,10 +175,12 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
  */
 
 exports.json = function(req, res, files){
-  files = JSON.stringify(files);
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Length', files.length);
-  res.end(files);
+  var body = JSON.stringify(files);
+  var buf = new Buffer(body, 'utf8');
+
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Length', buf.length);
+  res.end(buf);
 };
 
 /**
@@ -184,10 +188,12 @@ exports.json = function(req, res, files){
  */
 
 exports.plain = function(req, res, files){
-  files = files.join('\n') + '\n';
-  res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Content-Length', files.length);
-  res.end(files);
+  var body = files.join('\n') + '\n';
+  var buf = new Buffer(body, 'utf8');
+
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Length', buf.length);
+  res.end(buf);
 };
 
 /**

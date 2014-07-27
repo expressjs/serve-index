@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Fix Content-Length calculation for multi-byte file names
+
 1.1.4 / 2014-06-20
 ==================
 
