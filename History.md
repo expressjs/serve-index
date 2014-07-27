@@ -2,6 +2,8 @@ unreleased
 ==========
 
   * Fix Content-Length calculation for multi-byte file names
+  * deps: accepts@~1.0.7
+    - deps: negotiator@0.4.7
 
 1.1.4 / 2014-06-20
 ==================
