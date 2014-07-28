@@ -82,7 +82,8 @@ exports = module.exports = function serveIndex(root, options){
     , filter = options.filter
     , root = normalize(root + sep)
     , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet;
+    , stylesheet = options.stylesheet || defaultStylesheet
+    , up = options.up || '..';
 
   return function serveIndex(req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -99,7 +100,7 @@ exports = module.exports = function serveIndex(root, options){
       , path = normalize(join(root, dir))
       , originalUrl = parse(req.originalUrl || req.url)
       , originalDir = decodeURIComponent(originalUrl.pathname)
-      , showUp = path != root;
+      , showUp = path != root ? up : false;
 
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400));
@@ -154,7 +155,7 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         if (err) return next(err);
         files = files.map(function(file, i){ return { name: file, stat: stats[i] }; });
         files.sort(fileSort);
-        if (showUp) files.unshift({ name: '..' });
+        if (showUp) files.unshift({ name: (typeof showUp == 'string' ? showUp : '..') });
         str = str
           .replace('{style}', style.concat(iconStyle(files, icons)))
           .replace('{files}', html(files, dir, icons, view))

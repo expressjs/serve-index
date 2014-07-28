@@ -185,6 +185,31 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "up" option', function () {
+    it('should not show it in the root', function (done) {
+      var server = createServer(false, { up: 'goup' })
+
+      request(server)
+      .get('/')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        res.text.should.not.containEql('goup')
+        done()
+      });
+    });
+
+    it('should show the correct label', function (done) {
+      var server = createServer(false, { up: 'goup' })
+
+      request(server)
+      .get('/users')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        res.text.should.containEql('goup')
+        done()
+      });
+    });
+  });
   describe('with "hidden" option', function () {
     it('should filter hidden files by default', function (done) {
       var server = createServer()
