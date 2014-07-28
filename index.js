@@ -155,7 +155,7 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         if (err) return next(err);
         files = files.map(function(file, i){ return { name: file, stat: stats[i] }; });
         files.sort(fileSort);
-        if (showUp) files.unshift({ name: showUp });
+        if (showUp) files.unshift({ name: (typeof showUp == 'string' ? showUp : '..') });
         str = str
           .replace('{style}', style.concat(iconStyle(files, icons)))
           .replace('{files}', html(files, dir, icons, view))
