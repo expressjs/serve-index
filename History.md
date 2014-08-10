@@ -1,5 +1,5 @@
-unreleased
-==========
+1.1.6 / 2014-08-10
+==================
 
   * Fix URL parsing
   * deps: parseurl@~1.3.0
