@@ -17,13 +17,13 @@
 var accepts = require('accepts');
 var http = require('http')
   , fs = require('fs')
-  , parse = require('url').parse
   , path = require('path')
   , normalize = path.normalize
   , sep = path.sep
   , extname = path.extname
   , join = path.join;
 var Batch = require('batch');
+var parseUrl = require('parseurl');
 
 /*!
  * Icon cache.
@@ -94,10 +94,12 @@ exports = module.exports = function serveIndex(root, options){
       return;
     }
 
-    var url = parse(req.url)
-      , dir = decodeURIComponent(url.pathname)
+    // parse URLs
+    var url = parseUrl(req);
+    var originalUrl = parseUrl.original(req);
+
+    var dir = decodeURIComponent(url.pathname)
       , path = normalize(join(root, dir))
-      , originalUrl = parse(req.originalUrl || req.url)
       , originalDir = decodeURIComponent(originalUrl.pathname)
       , showUp = path != root;
 
