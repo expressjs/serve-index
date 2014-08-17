@@ -7,21 +7,26 @@
 
   Serves pages that contain directory listings for a given path.
 
+## Install
+
+```sh
+$ npm install serve-index
+```
+
 ## API
 
 ```js
-var express   = require('express')
 var serveIndex = require('serve-index')
-
-var app = express()
-
-app.use(serveIndex('public/ftp', {'icons': true}))
-app.listen()
 ```
 
 ### serveIndex(path, options)
 
-  Returns middlware that serves an index of the directory in the given `path`.
+Returns middlware that serves an index of the directory in the given `path`.
+
+The `path` is based off the `req.url` value, so a `req.url` of `'/some/dir`
+with a `path` of `'public'` will look at `'public/some/dir'`. If you are using
+something like `express`, you can change the URL "base" with `app.use` (see
+the express example).
 
 #### Options
 
@@ -36,6 +41,48 @@ app.listen()
     - `{files}` with the HTML of an unordered list of file links.
     - `{linked-path}` with the HTML of a link to the directory.
     - `{style}` with the specified stylesheet and embedded images.
+
+## Examples
+
+### Serve directory indexes with vanilla node.js http server
+
+```js
+var finalhandler = require('finalhandler')
+var http = require('http')
+var serveIndex = require('serve-index')
+var serveStatic = require('serve-static')
+
+// Serve directory indexes for public/ftp folder (with icons)
+var index = serveIndex('public/ftp', {'icons': true})
+
+// Serve up public/ftp folder files
+var serve = serveStatic('public/ftp')
+
+// Create server
+var server = http.createServer(function onRequest(req, res){
+  var done = finalhandler(req, res)
+  serve(req, res, function onNext(err) {
+    if (err) return done(err)
+    index(req, res, done)
+  })
+})
+
+// Listen
+server.listen(3000)
+```
+
+### Serve directory indexes with express
+
+```js
+var express    = require('express')
+var serveIndex = require('serve-index')
+
+var app = express()
+
+// Serve URLs like /ftp/thing as public/ftp/thing
+app.use('/ftp', serveIndex('public/ftp', {'icons': true}))
+app.listen()
+```
 
 ## License
 
