@@ -31,17 +31,38 @@ the express example).
 
 #### Options
 
-  - `hidden` - display hidden (dot) files. Defaults to `false`.
-  - `view` - display mode. `tiles` and `details` are available. Defaults to `tiles`.
-  - `icons` - display icons. Defaults to `false`.
-  - `filter` - Apply this filter function to files. Defaults to `false`.
-  - `stylesheet` - Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
-  - `template` - Optional path to an HTML template. Defaults to a built-in template.
-    - The following tokens are replaced in templates:
-    - `{directory}` with the name of the directory.
-    - `{files}` with the HTML of an unordered list of file links.
-    - `{linked-path}` with the HTML of a link to the directory.
-    - `{style}` with the specified stylesheet and embedded images.
+Serve index accepts these properties in the options object.
+
+##### filter
+
+Apply this filter function to files. Defaults to `false`.
+
+##### hidden
+
+Display hidden (dot) files. Defaults to `false`.
+
+##### icons
+
+Display icons. Defaults to `false`.
+
+##### stylesheet
+
+Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
+
+##### template
+
+Optional path to an HTML template. Defaults to a built-in template.
+
+The following tokens are replaced in templates:
+
+  * `{directory}` with the name of the directory.
+  * `{files}` with the HTML of an unordered list of file links.
+  * `{linked-path}` with the HTML of a link to the directory.
+  * `{style}` with the specified stylesheet and embedded images.
+
+##### view
+
+Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
 ## Examples
 
