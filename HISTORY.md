@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Resolve relative paths at middleware setup
+
 1.1.6 / 2014-08-10
 ==================
 

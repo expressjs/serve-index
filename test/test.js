@@ -1,9 +1,15 @@
 
 var http = require('http');
 var fs = require('fs');
+var path = require('path');
 var request = require('supertest');
 var should = require('should');
 var serveIndex = require('..');
+
+var fixtures = path.join(__dirname, '/fixtures');
+var relative = path.relative(process.cwd(), fixtures);
+
+var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relative;
 
 describe('serveIndex(root)', function () {
   it('should require root', function () {
@@ -222,7 +228,7 @@ describe('serveIndex(root)', function () {
   describe('with "filter" option', function () {
     it('should custom filter files', function (done) {
       var seen = false
-      var server = createServer('test/fixtures', {'filter': filter})
+      var server = createServer(fixtures, {'filter': filter})
 
       function filter(name) {
         if (name.indexOf('foo') === -1) return true
@@ -242,7 +248,7 @@ describe('serveIndex(root)', function () {
 
     it('should filter after hidden filter', function (done) {
       var seen = false
-      var server = createServer('test/fixtures', {'filter': filter, 'hidden': false})
+      var server = createServer(fixtures, {'filter': filter, 'hidden': false})
 
       function filter(name) {
         seen = seen || name.indexOf('.') === 0
@@ -261,7 +267,7 @@ describe('serveIndex(root)', function () {
 
   describe('with "icons" option', function () {
     it('should include icons for html', function (done) {
-      var server = createServer('test/fixtures', {'icons': true})
+      var server = createServer(fixtures, {'icons': true})
 
       request(server)
       .get('/')
@@ -468,7 +474,7 @@ describe('serveIndex(root)', function () {
   describe('when setting a custom template', function () {
     var server;
     before(function () {
-      server = createServer('test/fixtures', {'template': __dirname + '/shared/template.html'});
+      server = createServer(fixtures, {'template': __dirname + '/shared/template.html'});
     });
 
     it('should respond with file list', function (done) {
@@ -500,7 +506,7 @@ describe('serveIndex(root)', function () {
   describe('when setting a custom stylesheet', function () {
     var server;
     before(function () {
-      server = createServer('test/fixtures', {'stylesheet': __dirname + '/shared/styles.css'});
+      server = createServer(fixtures, {'stylesheet': __dirname + '/shared/styles.css'});
     });
 
     it('should respond with appropriate embedded styles', function (done) {
@@ -517,7 +523,7 @@ describe('serveIndex(root)', function () {
   describe('when set with trailing slash', function () {
     var server;
     before(function () {
-      server = createServer('test/fixtures/');
+      server = createServer(fixtures + '/');
     });
 
     it('should respond with file list', function (done) {
@@ -533,20 +539,22 @@ describe('serveIndex(root)', function () {
     });
   });
 
-  describe('when set to \'.\'', function () {
+  (skipRelative ? describe.skip : describe)('when set to \'.\'', function () {
     var server;
     before(function () {
       server = createServer('.');
     });
 
     it('should respond with file list', function (done) {
+      var dest = relative.split(path.sep).join('/');
       request(server)
-      .get('/')
+      .get('/' + dest + '/')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(/LICENSE/)
-      .expect(/public/)
-      .expect(/test/)
+      .expect(/users/)
+      .expect(/file #1\.txt/)
+      .expect(/nums/)
+      .expect(/todo\.txt/)
       .expect(200, done)
     });
 
@@ -560,7 +568,7 @@ describe('serveIndex(root)', function () {
 });
 
 function createServer(dir, opts) {
-  dir = dir || 'test/fixtures'
+  dir = dir || fixtures
 
   var _serveIndex = serveIndex(dir, opts)
 

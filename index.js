@@ -24,6 +24,7 @@ var http = require('http')
   , join = path.join;
 var Batch = require('batch');
 var parseUrl = require('parseurl');
+var resolve = require('path').resolve;
 
 /*!
  * Icon cache.
@@ -76,11 +77,13 @@ exports = module.exports = function serveIndex(root, options){
   // root required
   if (!root) throw new TypeError('serveIndex() root path required');
 
+  // resolve root to absolute
+  root = resolve(root);
+
   var hidden = options.hidden
     , icons = options.icons
     , view = options.view || 'tiles'
     , filter = options.filter
-    , root = normalize(root + sep)
     , template = options.template || defaultTemplate
     , stylesheet = options.stylesheet || defaultStylesheet;
 
@@ -101,7 +104,7 @@ exports = module.exports = function serveIndex(root, options){
     var dir = decodeURIComponent(url.pathname)
       , path = normalize(join(root, dir))
       , originalDir = decodeURIComponent(originalUrl.pathname)
-      , showUp = path != root;
+    var showUp = resolve(path) !== root;
 
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400));
