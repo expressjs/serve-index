@@ -1,5 +1,5 @@
-unreleased
-==========
+1.2.0 / 2014-08-25
+==================
 
   * Add `debug` messages
   * Resolve relative paths at middleware setup
