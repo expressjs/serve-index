@@ -15,6 +15,7 @@
  */
 
 var accepts = require('accepts');
+var debug = require('debug')('serve-index');
 var http = require('http')
   , fs = require('fs')
   , path = require('path')
@@ -109,10 +110,14 @@ exports = module.exports = function serveIndex(root, options){
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400));
 
-    // malicious path, forbidden
-    if (0 != path.indexOf(root)) return next(createError(403));
+    // malicious path
+    if (path.substr(0, root.length) !== root) {
+      debug('malicious path "%s"', path);
+      return next(createError(403));
+    }
 
     // check if we have a directory
+    debug('stat "%s"', path);
     fs.stat(path, function(err, stat){
       if (err && err.code === 'ENOENT') {
         return next();
@@ -128,6 +133,7 @@ exports = module.exports = function serveIndex(root, options){
       if (!stat.isDirectory()) return next();
 
       // fetch files
+      debug('readdir "%s"', path);
       fs.readdir(path, function(err, files){
         if (err) return next(err);
         if (!hidden) files = removeHidden(files);
