@@ -19,7 +19,7 @@
   "files": [
     "public/",
     "LICENSE",
-    "History.md",
+    "HISTORY.md",
     "index.js"
   ],
   "engines": {
