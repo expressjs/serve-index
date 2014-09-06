@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * deps: accepts@~1.1.0
   * deps: debug@~2.0.0
 
 1.2.0 / 2014-08-25
