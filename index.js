@@ -24,6 +24,7 @@ var http = require('http')
   , extname = path.extname
   , join = path.join;
 var Batch = require('batch');
+var mime = require('mime-types');
 var parseUrl = require('parseurl');
 var resolve = require('path').resolve;
 
@@ -245,6 +246,64 @@ function htmlPath(dir) {
 }
 
 /**
+ * Get the icon data for the file name.
+ */
+
+function iconLookup(filename) {
+  var ext = extname(filename);
+
+  // try by extension
+  if (icons[ext]) {
+    return {
+      className: 'icon-' + ext.substring(1),
+      fileName: icons[ext]
+    };
+  }
+
+  var mimetype = mime.lookup(ext);
+
+  // default if no mime type
+  if (mimetype === false) {
+    return {
+      className: 'icon-default',
+      fileName: icons.default
+    };
+  }
+
+  // try by mime type
+  if (icons[mimetype]) {
+    return {
+      className: 'icon-' + mimetype.replace('/', '-'),
+      fileName: icons[mimetype]
+    };
+  }
+
+  var suffix = mimetype.split('+')[1];
+
+  if (suffix && icons['+' + suffix]) {
+    return {
+      className: 'icon-' + suffix,
+      fileName: icons['+' + suffix]
+    };
+  }
+
+  var type = mimetype.split('/')[0];
+
+  // try by type only
+  if (icons[type]) {
+    return {
+      className: 'icon-' + type,
+      fileName: icons[type]
+    };
+  }
+
+  return {
+    className: 'icon-default',
+    fileName: icons.default
+  };
+}
+
+/**
  * Load icon images, return css string.
  */
 
@@ -252,7 +311,7 @@ function iconStyle (files, useIcons) {
   if (!useIcons) return '';
   var className;
   var i;
-  var icon;
+  var iconName;
   var list = [];
   var rules = {};
   var selector;
@@ -263,26 +322,27 @@ function iconStyle (files, useIcons) {
     var file = files[i];
 
     var isDir = '..' == file.name || (file.stat && file.stat.isDirectory());
-    icon = isDir ? icons.folder : icons[extname(file.name)] || icons.default;
+    var icon = isDir
+      ? { className: 'icon-directory', fileName: icons.folder }
+      : iconLookup(file.name);
+    var iconName = icon.fileName;
 
-    var ext = extname(file.name);
-    className = 'icon-' + (isDir ? 'directory' : (icons[ext] ? ext.substring(1) : 'default'));
-    selector = '#files .' + className + ' .name';
+    selector = '#files .' + icon.className + ' .name';
 
-    if (!rules[icon]) {
-      rules[icon] = 'background-image: url(data:image/png;base64,' + load(icon) + ');'
-      selectors[icon] = [];
-      list.push(icon);
+    if (!rules[iconName]) {
+      rules[iconName] = 'background-image: url(data:image/png;base64,' + load(iconName) + ');'
+      selectors[iconName] = [];
+      list.push(iconName);
     }
 
-    if (!~selectors[icon].indexOf(selector)) {
-      selectors[icon].push(selector);
+    if (selectors[iconName].indexOf(selector) === -1) {
+      selectors[iconName].push(selector);
     }
   }
 
   for (i = 0; i < list.length; i++) {
-    icon = list[i];
-    style += selectors[icon].join(',\n') + ' {\n  ' + rules[icon] + '\n}\n';
+    iconName = list[i];
+    style += selectors[iconName].join(',\n') + ' {\n  ' + rules[iconName] + '\n}\n';
   }
 
   return style;
@@ -306,10 +366,21 @@ function html(files, dir, useIcons, view) {
       , path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
 
     if (useIcons) {
-      var ext = extname(file.name);
-      ext = isDir ? '.directory' : (icons[ext] ? ext : '.default');
       classes.push('icon');
-      classes.push('icon-' + ext.substring(1));
+
+      if (isDir) {
+        classes.push('icon-directory');
+      } else {
+        var ext = extname(file.name);
+        var icon = iconLookup(file.name);
+
+        classes.push('icon');
+        classes.push('icon-' + ext.substring(1));
+
+        if (classes.indexOf(icon.className) === -1) {
+          classes.push(icon.className);
+        }
+      }
     }
 
     path.push(encodeURIComponent(file.name));
@@ -406,126 +477,112 @@ function stat(dir, files, cb) {
  */
 
 var icons = {
-    '.js': 'page_white_code_red.png'
-  , '.json': 'page_white_code.png'
-  , '.c': 'page_white_c.png'
-  , '.h': 'page_white_h.png'
-  , '.cc': 'page_white_cplusplus.png'
-  , '.php': 'page_white_php.png'
-  , '.rb': 'page_white_ruby.png'
-  , '.erb': 'page_white_ruby.png'
-  , '.cpp': 'page_white_cplusplus.png'
-  , '.as': 'page_white_actionscript.png'
-  , '.cfm': 'page_white_coldfusion.png'
-  , '.cs': 'page_white_csharp.png'
-  , '.java': 'page_white_cup.png'
-  , '.jsp': 'page_white_cup.png'
-  , '.dll': 'page_white_gear.png'
-  , '.ini': 'page_white_gear.png'
-  , '.asp': 'page_white_code.png'
-  , '.aspx': 'page_white_code.png'
-  , '.clj': 'page_white_code.png'
-  , '.css': 'page_white_code.png'
-  , '.sass': 'page_white_code.png'
-  , '.scss': 'page_white_code.png'
-  , '.less': 'page_white_code.png'
-  , '.htm': 'page_white_code.png'
-  , '.html': 'page_white_code.png'
-  , '.xhtml': 'page_white_code.png'
-  , '.lua': 'page_white_code.png'
-  , '.m': 'page_white_code.png'
-  , '.pl': 'page_white_code.png'
-  , '.py': 'page_white_code.png'
-  , '.vb': 'page_white_code.png'
-  , '.vbs': 'page_white_code.png'
-  , '.xml': 'page_white_code.png'
-  , '.yaws': 'page_white_code.png'
-  , '.map': 'map.png'
+  // base icons
+  'default': 'page_white.png',
+  'folder': 'folder.png',
 
-  , '.app': 'application_xp.png'
-  , '.exe': 'application_xp.png'
-  , '.bat': 'application_xp_terminal.png'
-  , '.cgi': 'application_xp_terminal.png'
-  , '.sh': 'application_xp_terminal.png'
+  // generic mime type icons
+  'image': 'image.png',
+  'text': 'page_white_text.png',
+  'video': 'film.png',
 
-  , '.avi': 'film.png'
-  , '.flv': 'film.png'
-  , '.mkv': 'film.png'
-  , '.mv4': 'film.png'
-  , '.mov': 'film.png'
-  , '.mp4': 'film.png'
-  , '.mpeg': 'film.png'
-  , '.mpg': 'film.png'
-  , '.ogv': 'film.png'
-  , '.rm': 'film.png'
-  , '.webm': 'film.png'
-  , '.wmv': 'film.png'
-  , '.fnt': 'font.png'
-  , '.otf': 'font.png'
-  , '.ttf': 'font.png'
-  , '.woff': 'font.png'
-  , '.bmp': 'image.png'
-  , '.gif': 'image.png'
-  , '.ico': 'image.png'
-  , '.jpeg': 'image.png'
-  , '.jpg': 'image.png'
-  , '.png': 'image.png'
-  , '.psd': 'page_white_picture.png'
-  , '.xcf': 'page_white_picture.png'
-  , '.pdf': 'page_white_acrobat.png'
-  , '.swf': 'page_white_flash.png'
-  , '.ai': 'page_white_vector.png'
-  , '.eps': 'page_white_vector.png'
-  , '.ps': 'page_white_vector.png'
-  , '.svg': 'page_white_vector.png'
+  // generic mime suffix icons
+  '+json': 'page_white_code.png',
+  '+xml': 'page_white_code.png',
+  '+zip': 'box.png',
 
-  , '.ods': 'page_white_excel.png'
-  , '.xls': 'page_white_excel.png'
-  , '.xlsx': 'page_white_excel.png'
-  , '.odp': 'page_white_powerpoint.png'
-  , '.ppt': 'page_white_powerpoint.png'
-  , '.pptx': 'page_white_powerpoint.png'
-  , '.md': 'page_white_text.png'
-  , '.srt': 'page_white_text.png'
-  , '.txt': 'page_white_text.png'
-  , '.doc': 'page_white_word.png'
-  , '.docx': 'page_white_word.png'
-  , '.odt': 'page_white_word.png'
-  , '.rtf': 'page_white_word.png'
+  // specific mime type icons
+  'application/font-woff': 'font.png',
+  'application/javascript': 'page_white_code_red.png',
+  'application/json': 'page_white_code.png',
+  'application/msword': 'page_white_word.png',
+  'application/pdf': 'page_white_acrobat.png',
+  'application/postscript': 'page_white_vector.png',
+  'application/rtf': 'page_white_word.png',
+  'application/vnd.ms-excel': 'page_white_excel.png',
+  'application/vnd.ms-powerpoint': 'page_white_powerpoint.png',
+  'application/vnd.oasis.opendocument.presentation': 'page_white_powerpoint.png',
+  'application/vnd.oasis.opendocument.spreadsheet': 'page_white_excel.png',
+  'application/vnd.oasis.opendocument.text': 'page_white_word.png',
+  'application/x-7z-compressed': 'box.png',
+  'application/x-sh': 'application_xp_terminal.png',
+  'application/x-font-ttf': 'font.png',
+  'application/x-msaccess': 'page_white_database.png',
+  'application/x-shockwave-flash': 'page_white_flash.png',
+  'application/x-sql': 'page_white_database.png',
+  'application/x-tar': 'box.png',
+  'application/x-xz': 'box.png',
+  'application/xml': 'page_white_code.png',
+  'application/zip': 'box.png',
+  'image/svg+xml': 'page_white_vector.png',
+  'text/css': 'page_white_code.png',
+  'text/html': 'page_white_code.png',
+  'text/less': 'page_white_code.png',
 
-  , '.dmg': 'drive.png'
-  , '.iso': 'cd.png'
-  , '.7z': 'box.png'
-  , '.apk': 'box.png'
-  , '.bz2': 'box.png'
-  , '.cab': 'box.png'
-  , '.deb': 'box.png'
-  , '.gz': 'box.png'
-  , '.jar': 'box.png'
-  , '.lz': 'box.png'
-  , '.lzma': 'box.png'
-  , '.msi': 'box.png'
-  , '.pkg': 'box.png'
-  , '.rar': 'box.png'
-  , '.rpm': 'box.png'
-  , '.tar': 'box.png'
-  , '.tbz2': 'box.png'
-  , '.tgz': 'box.png'
-  , '.tlz': 'box.png'
-  , '.xz': 'box.png'
-  , '.zip': 'box.png'
-
-  , '.accdb': 'page_white_database.png'
-  , '.db': 'page_white_database.png'
-  , '.dbf': 'page_white_database.png'
-  , '.mdb': 'page_white_database.png'
-  , '.pdb': 'page_white_database.png'
-  , '.sql': 'page_white_database.png'
-
-  , '.gam': 'controller.png'
-  , '.rom': 'controller.png'
-  , '.sav': 'controller.png'
-
-  , 'folder': 'folder.png'
-  , 'default': 'page_white.png'
+  // other, extension-specific icons
+  '.accdb': 'page_white_database.png',
+  '.apk': 'box.png',
+  '.app': 'application_xp.png',
+  '.as': 'page_white_actionscript.png',
+  '.asp': 'page_white_code.png',
+  '.aspx': 'page_white_code.png',
+  '.bat': 'application_xp_terminal.png',
+  '.bz2': 'box.png',
+  '.c': 'page_white_c.png',
+  '.cab': 'box.png',
+  '.cfm': 'page_white_coldfusion.png',
+  '.clj': 'page_white_code.png',
+  '.cc': 'page_white_cplusplus.png',
+  '.cgi': 'application_xp_terminal.png',
+  '.cpp': 'page_white_cplusplus.png',
+  '.cs': 'page_white_csharp.png',
+  '.db': 'page_white_database.png',
+  '.dbf': 'page_white_database.png',
+  '.deb': 'box.png',
+  '.dll': 'page_white_gear.png',
+  '.dmg': 'drive.png',
+  '.docx': 'page_white_word.png',
+  '.erb': 'page_white_ruby.png',
+  '.exe': 'application_xp.png',
+  '.fnt': 'font.png',
+  '.gam': 'controller.png',
+  '.gz': 'box.png',
+  '.h': 'page_white_h.png',
+  '.ini': 'page_white_gear.png',
+  '.iso': 'cd.png',
+  '.jar': 'box.png',
+  '.java': 'page_white_cup.png',
+  '.jsp': 'page_white_cup.png',
+  '.lua': 'page_white_code.png',
+  '.lz': 'box.png',
+  '.lzma': 'box.png',
+  '.m': 'page_white_code.png',
+  '.map': 'map.png',
+  '.msi': 'box.png',
+  '.mv4': 'film.png',
+  '.otf': 'font.png',
+  '.pdb': 'page_white_database.png',
+  '.php': 'page_white_php.png',
+  '.pl': 'page_white_code.png',
+  '.pkg': 'box.png',
+  '.pptx': 'page_white_powerpoint.png',
+  '.psd': 'page_white_picture.png',
+  '.py': 'page_white_code.png',
+  '.rar': 'box.png',
+  '.rb': 'page_white_ruby.png',
+  '.rm': 'film.png',
+  '.rom': 'controller.png',
+  '.rpm': 'box.png',
+  '.sass': 'page_white_code.png',
+  '.sav': 'controller.png',
+  '.scss': 'page_white_code.png',
+  '.srt': 'page_white_text.png',
+  '.tbz2': 'box.png',
+  '.tgz': 'box.png',
+  '.tlz': 'box.png',
+  '.vb': 'page_white_code.png',
+  '.vbs': 'page_white_code.png',
+  '.xcf': 'page_white_picture.png',
+  '.xlsx': 'page_white_excel.png',
+  '.yaws': 'page_white_code.png'
 };

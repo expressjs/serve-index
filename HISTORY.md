@@ -2,6 +2,7 @@ unreleased
 ==========
 
   * Add icon for mkv files
+  * Lookup icon by mime type for greater icon support
 
 1.2.1 / 2014-09-05
 ==================

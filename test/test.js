@@ -148,6 +148,7 @@ describe('serveIndex(root)', function () {
           var urls = res.text.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
           urls.should.eql([
             '/%23directory',
+            '/collect',
             '/g%23%20%253%20o%20%252525%20%2537%20dir',
             '/users',
             '/file%20%231.txt',
@@ -270,11 +271,15 @@ describe('serveIndex(root)', function () {
       var server = createServer(fixtures, {'icons': true})
 
       request(server)
-      .get('/')
+      .get('/collect')
       .expect(/data:image\/png/)
       .expect(/icon-default/)
       .expect(/icon-directory/)
+      .expect(/icon-image/)
       .expect(/icon-txt/)
+      .expect(/icon-application-pdf/)
+      .expect(/icon-video/)
+      .expect(/icon-xml/)
       .expect(200, done)
     });
   });
