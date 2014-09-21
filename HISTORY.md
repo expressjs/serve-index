@@ -1,5 +1,5 @@
-unreleased
-==========
+1.3.0 / 2014-09-20
+==================
 
   * Add icon for mkv files
   * Lookup icon by mime type for greater icon support
