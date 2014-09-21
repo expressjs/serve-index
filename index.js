@@ -455,6 +455,7 @@ var icons = {
   , '.mp4': 'film.png'
   , '.mpeg': 'film.png'
   , '.mpg': 'film.png'
+  , '.mkv': 'film.png'
   , '.ogv': 'film.png'
   , '.rm': 'film.png'
   , '.webm': 'film.png'
