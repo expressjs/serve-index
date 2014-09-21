@@ -450,6 +450,7 @@ var icons = {
 
   , '.avi': 'film.png'
   , '.flv': 'film.png'
+  , '.mkv': 'film.png'
   , '.mv4': 'film.png'
   , '.mov': 'film.png'
   , '.mp4': 'film.png'

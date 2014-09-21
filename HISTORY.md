@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Add icon for mkv files
+
 1.2.1 / 2014-09-05
 ==================
 
