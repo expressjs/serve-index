@@ -79,8 +79,9 @@ exports = module.exports = function serveIndex(root, options){
   // root required
   if (!root) throw new TypeError('serveIndex() root path required');
 
-  // resolve root to absolute
+  // resolve root to absolute and normalize
   root = resolve(root);
+  root = normalize(root + sep);
 
   var hidden = options.hidden
     , icons = options.icons
@@ -102,20 +103,23 @@ exports = module.exports = function serveIndex(root, options){
     // parse URLs
     var url = parseUrl(req);
     var originalUrl = parseUrl.original(req);
+    var dir = decodeURIComponent(url.pathname);
+    var originalDir = decodeURIComponent(originalUrl.pathname);
 
-    var dir = decodeURIComponent(url.pathname)
-      , path = normalize(join(root, dir))
-      , originalDir = decodeURIComponent(originalUrl.pathname)
-    var showUp = resolve(path) !== root;
+    // join / normalize from root dir
+    var path = normalize(join(root, dir));
 
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400));
 
     // malicious path
-    if (path.substr(0, root.length) !== root) {
+    if ((path + sep).substr(0, root.length) !== root) {
       debug('malicious path "%s"', path);
       return next(createError(403));
     }
+
+    // determine ".." display
+    var showUp = normalize(resolve(path) + sep) !== root;
 
     // check if we have a directory
     debug('stat "%s"', path);
