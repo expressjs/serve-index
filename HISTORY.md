@@ -2,6 +2,9 @@ unreleased
 ==========
 
   * Fix incorrect 403 on Windows and Node.js 0.11
+  * deps: accepts@~1.1.1
+    - deps: mime-types@~2.0.2
+    - deps: negotiator@0.4.8
 
 1.3.0 / 2014-09-20
 ==================
