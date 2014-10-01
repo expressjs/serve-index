@@ -1,5 +1,5 @@
-unreleased
-==========
+1.3.1 / 2014-10-01
+==================
 
   * Fix incorrect 403 on Windows and Node.js 0.11
   * deps: accepts@~1.1.1
