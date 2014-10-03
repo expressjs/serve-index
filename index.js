@@ -172,10 +172,10 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         files.sort(fileSort);
         if (showUp) files.unshift({ name: '..' });
         str = str
-          .replace('{style}', style.concat(iconStyle(files, icons)))
-          .replace('{files}', html(files, dir, icons, view))
-          .replace('{directory}', dir)
-          .replace('{linked-path}', htmlPath(dir));
+          .replace(/\{style\}/g, style.concat(iconStyle(files, icons)))
+          .replace(/\{files\}/g, html(files, dir, icons, view))
+          .replace(/\{directory\}/g, dir)
+          .replace(/\{linked-path\}/g, htmlPath(dir));
 
         var buf = new Buffer(str, 'utf8');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');

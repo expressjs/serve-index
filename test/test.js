@@ -506,6 +506,18 @@ describe('serveIndex(root)', function () {
       .set('Accept', 'text/html')
       .expect(200, /ul#files/, done)
     });
+
+    it('should list directory twice', function (done) {
+      request(server)
+      .get('/users/')
+      .set('Accept', 'text/html')
+      .expect(function (res) {
+        var occurances = res.text.match(/directory \/users\//g)
+        if (occurances && occurances.length === 2) return
+        throw new Error('directory not listed twice')
+      })
+      .expect(200, done)
+    });
   });
 
   describe('when setting a custom stylesheet', function () {
