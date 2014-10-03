@@ -1,5 +1,5 @@
-unreleased
-==========
+1.4.0 / 2014-10-03
+==================
 
   * Add `dir` argument to `filter` function
   * Support using tokens multiple times
