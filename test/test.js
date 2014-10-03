@@ -264,6 +264,26 @@ describe('serveIndex(root)', function () {
         done()
       });
     });
+
+    it('should filter directory paths', function (done) {
+      var seen = false
+      var server = createServer(fixtures, {'filter': filter})
+
+      function filter(name, index, list, dir) {
+        if (path.normalize(dir) === path.normalize(path.join(fixtures, '/users'))) {
+          seen = true
+        }
+        return true
+      }
+
+      request(server)
+      .get('/users')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        seen.should.be.true
+        done()
+      });
+    });
   });
 
   describe('with "icons" option', function () {

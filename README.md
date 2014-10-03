@@ -35,7 +35,11 @@ Serve index accepts these properties in the options object.
 
 ##### filter
 
-Apply this filter function to files. Defaults to `false`.
+Apply this filter function to files. Defaults to `false`. The `filter` function
+is called for each file, with the signature `filter(filename, index, files, dir)`
+where `filename` is the name of the file, `index` is the array index, `files` is
+the array of files and `dir` is the absolute path the file is located (and thus,
+the directory the listing is for).
 
 ##### hidden
 
