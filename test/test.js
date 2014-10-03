@@ -264,6 +264,31 @@ describe('serveIndex(root)', function () {
         done()
       });
     });
+
+    it('should filter directory paths', function (done) {
+      var seen = false
+      var server = createServer(fixtures, {'filter': filter})
+
+      function filter(name, index, list, path) {
+        if (path.indexOf('collect') !== -1) return false
+        seen = true
+        return true
+      }
+
+      request(server)
+      .get('/collect')
+      .expect(200, function (err, res) {
+        if (err) return done(err)
+        seen.should.be.false
+        request(server)
+        .get('/')
+        .expect(200, function (err, res) {
+          if (err) return done(err)
+          seen.should.be.true
+          done()
+        });
+      });
+    });
   });
 
   describe('with "icons" option', function () {
