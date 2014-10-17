@@ -1,5 +1,5 @@
-unreleased
-==========
+1.5.0 / 2014-10-16
+==================
 
   * Create errors with `http-errors`
   * deps: debug@~2.1.0
