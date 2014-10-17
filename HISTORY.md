@@ -1,6 +1,8 @@
 unreleased
 ==========
 
+  * deps: debug@~2.1.0
+    - Implement `DEBUG_FD` env variable support
   * deps: mime-types@~2.0.2
     - deps: mime-db@~1.1.0
 
