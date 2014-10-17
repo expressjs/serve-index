@@ -1,4 +1,3 @@
-
 /*!
  * serve-index
  * Copyright(c) 2011 Sencha Inc.
@@ -15,9 +14,9 @@
  */
 
 var accepts = require('accepts');
+var createError = require('http-errors');
 var debug = require('debug')('serve-index');
-var http = require('http')
-  , fs = require('fs')
+var fs = require('fs')
   , path = require('path')
   , normalize = path.normalize
   , sep = path.sep
@@ -212,22 +211,6 @@ exports.plain = function(req, res, files){
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Content-Length', buf.length);
   res.end(buf);
-};
-
-/**
- * Generate an `Error` from the given status `code`
- * and optional `msg`.
- *
- * @param {Number} code
- * @param {String} msg
- * @return {Error}
- * @api private
- */
-
-function createError(code, msg) {
-  var err = new Error(msg || http.STATUS_CODES[code]);
-  err.status = code;
-  return err;
 };
 
 /**

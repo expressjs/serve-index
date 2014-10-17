@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Create errors with `http-errors`
   * deps: debug@~2.1.0
     - Implement `DEBUG_FD` env variable support
   * deps: mime-types@~2.0.2
