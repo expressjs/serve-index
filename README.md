@@ -4,7 +4,7 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Build Status][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
-[![Gittip][gittip-image]][gittip-url]
+[![Gratipay][gratipay-image]][gratipay-url]
 
   Serves pages that contain directory listings for a given path.
 
@@ -123,5 +123,5 @@ are created by/copyright of [FAMFAMFAM](http://www.famfamfam.com/).
 [coveralls-url]: https://coveralls.io/r/expressjs/serve-index?branch=master
 [downloads-image]: https://img.shields.io/npm/dm/serve-index.svg?style=flat
 [downloads-url]: https://npmjs.org/package/serve-index
-[gittip-image]: https://img.shields.io/gittip/dougwilson.svg?style=flat
-[gittip-url]: https://www.gittip.com/dougwilson/
+[gratipay-image]: https://img.shields.io/gratipay/dougwilson.svg?style=flat
+[gratipay-url]: https://www.gratipay.com/dougwilson/
