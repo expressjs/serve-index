@@ -13,19 +13,19 @@
  * Module dependencies.
  */
 
-var accepts = require('accepts');
-var createError = require('http-errors');
-var debug = require('debug')('serve-index');
-var fs = require('fs')
+var accepts = require('accepts')
+  , createError = require('http-errors')
+  , debug = require('debug')('serve-index')
+  , fs = require('fs')
   , path = require('path')
   , normalize = path.normalize
   , sep = path.sep
   , extname = path.extname
   , join = path.join;
-var Batch = require('batch');
-var mime = require('mime-types');
-var parseUrl = require('parseurl');
-var resolve = require('path').resolve;
+  , Batch = require('batch')
+  , mime = require('mime-types')
+  , parseUrl = require('parseurl')
+  , resolve = require('path').resolve;
 
 /*!
  * Icon cache.
