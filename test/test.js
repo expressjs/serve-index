@@ -1,9 +1,10 @@
 
+var after = require('after');
+var assert = require('assert');
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var request = require('supertest');
-var should = require('should');
 var serveIndex = require('..');
 
 var fixtures = path.join(__dirname, '/fixtures');
@@ -13,7 +14,7 @@ var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relativ
 
 describe('serveIndex(root)', function () {
   it('should require root', function () {
-    serveIndex.should.throw(/root path required/)
+    assert.throws(serveIndex, /root path required/)
   })
 
   it('should serve text/html without Accept header', function (done) {
@@ -146,7 +147,7 @@ describe('serveIndex(root)', function () {
         .end(function (err, res) {
           if (err) throw err;
           var urls = res.text.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
-          urls.should.eql([
+          assert.deepEqual(urls, [
             '/%23directory',
             '/collect',
             '/g%23%20%253%20o%20%252525%20%2537%20dir',
@@ -198,11 +199,8 @@ describe('serveIndex(root)', function () {
 
       request(server)
       .get('/')
-      .expect(200, function (err, res) {
-        if (err) return done(err)
-        res.text.should.not.containEql('.hidden')
-        done()
-      });
+      .expect(bodyDoesNotContain('.hidden'))
+      .expect(200, done)
     });
 
     it('should filter hidden files', function (done) {
@@ -210,11 +208,8 @@ describe('serveIndex(root)', function () {
 
       request(server)
       .get('/')
-      .expect(200, function (err, res) {
-        if (err) return done(err)
-        res.text.should.not.containEql('.hidden')
-        done()
-      });
+      .expect(bodyDoesNotContain('.hidden'))
+      .expect(200, done)
     });
 
     it('should not filter hidden files', function (done) {
@@ -228,61 +223,51 @@ describe('serveIndex(root)', function () {
 
   describe('with "filter" option', function () {
     it('should custom filter files', function (done) {
-      var seen = false
+      var cb = after(2, done)
       var server = createServer(fixtures, {'filter': filter})
 
       function filter(name) {
         if (name.indexOf('foo') === -1) return true
-        seen = true
+        cb()
         return false
       }
 
       request(server)
       .get('/')
-      .expect(200, function (err, res) {
-        if (err) return done(err)
-        seen.should.be.true
-        res.text.should.not.containEql('foo')
-        done()
-      });
+      .expect(bodyDoesNotContain('foo'))
+      .expect(200, cb)
     });
 
     it('should filter after hidden filter', function (done) {
-      var seen = false
       var server = createServer(fixtures, {'filter': filter, 'hidden': false})
 
       function filter(name) {
-        seen = seen || name.indexOf('.') === 0
+        if (name.indexOf('.') === 0) {
+          done(new Error('unexpected hidden file'))
+        }
+
         return true
       }
 
       request(server)
       .get('/')
-      .expect(200, function (err, res) {
-        if (err) return done(err)
-        seen.should.be.false
-        done()
-      });
+      .expect(200, done)
     });
 
     it('should filter directory paths', function (done) {
-      var seen = false
+      var cb = after(3, done)
       var server = createServer(fixtures, {'filter': filter})
 
       function filter(name, index, list, dir) {
         if (path.normalize(dir) === path.normalize(path.join(fixtures, '/users'))) {
-          seen = true
+          cb()
         }
         return true
       }
 
       request(server)
       .get('/users')
-      .expect(200, function (err, res) {
-        if (err) return done(err)
-        seen.should.be.true
-        done()
-      });
+      .expect(200, cb)
     });
   });
 
@@ -306,10 +291,7 @@ describe('serveIndex(root)', function () {
 
   describe('when using custom handler', function () {
     describe('exports.html', function () {
-      var orig = serveIndex.html
-      after(function () {
-        serveIndex.html = orig
-      })
+      alterProperty(serveIndex, 'html', serveIndex.html)
 
       it('should get called with Accept: text/html', function (done) {
         var server = createServer()
@@ -404,10 +386,7 @@ describe('serveIndex(root)', function () {
     });
 
     describe('exports.plain', function () {
-      var orig = serveIndex.plain
-      after(function () {
-        serveIndex.plain = orig
-      })
+      alterProperty(serveIndex, 'plain', serveIndex.plain)
 
       it('should get called with Accept: text/plain', function (done) {
         var server = createServer()
@@ -425,10 +404,7 @@ describe('serveIndex(root)', function () {
     });
 
     describe('exports.json', function () {
-      var orig = serveIndex.json
-      after(function () {
-        serveIndex.json = orig
-      })
+      alterProperty(serveIndex, 'json', serveIndex.json)
 
       it('should get called with Accept: application/json', function (done) {
         var server = createServer()
@@ -604,6 +580,18 @@ describe('serveIndex(root)', function () {
   });
 });
 
+function alterProperty(obj, prop, val) {
+  var prev
+
+  beforeEach(function () {
+    prev = obj[prop]
+    obj[prop] = val
+  })
+  afterEach(function () {
+    obj[prop] = prev
+  })
+}
+
 function createServer(dir, opts) {
   dir = dir || fixtures
 
@@ -615,4 +603,10 @@ function createServer(dir, opts) {
       res.end(err ? err.message : 'Not Found')
     })
   })
+}
+
+function bodyDoesNotContain(text) {
+  return function (res) {
+    assert.equal(res.text.indexOf(text), -1)
+  }
 }
