@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * Fix icon name background alignment on mobile view
+
 1.5.1 / 2014-11-22
 ==================
 

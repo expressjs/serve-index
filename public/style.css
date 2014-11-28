@@ -249,7 +249,7 @@ ul#files.view-details li.header {
     display: inline-block;
     width: 100%;
     text-indent: 0;
-    background-position: 0 0;
+    background-position: 0 50%;
   }
   #files .icon .name {
     text-indent: 41px;
