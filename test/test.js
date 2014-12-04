@@ -145,8 +145,9 @@ describe('serveIndex(root)', function () {
         .expect(200)
         .expect('Content-Type', 'text/html; charset=utf-8')
         .end(function (err, res) {
-          if (err) throw err;
-          var urls = res.text.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
+          if (err) done(err);
+          var body = res.text.split('</h1>')[1];
+          var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
           assert.deepEqual(urls, [
             '/%23directory',
             '/collect',
