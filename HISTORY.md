@@ -3,6 +3,8 @@ unreleased
 
   * deps: accepts@~1.1.4
     - deps: mime-types@~2.0.4
+  * deps: http-errors@~1.2.8
+    - Fix stack trace from exported function
   * deps: mime-types@~2.0.4
     - Add new mime types
     - deps: mime-db@~1.3.0
