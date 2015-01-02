@@ -148,7 +148,7 @@ exports = module.exports = function serveIndex(root, options){
 
         // content-negotiation
         var accept = accepts(req);
-        var type = accept.types(mediaTypes);
+        var type = accept.type(mediaTypes);
 
         // not acceptable
         if (!type) return next(createError(406));
