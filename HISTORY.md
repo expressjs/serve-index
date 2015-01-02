@@ -2,6 +2,7 @@ unreleased
 ==========
 
   * Add link to root directory
+  * deps: batch@0.5.2
   * deps: debug@~2.1.1
   * deps: mime-types@~2.0.7
     - Add new mime types

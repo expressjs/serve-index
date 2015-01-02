@@ -7,7 +7,7 @@
   "repository": "expressjs/serve-index",
   "dependencies": {
     "accepts": "~1.1.4",
-    "batch": "0.5.1",
+    "batch": "0.5.2",
     "debug": "~2.1.1",
     "http-errors": "~1.2.8",
     "mime-types": "~2.0.7",
