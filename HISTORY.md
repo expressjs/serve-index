@@ -1,5 +1,5 @@
-unreleased
-==========
+1.6.0 / 2015-01-01
+==================
 
   * Add link to root directory
   * deps: accepts@~1.2.2
