@@ -3,6 +3,12 @@ unreleased
 
   * Add link to root directory
   * deps: debug@~2.1.1
+  * deps: mime-types@~2.0.7
+    - Add new mime types
+    - Fix missing extensions
+    - Fix various invalid MIME type entries
+    - Remove example template MIME types
+    - deps: mime-db@~1.5.0
 
 1.5.3 / 2014-12-10
 ==================
