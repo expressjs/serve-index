@@ -191,26 +191,42 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
  * Respond with application/json.
  */
 
-exports.json = function(req, res, files){
-  var body = JSON.stringify(files);
-  var buf = new Buffer(body, 'utf8');
+exports.json = function(req, res, files, next, dir, showUp, icons, path){
+  stat(path, files, function(err, stats) {
+    if (err) return next(err);
+    // append slashes to directory filenames
+    files = files.map(function(file, i) {
+      return file + (stats[i].isDirectory() ? '/' : '');
+    });
 
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
+    var body = JSON.stringify(files);
+    var buf = new Buffer(body, 'utf8');
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Length', buf.length);
+    res.end(buf);
+  });
 };
 
 /**
  * Respond with text/plain.
  */
 
-exports.plain = function(req, res, files){
-  var body = files.join('\n') + '\n';
-  var buf = new Buffer(body, 'utf8');
+exports.plain = function(req, res, files, next, dir, showUp, icons, path){
+  stat(path, files, function(err, stats) {
+    if (err) return next(err);
+    // append slashes to directory filenames
+    files = files.map(function(file, i) {
+      return file + (stats[i].isDirectory() ? '/' : '');
+    });
 
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
+    var body = files.join('\n') + '\n';
+    var buf = new Buffer(body, 'utf8');
+
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Length', buf.length);
+    res.end(buf);
+  });
 };
 
 /**
@@ -230,7 +246,7 @@ function htmlPath(dir) {
   var curr = [];
   return dir.split('/').map(function(part){
     curr.push(encodeURIComponent(part));
-    return part ? '<a href="' + curr.join('/') + '">' + part + '</a>' : '';
+    return part ? '<a href="' + curr.join('/') + '/">' + part + '</a>' : '';
   }).join(' / ');
 }
 
@@ -383,6 +399,7 @@ function html(files, dir, useIcons, view) {
 
     return '<li><a href="'
       + normalizeSlashes(normalize(path.join('/')))
+      + (isDir ? '/' : '')
       + '" class="'
       + classes.join(' ') + '"'
       + ' title="' + file.name + '">'
