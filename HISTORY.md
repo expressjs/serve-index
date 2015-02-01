@@ -1,6 +1,8 @@
 unreleased
 ==========
 
+  * deps: accepts@~1.2.3
+    - deps: mime-types@~2.0.8
   * deps: mime-types@~2.0.8
     - Add new mime types
     - deps: mime-db@~1.6.0
