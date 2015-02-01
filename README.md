@@ -2,7 +2,8 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
-[![Build Status][travis-image]][travis-url]
+[![Linux Build][travis-image]][travis-url]
+[![Windows Build][appveyor-image]][appveyor-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 [![Gratipay][gratipay-image]][gratipay-url]
 
@@ -117,9 +118,11 @@ are created by/copyright of [FAMFAMFAM](http://www.famfamfam.com/).
 
 [npm-image]: https://img.shields.io/npm/v/serve-index.svg?style=flat
 [npm-url]: https://npmjs.org/package/serve-index
-[travis-image]: https://img.shields.io/travis/expressjs/serve-index.svg?style=flat
+[travis-image]: https://img.shields.io/travis/expressjs/serve-index/master.svg?label=linux&style=flat
 [travis-url]: https://travis-ci.org/expressjs/serve-index
-[coveralls-image]: https://img.shields.io/coveralls/expressjs/serve-index.svg?style=flat
+[appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/serve-index/master.svg?label=windows&style=flat
+[appveyor-url]: https://ci.appveyor.com/project/dougwilson/serve-index
+[coveralls-image]: https://img.shields.io/coveralls/expressjs/serve-index/master.svg?style=flat
 [coveralls-url]: https://coveralls.io/r/expressjs/serve-index?branch=master
 [downloads-image]: https://img.shields.io/npm/dm/serve-index.svg?style=flat
 [downloads-url]: https://npmjs.org/package/serve-index
