@@ -4,6 +4,10 @@ unreleased
   * deps: accepts@~1.2.4
     - deps: mime-types@~2.0.9
     - deps: negotiator@0.5.1
+  * deps: http-errors@~1.3.1
+    - Construct errors using defined constructors from `createError`
+    - Fix error names that are not identifiers
+    - Set a meaningful `name` property on constructed errors
   * deps: mime-types@~2.0.9
     - Add new mime types
     - deps: mime-db@~1.7.0
