@@ -4,6 +4,9 @@ unreleased
   * deps: accepts@~1.2.4
     - deps: mime-types@~2.0.9
     - deps: negotiator@0.5.1
+  * deps: mime-types@~2.0.9
+    - Add new mime types
+    - deps: mime-db@~1.7.0
 
 1.6.1 / 2015-01-31
 ==================
