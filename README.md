@@ -116,15 +116,15 @@ app.listen()
 [MIT](LICENSE). The [Silk](http://www.famfamfam.com/lab/icons/silk/) icons
 are created by/copyright of [FAMFAMFAM](http://www.famfamfam.com/).
 
-[npm-image]: https://img.shields.io/npm/v/serve-index.svg?style=flat
+[npm-image]: https://img.shields.io/npm/v/serve-index.svg
 [npm-url]: https://npmjs.org/package/serve-index
-[travis-image]: https://img.shields.io/travis/expressjs/serve-index/master.svg?label=linux&style=flat
+[travis-image]: https://img.shields.io/travis/expressjs/serve-index/master.svg?label=linux
 [travis-url]: https://travis-ci.org/expressjs/serve-index
-[appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/serve-index/master.svg?label=windows&style=flat
+[appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/serve-index/master.svg?label=windows
 [appveyor-url]: https://ci.appveyor.com/project/dougwilson/serve-index
-[coveralls-image]: https://img.shields.io/coveralls/expressjs/serve-index/master.svg?style=flat
+[coveralls-image]: https://img.shields.io/coveralls/expressjs/serve-index/master.svg
 [coveralls-url]: https://coveralls.io/r/expressjs/serve-index?branch=master
-[downloads-image]: https://img.shields.io/npm/dm/serve-index.svg?style=flat
+[downloads-image]: https://img.shields.io/npm/dm/serve-index.svg
 [downloads-url]: https://npmjs.org/package/serve-index
-[gratipay-image]: https://img.shields.io/gratipay/dougwilson.svg?style=flat
+[gratipay-image]: https://img.shields.io/gratipay/dougwilson.svg
 [gratipay-url]: https://www.gratipay.com/dougwilson/
