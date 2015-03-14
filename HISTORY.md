@@ -6,6 +6,8 @@ unreleased
   * deps: debug@~2.1.3
     - Fix high intensity foreground color for bold
     - deps: ms@0.7.0
+  * deps: mime-types@~2.0.10
+    - Add new mime types
 
 1.6.2 / 2015-02-16
 ==================
