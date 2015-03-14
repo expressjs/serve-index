@@ -1,11 +1,13 @@
 unreleased
 ==========
 
+  * Properly escape file names in HTML
   * deps: accepts@~1.2.5
     - deps: mime-types@~2.0.10
   * deps: debug@~2.1.3
     - Fix high intensity foreground color for bold
     - deps: ms@0.7.0
+  * deps: escape-html@1.0.1
   * deps: mime-types@~2.0.10
     - Add new mime types
 

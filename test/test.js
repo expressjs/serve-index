@@ -109,7 +109,7 @@ describe('serveIndex(root)', function () {
         .get('/')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(/g# %3 o %2525 %37 dir/)
+        .expect(/g# %3 o & %2525 %37 dir/)
         .expect(/users/)
         .expect(/file #1\.txt/)
         .expect(/nums/)
@@ -128,11 +128,25 @@ describe('serveIndex(root)', function () {
         .set('Accept', 'text/html')
         .expect(200)
         .expect('Content-Type', 'text/html; charset=utf-8')
-        .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir"/)
+        .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
         .expect(/<a href="\/users"/)
         .expect(/<a href="\/file%20%231.txt"/)
         .expect(/<a href="\/todo.txt"/)
         .expect(/<a href="\/%E3%81%95%E3%81%8F%E3%82%89\.txt"/)
+        .end(done);
+      });
+
+      it('should property escape file names', function (done) {
+        var server = createServer()
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200)
+        .expect('Content-Type', 'text/html; charset=utf-8')
+        .expect(/<a href="\/foo%20%26%20bar"/)
+        .expect(/foo &amp; bar/)
+        .expect(bodyDoesNotContain('foo & bar'))
         .end(done);
       });
 
@@ -151,10 +165,10 @@ describe('serveIndex(root)', function () {
           assert.deepEqual(urls, [
             '/%23directory',
             '/collect',
-            '/g%23%20%253%20o%20%252525%20%2537%20dir',
+            '/g%23%20%253%20o%20%26%20%252525%20%2537%20dir',
             '/users',
             '/file%20%231.txt',
-            '/foo%20bar',
+            '/foo%20%26%20bar',
             '/nums',
             '/todo.txt',
             '/%E3%81%95%E3%81%8F%E3%82%89.txt'
@@ -174,7 +188,7 @@ describe('serveIndex(root)', function () {
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect(/users/)
-        .expect(/g# %3 o %2525 %37 dir/)
+        .expect(/g# %3 o & %2525 %37 dir/)
         .expect(/file #1.txt/)
         .expect(/todo.txt/)
         .expect(/さくら\.txt/)
@@ -454,12 +468,26 @@ describe('serveIndex(root)', function () {
       var server = createServer()
 
       request(server)
-      .get('/g%23%20%253%20o%20%252525%20%2537%20dir/')
+      .get('/g%23%20%253%20o%20%26%20%252525%20%2537%20dir/')
       .set('Accept', 'text/html')
       .expect(200)
       .expect('Content-Type', 'text/html; charset=utf-8')
-      .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir"/)
-      .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir\/empty.txt"/)
+      .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
+      .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir\/empty.txt"/)
+      .end(done);
+    });
+
+    it('should property escape directory names', function (done) {
+      var server = createServer()
+
+      request(server)
+      .get('/g%23%20%253%20o%20%26%20%252525%20%2537%20dir/')
+      .set('Accept', 'text/html')
+      .expect(200)
+      .expect('Content-Type', 'text/html; charset=utf-8')
+      .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
+      .expect(/g# %3 o &amp; %2525 %37 dir/)
+      .expect(bodyDoesNotContain('g# %3 o & %2525 %37 dir'))
       .end(done);
     });
 
@@ -483,7 +511,7 @@ describe('serveIndex(root)', function () {
       request(server)
       .get('/')
       .set('Accept', 'text/html')
-      .expect(/<a href="\/g%23%20%253%20o%20%252525%20%2537%20dir"/)
+      .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
       .expect(/<a href="\/users"/)
       .expect(/<a href="\/file%20%231.txt"/)
       .expect(/<a href="\/todo.txt"/)

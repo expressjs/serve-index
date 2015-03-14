@@ -2,7 +2,7 @@
  * serve-index
  * Copyright(c) 2011 Sencha Inc.
  * Copyright(c) 2011 TJ Holowaychuk
- * Copyright(c) 2014 Douglas Christopher Wilson
+ * Copyright(c) 2014-2015 Douglas Christopher Wilson
  * MIT Licensed
  */
 
@@ -11,11 +11,13 @@
 
 /**
  * Module dependencies.
+ * @private
  */
 
 var accepts = require('accepts');
 var createError = require('http-errors');
 var debug = require('debug')('serve-index');
+var escapeHtml = require('escape-html');
 var fs = require('fs')
   , path = require('path')
   , normalize = path.normalize
@@ -175,7 +177,7 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         str = str
           .replace(/\{style\}/g, style.concat(iconStyle(files, icons)))
           .replace(/\{files\}/g, html(files, dir, icons, view))
-          .replace(/\{directory\}/g, dir)
+          .replace(/\{directory\}/g, escapeHtml(dir))
           .replace(/\{linked-path\}/g, htmlPath(dir));
 
         var buf = new Buffer(str, 'utf8');
@@ -227,11 +229,19 @@ function fileSort(a, b) {
  */
 
 function htmlPath(dir) {
-  var curr = [];
-  return dir.split('/').map(function(part){
-    curr.push(encodeURIComponent(part));
-    return part ? '<a href="' + curr.join('/') + '">' + part + '</a>' : '';
-  }).join(' / ');
+  var parts = dir.split('/');
+  var crumb = new Array(parts.length);
+
+  for (var i = 0; i < parts.length; i++) {
+    var part = parts[i];
+
+    if (part) {
+      parts[i] = encodeURIComponent(part);
+      crumb[i] = '<a href="' + escapeHtml(parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(part) + '</a>';
+    }
+  }
+
+  return crumb.join(' / ');
 }
 
 /**
@@ -342,7 +352,7 @@ function iconStyle (files, useIcons) {
  */
 
 function html(files, dir, useIcons, view) {
-  return '<ul id="files" class="view-' + view + '">'
+  return '<ul id="files" class="view-' + escapeHtml(view) + '">'
     + (view == 'details' ? (
       '<li class="header">'
       + '<span class="name">Name</span>'
@@ -382,13 +392,12 @@ function html(files, dir, useIcons, view) {
       : '';
 
     return '<li><a href="'
-      + normalizeSlashes(normalize(path.join('/')))
-      + '" class="'
-      + classes.join(' ') + '"'
-      + ' title="' + file.name + '">'
-      + '<span class="name">'+file.name+'</span>'
-      + '<span class="size">'+size+'</span>'
-      + '<span class="date">'+date+'</span>'
+      + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
+      + '" class="' + escapeHtml(classes.join(' ')) + '"'
+      + ' title="' + escapeHtml(file.name) + '">'
+      + '<span class="name">' + escapeHtml(file.name) + '</span>'
+      + '<span class="size">' + escapeHtml(size) + '</span>'
+      + '<span class="date">' + escapeHtml(date) + '</span>'
       + '</a></li>';
 
   }).join('\n') + '</ul>';
