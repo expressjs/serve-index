@@ -1,5 +1,5 @@
-unreleased
-==========
+1.6.3 / 2015-03-13
+==================
 
   * Properly escape file names in HTML
   * deps: accepts@~1.2.5
