@@ -68,26 +68,33 @@ var mediaType = {
  *
  * See Readme.md for documentation of options.
  *
- * @param {String} path
+ * @param {String|Array} path
  * @param {Object} options
  * @return {Function} middleware
  * @api public
  */
 
-exports = module.exports = function serveIndex(root, options){
+exports = module.exports = function serveIndex(roots, options){
   options = options || {};
 
   // root required
-  if (!root) throw new TypeError('serveIndex() root path required');
+  if (!roots || roots.length === 0) throw new TypeError('serveIndex() root path required');
 
-  // resolve root to absolute and normalize
-  root = resolve(root);
-  root = normalize(root + sep);
+  // ensure array
+  if (typeof roots === 'string') {
+    roots = [roots];
+  }
+
+  // resolve roots to absolute and normalize
+  roots = roots.map(function(root){
+    return normalize(resolve(root) + sep);
+  });
 
   var hidden = options.hidden
     , icons = options.icons
     , view = options.view || 'tiles'
     , filter = options.filter
+    , caseSensitive = options.caseSensitive === false ? false : true
     , template = options.template || defaultTemplate
     , stylesheet = options.stylesheet || defaultStylesheet;
 
@@ -107,55 +114,117 @@ exports = module.exports = function serveIndex(root, options){
     var dir = decodeURIComponent(url.pathname);
     var originalDir = decodeURIComponent(originalUrl.pathname);
 
-    // join / normalize from root dir
-    var path = normalize(join(root, dir));
-
-    // null byte(s), bad request
-    if (~path.indexOf('\0')) return next(createError(400));
-
-    // malicious path
-    if ((path + sep).substr(0, root.length) !== root) {
-      debug('malicious path "%s"', path);
-      return next(createError(403));
-    }
-
     // determine ".." display
-    var showUp = normalize(resolve(path) + sep) !== root;
+    var showUp = dir !== '/';
 
-    // check if we have a directory
-    debug('stat "%s"', path);
-    fs.stat(path, function(err, stat){
-      if (err && err.code === 'ENOENT') {
+    // content-negotiation
+    var accept = accepts(req);
+    var type = accept.type(mediaTypes);
+
+    // not acceptable
+    if (!type) return next(createError(406));
+
+    var batch = new Batch();
+
+    batch.concurrency(10);
+
+    // read all root dirs and files with batch
+    roots.forEach(function(root){
+      batch.push(function(done){
+
+        // join / normalize from root dir
+        var path = normalize(join(root, dir));
+
+        // null byte(s), bad request
+        if (~path.indexOf('\0')) return done(createError(400));
+
+        // malicious path
+        if ((path + sep).substr(0, root.length) !== root) {
+          debug('malicious path "%s"', path);
+          return done(createError(403));
+        }
+
+        // check if we have a directory
+        debug('stat "%s"', path);
+        fs.stat(path, function(err, stat){
+          if (err && err.code === 'ENOENT') {
+            return done(null, null);
+          }
+
+          if (err) {
+            err.status = err.code === 'ENAMETOOLONG'
+              ? 414
+              : 500;
+            return done(err);
+          }
+
+          if (!stat.isDirectory()) return done(null, null);
+
+          // fetch files
+          debug('readdir "%s"', path);
+          fs.readdir(path, function(err, files){
+            if (err) return done(err);
+
+            // return dir path and files
+            done(null, { path: path, files: files });
+          });
+        });
+      });
+    });
+
+    // process all files
+    batch.end(function(err, dirs){
+      if (err) return next(err);
+
+      var files = [],   // all files
+          fileMap = {}, // remember already added files
+          lowerCaseFileMap = {}; // remember case-insensitive files
+
+      dirs.forEach(function(dir){
+        if (!dir) return;
+        dir.files.forEach(function(file){
+
+          /*
+            add file if
+             - exact filename wasn't added and
+             - `caseSensitive` mode active or
+             - there's no file ignoring case or
+             - the existing file ignoring case is in the same dir
+               which means it's a case-sensitive fs and both versions can be
+               displayed
+          */
+          if (!fileMap[file] && 
+              (
+                caseSensitive ||
+                !lowerCaseFileMap[file.toLowerCase()] ||
+                lowerCaseFileMap[file.toLowerCase()] == dir.path
+              )
+            ) {
+
+            fileMap[file] = true; // set flag to not add the file again
+            if (!caseSensitive) {
+              // also add to case-insensitive map if options is set to false
+              // use the dir path to check for it (see if-clause above)
+              lowerCaseFileMap[file.toLowerCase()] = dir.path;
+            }
+            files.push({ name: file, path: dir.path });
+          }
+        });
+      });
+
+      // no dirs/files found
+      if (files.length === 0) {
         return next();
       }
 
-      if (err) {
-        err.status = err.code === 'ENAMETOOLONG'
-          ? 414
-          : 500;
-        return next(err);
-      }
-
-      if (!stat.isDirectory()) return next();
-
-      // fetch files
-      debug('readdir "%s"', path);
-      fs.readdir(path, function(err, files){
-        if (err) return next(err);
-        if (!hidden) files = removeHidden(files);
-        if (filter) files = files.filter(function(filename, index, list) {
-          return filter(filename, index, list, path);
-        });
-        files.sort();
-
-        // content-negotiation
-        var accept = accepts(req);
-        var type = accept.type(mediaTypes);
-
-        // not acceptable
-        if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+      if (!hidden) files = removeHidden(files);
+      if (filter) files = files.filter(function(file, index, list) {
+        return filter(file.name, index, list, file.path);
       });
+
+      files.sort(fileSort);
+
+      exports[mediaType[type]](req, res, next, originalDir, files, showUp, icons, view, template, stylesheet);
     });
   };
 };
@@ -164,15 +233,14 @@ exports = module.exports = function serveIndex(root, options){
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+exports.html = function(req, res, next, dir, files, showUp, icons, view, template, stylesheet){
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
       if (err) return next(err);
-      stat(path, files, function(err, stats){
+      stat(files, function(err, files){
         if (err) return next(err);
-        files = files.map(function(file, i){ return { name: file, stat: stats[i] }; });
-        files.sort(fileSort);
+        files.sort(fileStatSort);
         if (showUp) files.unshift({ name: '..' });
         str = str
           .replace(/\{style\}/g, style.concat(iconStyle(files, icons)))
@@ -193,8 +261,8 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
  * Respond with application/json.
  */
 
-exports.json = function(req, res, files){
-  var body = JSON.stringify(files);
+exports.json = function(req, res, next, url, files){
+  var body = JSON.stringify(files.map(function(file){ return file.name; }));
   var buf = new Buffer(body, 'utf8');
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -206,8 +274,8 @@ exports.json = function(req, res, files){
  * Respond with text/plain.
  */
 
-exports.plain = function(req, res, files){
-  var body = files.join('\n') + '\n';
+exports.plain = function(req, res, next, url, files){
+  var body = files.map(function(file){ return file.name; }).join('\n') + '\n';
   var buf = new Buffer(body, 'utf8');
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -216,12 +284,19 @@ exports.plain = function(req, res, files){
 };
 
 /**
- * Sort function for with directories first.
+ * Sort function to compare file names.
  */
 
-function fileSort(a, b) {
-  return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
-    String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
+function fileSort(a, b){
+  return String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
+}
+
+/**
+ * Sort function to compare file names with directories first.
+ */
+
+function fileStatSort(a, b){
+  return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) || fileSort(a, b);
 }
 
 /**
@@ -440,32 +515,33 @@ function normalizeSlashes(path) {
 
 function removeHidden(files) {
   return files.filter(function(file){
-    return '.' != file[0];
+    return '.' != file.name[0];
   });
 }
 
 /**
- * Stat all files and return array of stat
- * in same order.
+ * Stat all files and add a `stat` property to each `files` object
  */
 
-function stat(dir, files, cb) {
+function stat(files, cb) {
   var batch = new Batch();
 
   batch.concurrency(10);
 
   files.forEach(function(file){
     batch.push(function(done){
-      fs.stat(join(dir, file), function(err, stat){
+      fs.stat(join(file.path, file.name), function(err, stat){
         if (err && err.code !== 'ENOENT') return done(err);
-
-        // pass ENOENT as null stat, not error
-        done(null, stat || null);
+        if (stat) file.stat = stat; // add stat property to existing object
+        done(null, null); // don't pass a result as the passed object was enhanced
       });
     });
   });
 
-  batch.end(cb);
+  batch.end(function(err){
+    // ignore batch result, just pass back original array which was enhanced
+    cb(err, files);
+  });
 }
 
 /**
