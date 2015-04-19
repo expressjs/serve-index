@@ -69,6 +69,12 @@ The following tokens are replaced in templates:
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
+### serveIndex.dateTimeToString
+
+`dateTimeToString` is the function that formats de date and time. By default returns `mtime.toDateString() + ' ' + mtime.toLocaleTimeString()`. 
+
+`dateTimeToString` receives a Date and must returns a string. 
+
 ## Examples
 
 ### Serve directory indexes with vanilla node.js http server
@@ -109,6 +115,20 @@ var app = express()
 // Serve URLs like /ftp/thing as public/ftp/thing
 app.use('/ftp', serveIndex('public/ftp', {'icons': true}))
 app.listen()
+```
+
+### use custom date time format
+
+```js
+// add to any other example:
+
+serveIndex.dateTimeToString=function(mtime){
+    var today=new Date();
+    if(mtime.toDateString()==today.toDateString()){
+        return 'today ' + mtime.toLocaleTimeString();
+    }
+    return mtime.toDateString() + ' ' + mtime.toLocaleTimeString()
+}
 ```
 
 ## License
