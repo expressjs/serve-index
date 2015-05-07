@@ -89,7 +89,8 @@ exports = module.exports = function serveIndex(root, options){
     , view = options.view || 'tiles'
     , filter = options.filter
     , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet;
+    , stylesheet = options.stylesheet || defaultStylesheet
+    , trailingSlashes = options.trailingSlashes || false;
 
   return function serveIndex(req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -154,7 +155,7 @@ exports = module.exports = function serveIndex(root, options){
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, trailingSlashes);
       });
     });
   };
@@ -164,7 +165,7 @@ exports = module.exports = function serveIndex(root, options){
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, trailingSlashes){
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
@@ -176,7 +177,7 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
         if (showUp) files.unshift({ name: '..' });
         str = str
           .replace(/\{style\}/g, style.concat(iconStyle(files, icons)))
-          .replace(/\{files\}/g, html(files, dir, icons, view))
+          .replace(/\{files\}/g, html(files, dir, icons, view, trailingSlashes))
           .replace(/\{directory\}/g, escapeHtml(dir))
           .replace(/\{linked-path\}/g, htmlPath(dir));
 
@@ -351,7 +352,7 @@ function iconStyle (files, useIcons) {
  * Map html `files`, returning an html unordered list.
  */
 
-function html(files, dir, useIcons, view) {
+function html(files, dir, useIcons, view, trailingSlashes) {
   return '<ul id="files" class="view-' + escapeHtml(view) + '">'
     + (view == 'details' ? (
       '<li class="header">'
@@ -393,6 +394,7 @@ function html(files, dir, useIcons, view) {
 
     return '<li><a href="'
       + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
+      + (trailingSlashes && isDir? '/' : '')
       + '" class="' + escapeHtml(classes.join(' ')) + '"'
       + ' title="' + escapeHtml(file.name) + '">'
       + '<span class="name">' + escapeHtml(file.name) + '</span>'
