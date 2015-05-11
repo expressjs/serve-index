@@ -392,9 +392,10 @@ function html(files, dir, useIcons, view, trailingSlashes) {
       ? file.stat.size
       : '';
 
+    var escapedHtml = escapeHtml(normalizeSlashes(normalize(path.join('/'))));
     return '<li><a href="'
-      + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
-      + (trailingSlashes && isDir? '/' : '')
+      + escapedHtml
+      + (escapedHtml !== '/' && trailingSlashes && isDir? '/' : '')
       + '" class="' + escapeHtml(classes.join(' ')) + '"'
       + ' title="' + escapeHtml(file.name) + '">'
       + '<span class="name">' + escapeHtml(file.name) + '</span>'
