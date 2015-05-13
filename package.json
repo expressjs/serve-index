@@ -11,7 +11,7 @@
     "debug": "~2.2.0",
     "escape-html": "1.0.1",
     "http-errors": "~1.3.1",
-    "mime-types": "~2.0.10",
+    "mime-types": "~2.0.11",
     "parseurl": "~1.3.0"
   },
   "devDependencies": {

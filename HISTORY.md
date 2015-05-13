@@ -6,6 +6,8 @@ unreleased
     - deps: negotiator@0.5.3
   * deps: debug@~2.2.0
     - deps: ms@0.7.1
+  * deps: mime-types@~2.0.11
+    - Add new mime types
 
 1.6.3 / 2015-03-13
 ==================
