@@ -30,6 +30,8 @@ with a `path` of `'public'` will look at `'public/some/dir'`. If you are using
 something like `express`, you can change the URL "base" with `app.use` (see
 the express example).
 
+`path` can also be an array to serve an overlay. The first matched file will be used for size and modified date (see the example).
+
 #### Options
 
 Serve index accepts these properties in the options object.
@@ -45,6 +47,11 @@ the directory the listing is for).
 ##### hidden
 
 Display hidden (dot) files. Defaults to `false`.
+
+##### caseSensitive
+
+Whether case-insensitive duplicates should be listed. Defaults to `true`.  
+This does only apply when multiple paths are provided and duplicates are from different folders.
 
 ##### icons
 
@@ -108,6 +115,19 @@ var app = express()
 
 // Serve URLs like /ftp/thing as public/ftp/thing
 app.use('/ftp', serveIndex('public/ftp', {'icons': true}))
+app.listen()
+```
+
+### Serve indexes from multiple directories with express
+
+```js
+var express    = require('express')
+var serveIndex = require('serve-index')
+
+var app = express()
+
+// Serve URLs like /ftp/thing as an overlay of public1/ftp/thing and public2/ftp/thing
+app.use('/ftp', serveIndex(['public1/ftp', 'public2/ftp'], {'icons': true}))
 app.listen()
 ```
 

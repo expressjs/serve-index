@@ -8,6 +8,9 @@ var request = require('supertest');
 var serveIndex = require('..');
 
 var fixtures = path.join(__dirname, '/fixtures');
+var public1 = path.join(fixtures, '/public1');
+var public2 = path.join(fixtures, '/public2');
+var roots = [ public1, public2 ];
 var relative = path.relative(process.cwd(), fixtures);
 
 var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relative;
@@ -15,6 +18,10 @@ var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relativ
 describe('serveIndex(root)', function () {
   it('should require root', function () {
     assert.throws(serveIndex, /root path required/)
+  })
+
+  it('should require root array with elements', function () {
+    assert.throws(function () { serveIndex([]) }, /root path required/)
   })
 
   it('should serve text/html without Accept header', function (done) {
@@ -219,7 +226,7 @@ describe('serveIndex(root)', function () {
     });
 
     it('should filter hidden files', function (done) {
-      var server = createServer('test/fixtures', {'hidden': false})
+      var server = createServer(roots, {'hidden': false})
 
       request(server)
       .get('/')
@@ -228,7 +235,7 @@ describe('serveIndex(root)', function () {
     });
 
     it('should not filter hidden files', function (done) {
-      var server = createServer('test/fixtures', {'hidden': true})
+      var server = createServer(roots, {'hidden': true})
 
       request(server)
       .get('/')
@@ -239,7 +246,7 @@ describe('serveIndex(root)', function () {
   describe('with "filter" option', function () {
     it('should custom filter files', function (done) {
       var cb = after(2, done)
-      var server = createServer(fixtures, {'filter': filter})
+      var server = createServer(roots, {'filter': filter})
 
       function filter(name) {
         if (name.indexOf('foo') === -1) return true
@@ -254,7 +261,7 @@ describe('serveIndex(root)', function () {
     });
 
     it('should filter after hidden filter', function (done) {
-      var server = createServer(fixtures, {'filter': filter, 'hidden': false})
+      var server = createServer(roots, {'filter': filter, 'hidden': false})
 
       function filter(name) {
         if (name.indexOf('.') === 0) {
@@ -271,10 +278,10 @@ describe('serveIndex(root)', function () {
 
     it('should filter directory paths', function (done) {
       var cb = after(3, done)
-      var server = createServer(fixtures, {'filter': filter})
+      var server = createServer(roots, {'filter': filter})
 
       function filter(name, index, list, dir) {
-        if (path.normalize(dir) === path.normalize(path.join(fixtures, '/users'))) {
+        if (path.normalize(dir) === path.normalize(path.join(public1, '/users'))) {
           cb()
         }
         return true
@@ -286,9 +293,21 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "caseSensitive" option', function () {
+    it('should not show case-insensitive files when set to "false"', function (done) {
+      var server = createServer(roots, {'caseSensitive': false})
+
+      request(server)
+      .get('/users/')
+      .expect(bodyDoesNotContain('Tobi.txt'))
+      .expect(200, done)
+    });
+
+  });
+
   describe('with "icons" option', function () {
     it('should include icons for html', function (done) {
-      var server = createServer(fixtures, {'icons': true})
+      var server = createServer(roots, {'icons': true})
 
       request(server)
       .get('/collect')
@@ -311,7 +330,7 @@ describe('serveIndex(root)', function () {
       it('should get called with Accept: text/html', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files) {
+        serveIndex.html = function (req, res, next) {
           res.setHeader('Content-Type', 'text/html');
           res.end('called');
         }
@@ -325,8 +344,9 @@ describe('serveIndex(root)', function () {
       it('should get file list', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files) {
+        serveIndex.html = function (req, res, next, dir, files) {
           var text = files
+            .map(function(file){ return file.name; })
             .filter(function (f) { return /\.txt$/.test(f) })
             .sort()
           res.setHeader('Content-Type', 'text/html')
@@ -342,7 +362,7 @@ describe('serveIndex(root)', function () {
       it('should get dir name', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir) {
+        serveIndex.html = function (req, res, next, dir, files) {
           res.setHeader('Content-Type', 'text/html')
           res.end('<b>' + dir + '</b>')
         }
@@ -356,7 +376,7 @@ describe('serveIndex(root)', function () {
       it('should get template path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, next, dir, files, showUp, icons, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(template)))
         }
@@ -370,7 +390,7 @@ describe('serveIndex(root)', function () {
       it('should get template with tokens', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, next, dir, files, showUp, icons, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(fs.readFileSync(template, 'utf8'))
         }
@@ -388,7 +408,7 @@ describe('serveIndex(root)', function () {
       it('should get stylesheet path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+        serveIndex.html = function (req, res, next, dir, files, showUp, icons, view, template, stylesheet) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(stylesheet)))
         }
@@ -406,7 +426,7 @@ describe('serveIndex(root)', function () {
       it('should get called with Accept: text/plain', function (done) {
         var server = createServer()
 
-        serveIndex.plain = function (req, res, files) {
+        serveIndex.plain = function (req, res, next, dir, files) {
           res.setHeader('Content-Type', 'text/plain');
           res.end('called');
         }
@@ -424,7 +444,7 @@ describe('serveIndex(root)', function () {
       it('should get called with Accept: application/json', function (done) {
         var server = createServer()
 
-        serveIndex.json = function (req, res, files) {
+        serveIndex.json = function (req, res, next, dir, files) {
           res.setHeader('Content-Type', 'application/json');
           res.end('"called"');
         }
@@ -448,6 +468,7 @@ describe('serveIndex(root)', function () {
       .expect('Content-Type', 'text/html; charset=utf-8')
       .expect(/<a href="\/users\/index.html"/)
       .expect(/<a href="\/users\/tobi.txt"/)
+      .expect(/<a href="\/users\/Tobi.txt"/)
       .end(done);
     });
 
@@ -504,7 +525,7 @@ describe('serveIndex(root)', function () {
   describe('when setting a custom template', function () {
     var server;
     before(function () {
-      server = createServer(fixtures, {'template': __dirname + '/shared/template.html'});
+      server = createServer(roots, {'template': __dirname + '/shared/template.html'});
     });
 
     it('should respond with file list', function (done) {
@@ -548,7 +569,7 @@ describe('serveIndex(root)', function () {
   describe('when setting a custom stylesheet', function () {
     var server;
     before(function () {
-      server = createServer(fixtures, {'stylesheet': __dirname + '/shared/styles.css'});
+      server = createServer(roots, {'stylesheet': __dirname + '/shared/styles.css'});
     });
 
     it('should respond with appropriate embedded styles', function (done) {
@@ -565,7 +586,7 @@ describe('serveIndex(root)', function () {
   describe('when set with trailing slash', function () {
     var server;
     before(function () {
-      server = createServer(fixtures + '/');
+      server = createServer([ public1 + '/', public2 + '/']);
     });
 
     it('should respond with file list', function (done) {
@@ -588,7 +609,7 @@ describe('serveIndex(root)', function () {
     });
 
     it('should respond with file list', function (done) {
-      var dest = relative.split(path.sep).join('/');
+      var dest = relative.split(path.sep).join('/') + '/public2';
       request(server)
       .get('/' + dest + '/')
       .set('Accept', 'application/json')
@@ -622,7 +643,7 @@ function alterProperty(obj, prop, val) {
 }
 
 function createServer(dir, opts) {
-  dir = dir || fixtures
+  dir = dir || roots
 
   var _serveIndex = serveIndex(dir, opts)
 
