@@ -69,6 +69,10 @@ The following tokens are replaced in templates:
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
+##### trailingSlashes
+
+If set to true, links to directories will include a trailing slash. Defaults to false.
+
 ## Examples
 
 ### Serve directory indexes with vanilla node.js http server
