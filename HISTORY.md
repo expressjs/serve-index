@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Send non-chunked response for `OPTIONS`
   * deps: escape-html@1.0.2
   * perf: enable strict mode
 
