@@ -1,5 +1,5 @@
-unreleased
-==========
+1.7.0 / 2015-06-15
+==================
 
   * Accept `function` value for `template` option
   * Send non-chunked response for `OPTIONS`
