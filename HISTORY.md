@@ -1,5 +1,5 @@
-unreleased
-==========
+1.6.5 / 2015-06-14
+==================
 
   * Send non-chunked response for `OPTIONS`
   * deps: accepts@~1.2.9
