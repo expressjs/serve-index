@@ -10,6 +10,8 @@ unreleased
     - perf: enable strict mode
     - perf: remove unnecessary bitwise operator
   * deps: escape-html@1.0.2
+  * deps: mime-types@~2.1.1
+    - Add new mime types
   * perf: enable strict mode
   * perf: remove argument reassignment
 
