@@ -228,6 +228,14 @@ serveIndex.plain = function _plain(req, res, files) {
 };
 
 /**
+ * dateTimeToString for external customize 
+ */
+
+exports.dateTimeToString=function(mtime){
+    return mtime.toDateString() + ' ' + mtime.toLocaleTimeString()
+}
+
+/**
  * Sort function for with directories first.
  */
 
@@ -397,7 +405,7 @@ function html(files, dir, useIcons, view) {
     path.push(encodeURIComponent(file.name));
 
     var date = file.stat && file.name !== '..'
-      ? file.stat.mtime.toDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
+      ? exports.dateTimeToString(file.stat.mtime)
       : '';
     var size = file.stat && !isDir
       ? file.stat.size

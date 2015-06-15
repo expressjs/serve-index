@@ -435,7 +435,26 @@ describe('serveIndex(root)', function () {
         .expect(200, '"called"', done)
       });
     });
-  });
+
+    describe('dateTimeToString', function () {
+      alterProperty(serveIndex, 'dateTimeToString', serveIndex.dateTimeToString)
+      it('should use dateTimeToString', function (done) {
+        var server = createServer()
+
+        serveIndex.dateTimeToString = function (mtime){
+            return 'this date time string';
+        };
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200)
+        .expect(/<a href="\/foo%20%26%20bar"/)
+        .expect(/this date time string/)
+        .end(done);
+      });
+    });
+});
 
   describe('when navigating to other directory', function () {
     it('should respond with correct listing', function (done) {
