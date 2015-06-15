@@ -304,6 +304,146 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "template" option', function () {
+    describe('when setting a custom template file', function () {
+      var server;
+      before(function () {
+        server = createServer(fixtures, {'template': __dirname + '/shared/template.html'});
+      });
+
+      it('should respond with file list', function (done) {
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
+        .expect(/<a href="\/users"/)
+        .expect(/<a href="\/file%20%231.txt"/)
+        .expect(/<a href="\/todo.txt"/)
+        .expect(200, done)
+      });
+
+      it('should respond with testing template sentence', function (done) {
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200, /This is the test template/, done)
+      });
+
+      it('should have default styles', function (done) {
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200, /ul#files/, done)
+      });
+
+      it('should list directory twice', function (done) {
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(function (res) {
+          var occurances = res.text.match(/directory \/users\//g)
+          if (occurances && occurances.length === 2) return
+          throw new Error('directory not listed twice')
+        })
+        .expect(200, done)
+      });
+    });
+
+    describe('when setting a custom template function', function () {
+      it('should invoke function to render', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, 'This is a template.');
+        }});
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(200, 'This is a template.', done);
+      });
+
+      it('should handle render errors', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(new Error('boom!'));
+        }});
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect(500, 'boom!', done);
+      });
+
+      it('should provide "directory" local', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.directory));
+        }});
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, '"/users/"', done);
+      });
+
+      it('should provide "displayIcons" local', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.displayIcons));
+        }});
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, 'false', done);
+      });
+
+      it('should provide "fileList" local', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.fileList.map(function (file) {
+            file.stat = file.stat instanceof fs.Stats;
+            return file;
+          })));
+        }});
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect('[{"name":"..","stat":true},{"name":"#dir","stat":true},{"name":"index.html","stat":true},{"name":"tobi.txt","stat":true}]')
+        .expect(200, done);
+      });
+
+      it('should provide "path" local', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.path));
+        }});
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, JSON.stringify(path.join(fixtures, 'users/')), done);
+      });
+
+      it('should provide "style" local', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.style));
+        }});
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, /#files \.icon \.name/, done);
+      });
+
+      it('should provide "viewName" local', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.viewName));
+        }});
+
+        request(server)
+        .get('/users/')
+        .set('Accept', 'text/html')
+        .expect(200, '"tiles"', done);
+      });
+    });
+  });
+
   describe('when using custom handler', function () {
     describe('exports.html', function () {
       alterProperty(serveIndex, 'html', serveIndex.html)
@@ -517,50 +657,6 @@ describe('serveIndex(root)', function () {
       .get('/../support/')
       .set('Accept', 'text/html')
       .expect(403, done);
-    });
-  });
-
-  describe('when setting a custom template', function () {
-    var server;
-    before(function () {
-      server = createServer(fixtures, {'template': __dirname + '/shared/template.html'});
-    });
-
-    it('should respond with file list', function (done) {
-      request(server)
-      .get('/')
-      .set('Accept', 'text/html')
-      .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
-      .expect(/<a href="\/users"/)
-      .expect(/<a href="\/file%20%231.txt"/)
-      .expect(/<a href="\/todo.txt"/)
-      .expect(200, done)
-    });
-
-    it('should respond with testing template sentence', function (done) {
-      request(server)
-      .get('/')
-      .set('Accept', 'text/html')
-      .expect(200, /This is the test template/, done)
-    });
-
-    it('should have default styles', function (done) {
-      request(server)
-      .get('/')
-      .set('Accept', 'text/html')
-      .expect(200, /ul#files/, done)
-    });
-
-    it('should list directory twice', function (done) {
-      request(server)
-      .get('/users/')
-      .set('Accept', 'text/html')
-      .expect(function (res) {
-        var occurances = res.text.match(/directory \/users\//g)
-        if (occurances && occurances.length === 2) return
-        throw new Error('directory not listed twice')
-      })
-      .expect(200, done)
     });
   });
 

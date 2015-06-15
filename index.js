@@ -171,26 +171,43 @@ function serveIndex(root, options) {
  */
 
 serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+  var render = typeof template !== 'function'
+    ? createHtmlRender(template)
+    : template
+
   if (showUp) {
     files.unshift('..');
   }
 
+  // stat all files
   stat(path, files, function (err, stats) {
     if (err) return next(err);
-    fs.readFile(template, 'utf8', function(err, str){
+
+    // combine the stats into the file list
+    var fileList = files.map(function (file, i) {
+      return { name: file, stat: stats[i] };
+    });
+
+    // sort file list
+    fileList.sort(fileSort);
+
+    // read stylesheet
+    fs.readFile(stylesheet, 'utf8', function (err, style) {
       if (err) return next(err);
-      fs.readFile(stylesheet, 'utf8', function(err, style){
+
+      // create locals for rendering
+      var locals = {
+        directory: dir,
+        displayIcons: Boolean(icons),
+        fileList: fileList,
+        path: path,
+        style: style,
+        viewName: view
+      };
+
+      // render html
+      render(locals, function (err, body) {
         if (err) return next(err);
-
-        var fileData = files.map(function (file, i) {
-          return { name: file, stat: stats[i] };
-        }).sort(fileSort);
-
-        var body = str
-          .replace(/\{style\}/g, style.concat(iconStyle(fileData, icons)))
-          .replace(/\{files\}/g, createHtmlFileList(fileData, dir, icons, view))
-          .replace(/\{directory\}/g, escapeHtml(dir))
-          .replace(/\{linked-path\}/g, htmlPath(dir));
 
         var buf = new Buffer(body, 'utf8');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -286,6 +303,27 @@ function createHtmlFileList(files, dir, useIcons, view) {
   html += '</ul>';
 
   return html;
+}
+
+/**
+ * Create function to render html.
+ */
+
+function createHtmlRender(template) {
+  return function render(locals, callback) {
+    // read template
+    fs.readFile(template, 'utf8', function (err, str) {
+      if (err) return callback(err);
+
+      var body = str
+        .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
+        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
+        .replace(/\{directory\}/g, escapeHtml(locals.directory))
+        .replace(/\{linked-path\}/g, htmlPath(locals.directory));
+
+      callback(null, body);
+    });
+  };
 }
 
 /**
@@ -385,7 +423,7 @@ function iconLookup(filename) {
  * Load icon images, return css string.
  */
 
-function iconStyle (files, useIcons) {
+function iconStyle(files, useIcons) {
   if (!useIcons) return '';
   var className;
   var i;

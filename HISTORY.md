@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Accept `function` value for `template` option
   * Send non-chunked response for `OPTIONS`
   * Stat parent directory when necessary
   * Use `Date.prototype.toLocaleDateString` to format date

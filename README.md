@@ -56,14 +56,30 @@ Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
 
 ##### template
 
-Optional path to an HTML template. Defaults to a built-in template.
+Optional path to an HTML template or a function that will render a HTML
+string. Defaults to a built-in template.
 
-The following tokens are replaced in templates:
+When given a string, the string is used as a file path to load and then the
+following tokens are replaced in templates:
 
   * `{directory}` with the name of the directory.
   * `{files}` with the HTML of an unordered list of file links.
   * `{linked-path}` with the HTML of a link to the directory.
   * `{style}` with the specified stylesheet and embedded images.
+
+When given as a function, the function is called as `template(locals, callback)`
+and it needs to invoke `callback(error, htmlString)`. The following are the
+provided locals:
+
+  * `directory` is the directory being displayed (where `/` is the root).
+  * `displayIcons` is a Boolean for if icons should be rendered or not.
+  * `fileList` is a sorted array of files in the directory. The array contains
+    objects with the following properties:
+    - `name` is the relative name for the file.
+    - `stat` is a `fs.Stats` object for the file.
+  * `path` is the full filesystem path to `directory`.
+  * `style` is the default stylesheet or the contents of the `stylesheet` option.
+  * `viewName` is the view name provided by the `view` option.
 
 ##### view
 
