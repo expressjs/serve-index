@@ -188,7 +188,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
 
         var body = str
           .replace(/\{style\}/g, style.concat(iconStyle(fileData, icons)))
-          .replace(/\{files\}/g, html(fileData, dir, icons, view))
+          .replace(/\{files\}/g, createHtmlFileList(fileData, dir, icons, view))
           .replace(/\{directory\}/g, escapeHtml(dir))
           .replace(/\{linked-path\}/g, htmlPath(dir));
 
@@ -226,6 +226,67 @@ serveIndex.plain = function _plain(req, res, files) {
   res.setHeader('Content-Length', buf.length);
   res.end(buf);
 };
+
+/**
+ * Map html `files`, returning an html unordered list.
+ * @private
+ */
+
+function createHtmlFileList(files, dir, useIcons, view) {
+  var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'
+    + (view == 'details' ? (
+      '<li class="header">'
+      + '<span class="name">Name</span>'
+      + '<span class="size">Size</span>'
+      + '<span class="date">Modified</span>'
+      + '</li>') : '');
+
+  html += files.map(function (file) {
+    var classes = [];
+    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory());
+    var path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
+
+    if (useIcons) {
+      classes.push('icon');
+
+      if (isDir) {
+        classes.push('icon-directory');
+      } else {
+        var ext = extname(file.name);
+        var icon = iconLookup(file.name);
+
+        classes.push('icon');
+        classes.push('icon-' + ext.substring(1));
+
+        if (classes.indexOf(icon.className) === -1) {
+          classes.push(icon.className);
+        }
+      }
+    }
+
+    path.push(encodeURIComponent(file.name));
+
+    var date = file.stat && file.name !== '..'
+      ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
+      : '';
+    var size = file.stat && !isDir
+      ? file.stat.size
+      : '';
+
+    return '<li><a href="'
+      + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
+      + '" class="' + escapeHtml(classes.join(' ')) + '"'
+      + ' title="' + escapeHtml(file.name) + '">'
+      + '<span class="name">' + escapeHtml(file.name) + '</span>'
+      + '<span class="size">' + escapeHtml(size) + '</span>'
+      + '<span class="date">' + escapeHtml(date) + '</span>'
+      + '</a></li>';
+  }).join('\n');
+
+  html += '</ul>';
+
+  return html;
+}
 
 /**
  * Sort function for with directories first.
@@ -357,62 +418,6 @@ function iconStyle (files, useIcons) {
   }
 
   return style;
-}
-
-/**
- * Map html `files`, returning an html unordered list.
- */
-
-function html(files, dir, useIcons, view) {
-  return '<ul id="files" class="view-' + escapeHtml(view) + '">'
-    + (view == 'details' ? (
-      '<li class="header">'
-      + '<span class="name">Name</span>'
-      + '<span class="size">Size</span>'
-      + '<span class="date">Modified</span>'
-      + '</li>') : '')
-    + files.map(function(file){
-    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory())
-      , classes = []
-      , path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
-
-    if (useIcons) {
-      classes.push('icon');
-
-      if (isDir) {
-        classes.push('icon-directory');
-      } else {
-        var ext = extname(file.name);
-        var icon = iconLookup(file.name);
-
-        classes.push('icon');
-        classes.push('icon-' + ext.substring(1));
-
-        if (classes.indexOf(icon.className) === -1) {
-          classes.push(icon.className);
-        }
-      }
-    }
-
-    path.push(encodeURIComponent(file.name));
-
-    var date = file.stat && file.name !== '..'
-      ? file.stat.mtime.toDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
-      : '';
-    var size = file.stat && !isDir
-      ? file.stat.size
-      : '';
-
-    return '<li><a href="'
-      + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
-      + '" class="' + escapeHtml(classes.join(' ')) + '"'
-      + ' title="' + escapeHtml(file.name) + '">'
-      + '<span class="name">' + escapeHtml(file.name) + '</span>'
-      + '<span class="size">' + escapeHtml(size) + '</span>'
-      + '<span class="date">' + escapeHtml(date) + '</span>'
-      + '</a></li>';
-
-  }).join('\n') + '</ul>';
 }
 
 /**

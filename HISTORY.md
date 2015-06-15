@@ -2,6 +2,7 @@ unreleased
 ==========
 
   * Send non-chunked response for `OPTIONS`
+  * Use `Date.prototype.toLocaleDateString` to format date
   * deps: accepts@~1.2.9
     - deps: mime-types@~2.1.1
     - deps: negotiator@0.5.3
