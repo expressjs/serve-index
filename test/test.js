@@ -270,7 +270,7 @@ describe('serveIndex(root)', function () {
     });
 
     it('should filter directory paths', function (done) {
-      var cb = after(3, done)
+      var cb = after(4, done)
       var server = createServer(fixtures, {'filter': filter})
 
       function filter(name, index, list, dir) {
@@ -449,6 +449,25 @@ describe('serveIndex(root)', function () {
       .expect(/<a href="\/users\/index.html"/)
       .expect(/<a href="\/users\/tobi.txt"/)
       .end(done);
+    });
+
+    it('should include link to parent directory', function (done) {
+      var server = createServer()
+
+      request(server)
+      .get('/users')
+      .end(function (err, res) {
+        if (err) return done(err);
+        var body = res.text.split('</h1>')[1];
+        var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
+        assert.deepEqual(urls, [
+          '/',
+          '/users/%23dir',
+          '/users/index.html',
+          '/users/tobi.txt'
+        ]);
+        done();
+      });
     });
 
     it('should work for directory with #', function (done) {

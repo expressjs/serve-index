@@ -171,20 +171,20 @@ function serveIndex(root, options) {
  */
 
 serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
-  fs.readFile(template, 'utf8', function(err, str){
+  if (showUp) {
+    files.unshift('..');
+  }
+
+  stat(path, files, function (err, stats) {
     if (err) return next(err);
-    fs.readFile(stylesheet, 'utf8', function(err, style){
+    fs.readFile(template, 'utf8', function(err, str){
       if (err) return next(err);
-      stat(path, files, function(err, stats){
+      fs.readFile(stylesheet, 'utf8', function(err, style){
         if (err) return next(err);
 
         var fileData = files.map(function (file, i) {
           return { name: file, stat: stats[i] };
         }).sort(fileSort);
-
-        if (showUp) {
-          fileData.unshift({ name: '..' });
-        }
 
         var body = str
           .replace(/\{style\}/g, style.concat(iconStyle(fileData, icons)))
@@ -243,7 +243,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
   html += files.map(function (file) {
     var classes = [];
-    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory());
+    var isDir = file.stat && file.stat.isDirectory();
     var path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
 
     if (useIcons) {
@@ -293,6 +293,12 @@ function createHtmlFileList(files, dir, useIcons, view) {
  */
 
 function fileSort(a, b) {
+  // sort ".." to the top
+  if (a.name === '..' || b.name === '..') {
+    return a.name === b.name ? 0
+      : a.name === '..' ? -1 : 1;
+  }
+
   return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
     String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
 }
@@ -393,7 +399,7 @@ function iconStyle (files, useIcons) {
   for (i = 0; i < files.length; i++) {
     var file = files[i];
 
-    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory());
+    var isDir = file.stat && file.stat.isDirectory();
     var icon = isDir
       ? { className: 'icon-directory', fileName: icons.folder }
       : iconLookup(file.name);
