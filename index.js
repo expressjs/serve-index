@@ -28,6 +28,13 @@ var mime = require('mime-types');
 var parseUrl = require('parseurl');
 var resolve = require('path').resolve;
 
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = serveIndex;
+
 /*!
  * Icon cache.
  */
@@ -67,30 +74,31 @@ var mediaType = {
  *
  * See Readme.md for documentation of options.
  *
- * @param {String} path
+ * @param {String} root
  * @param {Object} options
  * @return {Function} middleware
- * @api public
+ * @public
  */
 
-exports = module.exports = function serveIndex(root, options){
-  options = options || {};
+function serveIndex(root, options) {
+  var opts = options || {};
 
   // root required
-  if (!root) throw new TypeError('serveIndex() root path required');
+  if (!root) {
+    throw new TypeError('serveIndex() root path required');
+  }
 
   // resolve root to absolute and normalize
-  root = resolve(root);
-  root = normalize(root + sep);
+  var rootPath = normalize(resolve(root) + sep);
 
-  var hidden = options.hidden
-    , icons = options.icons
-    , view = options.view || 'tiles'
-    , filter = options.filter
-    , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet;
+  var filter = opts.filter;
+  var hidden = opts.hidden;
+  var icons = opts.icons;
+  var stylesheet = opts.stylesheet || defaultStylesheet;
+  var template = opts.template || defaultTemplate;
+  var view = opts.view || 'tiles';
 
-  return function serveIndex(req, res, next) {
+  return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.statusCode = 'OPTIONS' === req.method ? 200 : 405;
       res.setHeader('Allow', 'GET, HEAD, OPTIONS');
@@ -106,19 +114,19 @@ exports = module.exports = function serveIndex(root, options){
     var originalDir = decodeURIComponent(originalUrl.pathname);
 
     // join / normalize from root dir
-    var path = normalize(join(root, dir));
+    var path = normalize(join(rootPath, dir));
 
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400));
 
     // malicious path
-    if ((path + sep).substr(0, root.length) !== root) {
+    if ((path + sep).substr(0, rootPath.length) !== rootPath) {
       debug('malicious path "%s"', path);
       return next(createError(403));
     }
 
     // determine ".." display
-    var showUp = normalize(resolve(path) + sep) !== root;
+    var showUp = normalize(resolve(path) + sep) !== rootPath;
 
     // check if we have a directory
     debug('stat "%s"', path);
@@ -152,7 +160,7 @@ exports = module.exports = function serveIndex(root, options){
 
         // not acceptable
         if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
       });
     });
   };
@@ -162,23 +170,29 @@ exports = module.exports = function serveIndex(root, options){
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet){
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
   fs.readFile(template, 'utf8', function(err, str){
     if (err) return next(err);
     fs.readFile(stylesheet, 'utf8', function(err, style){
       if (err) return next(err);
       stat(path, files, function(err, stats){
         if (err) return next(err);
-        files = files.map(function(file, i){ return { name: file, stat: stats[i] }; });
-        files.sort(fileSort);
-        if (showUp) files.unshift({ name: '..' });
-        str = str
-          .replace(/\{style\}/g, style.concat(iconStyle(files, icons)))
-          .replace(/\{files\}/g, html(files, dir, icons, view))
+
+        var fileData = files.map(function (file, i) {
+          return { name: file, stat: stats[i] };
+        }).sort(fileSort);
+
+        if (showUp) {
+          fileData.unshift({ name: '..' });
+        }
+
+        var body = str
+          .replace(/\{style\}/g, style.concat(iconStyle(fileData, icons)))
+          .replace(/\{files\}/g, html(fileData, dir, icons, view))
           .replace(/\{directory\}/g, escapeHtml(dir))
           .replace(/\{linked-path\}/g, htmlPath(dir));
 
-        var buf = new Buffer(str, 'utf8');
+        var buf = new Buffer(body, 'utf8');
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Content-Length', buf.length);
         res.end(buf);
@@ -191,7 +205,7 @@ exports.html = function(req, res, files, next, dir, showUp, icons, path, view, t
  * Respond with application/json.
  */
 
-exports.json = function(req, res, files){
+serveIndex.json = function _json(req, res, files) {
   var body = JSON.stringify(files);
   var buf = new Buffer(body, 'utf8');
 
@@ -204,7 +218,7 @@ exports.json = function(req, res, files){
  * Respond with text/plain.
  */
 
-exports.plain = function(req, res, files){
+serveIndex.plain = function _plain(req, res, files) {
   var body = files.join('\n') + '\n';
   var buf = new Buffer(body, 'utf8');
 

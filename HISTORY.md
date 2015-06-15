@@ -4,6 +4,7 @@ unreleased
   * Send non-chunked response for `OPTIONS`
   * deps: escape-html@1.0.2
   * perf: enable strict mode
+  * perf: remove argument reassignment
 
 1.6.4 / 2015-05-12
 ==================
