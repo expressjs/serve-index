@@ -6,8 +6,7 @@
  * MIT Licensed
  */
 
-// TODO: arrow key navigation
-// TODO: make icons extensible
+'use strict';
 
 /**
  * Module dependencies.

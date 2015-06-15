@@ -2,6 +2,7 @@ unreleased
 ==========
 
   * deps: escape-html@1.0.2
+  * perf: enable strict mode
 
 1.6.4 / 2015-05-12
 ==================
