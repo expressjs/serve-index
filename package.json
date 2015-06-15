@@ -9,7 +9,7 @@
     "accepts": "~1.2.7",
     "batch": "0.5.2",
     "debug": "~2.2.0",
-    "escape-html": "1.0.1",
+    "escape-html": "1.0.2",
     "http-errors": "~1.3.1",
     "mime-types": "~2.0.11",
     "parseurl": "~1.3.0"
