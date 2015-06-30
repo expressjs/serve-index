@@ -128,8 +128,8 @@ describe('serveIndex(root)', function () {
         .set('Accept', 'text/html')
         .expect(200)
         .expect('Content-Type', 'text/html; charset=utf-8')
-        .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
-        .expect(/<a href="\/users"/)
+        .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir\/"/)
+        .expect(/<a href="\/users\/"/)
         .expect(/<a href="\/file%20%231.txt"/)
         .expect(/<a href="\/todo.txt"/)
         .expect(/<a href="\/%E3%81%95%E3%81%8F%E3%82%89\.txt"/)
@@ -163,10 +163,10 @@ describe('serveIndex(root)', function () {
           var body = res.text.split('</h1>')[1];
           var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
           assert.deepEqual(urls, [
-            '/%23directory',
-            '/collect',
-            '/g%23%20%253%20o%20%26%20%252525%20%2537%20dir',
-            '/users',
+            '/%23directory/',
+            '/collect/',
+            '/g%23%20%253%20o%20%26%20%252525%20%2537%20dir/',
+            '/users/',
             '/file%20%231.txt',
             '/foo%20%26%20bar',
             '/nums',
@@ -315,8 +315,8 @@ describe('serveIndex(root)', function () {
         request(server)
         .get('/')
         .set('Accept', 'text/html')
-        .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir"/)
-        .expect(/<a href="\/users"/)
+        .expect(/<a href="\/g%23%20%253%20o%20%26%20%252525%20%2537%20dir\/"/)
+        .expect(/<a href="\/users\/"/)
         .expect(/<a href="\/file%20%231.txt"/)
         .expect(/<a href="\/todo.txt"/)
         .expect(200, done)
@@ -602,7 +602,7 @@ describe('serveIndex(root)', function () {
         var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
         assert.deepEqual(urls, [
           '/',
-          '/users/%23dir',
+          '/users/%23dir\/',
           '/users/index.html',
           '/users/tobi.txt'
         ]);
