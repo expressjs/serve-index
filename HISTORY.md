@@ -3,6 +3,8 @@ unreleased
 
   * deps: accepts@~1.2.12
     - deps: mime-types@~2.1.4
+  * deps: mime-types@~2.1.4
+    - Add new mime types
 
 1.7.1 / 2015-07-05
 ==================
