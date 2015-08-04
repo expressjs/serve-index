@@ -77,12 +77,35 @@
     <input id="search" type="text" placeholder="Search" autocomplete="off" />
     <div id="wrapper">
       <h1><a href="/">~</a>{linked-path}</h1>
-      <div class="run-buttons">
-        <a href="#">Run App...</a>
-        <a href="#">Run Tests...</a>
+      <div class="run-buttons" id="run-buttons">
+        <a data-role="app" href="#">Run App...</a>
+        <a data-role="test" href="#">Run Tests...</a>
         <div style="clear: both"></div>
       </div>
       {files}
     </div>
+
+    <script>
+      var runButtons = document.getElementById('run-buttons');
+      runButtons.addEventListener('click', function(ev){
+        var role = ev.target.dataset.role;
+        if(role){
+          ev.preventDefault();
+          var xhr = new XMLHttpRequest();
+          var url = window.location.pathname?
+            window.location.pathname + 'run/' + role :
+            'run/' + role;
+           console.log('url', url) 
+          xhr.open('GET', url);
+          xhr.onload = function(){
+            if(this.status === 200){
+              window.location.reload();
+            }
+          }
+          xhr.send();
+        }
+      });
+    </script>
+
   </body>
 </html>
