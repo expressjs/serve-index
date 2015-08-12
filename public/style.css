@@ -257,16 +257,9 @@ ul#files.view-details li.header {
 }
 
 .run-buttons {
-  width: 90%;
+  display: inline-block;
 }
 
-.run-buttons a {
-  font-weight: bold;
-  border-radius: 5px;
-  float: right;
-  padding: 2px 4px;
-  border: 1px solid blue;
-  background: #000;
-  color: #fff;
-  margin-left: 50px;
+.run-buttons button {
+  margin-right: 10px;  
 }

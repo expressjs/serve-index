@@ -385,20 +385,27 @@ function html(files, dir, useIcons, view, trailingSlashes) {
 
     path.push(encodeURIComponent(file.name));
 
+    var runButtons = '';
+    if( /\.js$/.test(file.name) ){
+      runButtons = '<div class="run-buttons"><button>run dev</button><button>run test</button></div>';
+    }
+
     var date = file.stat && file.name !== '..'
       ? file.stat.mtime.toDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
       : '';
     var size = file.stat && !isDir
       ? file.stat.size
       : '';
-
+    
     var escapedHtml = escapeHtml(normalizeSlashes(normalize(path.join('/'))));
     return '<li><a href="'
       + escapedHtml
       + (escapedHtml !== '/' && trailingSlashes && isDir? '/' : '')
       + '" class="' + escapeHtml(classes.join(' ')) + '"'
       + ' title="' + escapeHtml(file.name) + '">'
-      + '<span class="name">' + escapeHtml(file.name) + '</span>'
+      + '<span class="name">' + escapeHtml(file.name) 
+      + runButtons
+      + '</span>'
       + '<span class="size">' + escapeHtml(size) + '</span>'
       + '<span class="date">' + escapeHtml(date) + '</span>'
       + '</a></li>';
