@@ -387,7 +387,9 @@ function html(files, dir, useIcons, view, trailingSlashes) {
 
     var runButtons = '';
     if( /\.js$/.test(file.name) ){
-      runButtons = '<div class="run-buttons"><button>run dev</button><button>run test</button></div>';
+      runButtons = '<div class="run-buttons" id="run-buttons">'
+        + '<button data-file="'+file.name+'" data-role="dev">run dev</button>'
+        + '<button data-file="'+file.name+'" data-role="test">run test</button></div>';
     }
 
     var date = file.stat && file.name !== '..'

@@ -77,23 +77,25 @@
     <input id="search" type="text" placeholder="Search" autocomplete="off" />
     <div id="wrapper">
       <h1><a href="/">~</a>{linked-path}</h1>
-      <div class="run-buttons" id="run-buttons">
-        <a data-role="dev" href="run/dev">Run Dev...</a>
-        <a data-role="test" href="run/test">Run Tests...</a>
-        <div style="clear: both"></div>
-      </div>
       {files}
     </div>
 
     <script type="text/javascript" src="/gaston-compiled.js"></script>
     <script>
-      document.getElementById('run-buttons').addEventListener('click', function(ev){
-        var role = ev.target.dataset.role
+    var handler = function(ev){
+        ev.stopPropagation();
+        var role = ev.target.dataset.role; 
         if(role){
+          var file = ev.target.dataset.file;
           ev.preventDefault();
-          gaston.identify(role);
+          gaston.identify(role, file);
+          return false;
         }
-      });
+      };
+      var runButtons = document.getElementsByClassName('run-buttons');
+      for(var i = 0, l = runButtons.length; i < l; i++){
+        runButtons[i].addEventListener('click', handler);
+      }
     </script>
 
   </body>
