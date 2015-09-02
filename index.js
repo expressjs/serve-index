@@ -386,7 +386,9 @@ function html(files, dir, useIcons, view, trailingSlashes) {
     path.push(encodeURIComponent(file.name));
 
     var runButtons = '';
-    if( /\.js$/.test(file.name) ){
+    if( /\.js$/.test(file.name) 
+      && !~file.name.indexOf('bundle') 
+      && !~file.name.indexOf('build') ){
       runButtons = '<div class="run-buttons" id="run-buttons">'
         + '<button data-file="'+file.name+'" data-role="dev">run dev</button>'
         + '<button data-file="'+file.name+'" data-role="test">run test</button></div>';

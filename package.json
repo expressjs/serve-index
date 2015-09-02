@@ -1,10 +1,10 @@
 {
-  "name": "serve-index",
+  "name": "gaston-serve-index",
   "description": "Serve directory listings",
-  "version": "1.6.3",
-  "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
+  "version": "1.0.0",
+  "author": "André Alçada Padez <andre.padez@gmail.com>",
   "license": "MIT",
-  "repository": "expressjs/serve-index",
+  "repository": "vigour-io/gaston-serve-index",
   "dependencies": {
     "accepts": "~1.2.5",
     "batch": "0.5.2",
