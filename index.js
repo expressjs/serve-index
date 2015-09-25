@@ -14,38 +14,38 @@
  * @private
  */
 
-var accepts = require('accepts');
-var createError = require('http-errors');
-var debug = require('debug')('serve-index');
-var escapeHtml = require('escape-html');
-var fs = require('fs')
-  , path = require('path')
-  , normalize = path.normalize
-  , sep = path.sep
-  , extname = path.extname
-  , join = path.join;
-var Batch = require('batch');
-var mime = require('mime-types');
-var parseUrl = require('parseurl');
-var resolve = require('path').resolve;
+var accepts = require('accepts')
+var createError = require('http-errors')
+var debug = require('debug')('serve-index')
+var escapeHtml = require('escape-html')
+var fs = require('fs'),
+  path = require('path'),
+  normalize = path.normalize,
+  sep = path.sep,
+  extname = path.extname,
+  join = path.join
+var Batch = require('batch')
+var mime = require('mime-types')
+var parseUrl = require('parseurl')
+var resolve = require('path').resolve
 
 /*!
  * Icon cache.
  */
 
-var cache = {};
+var cache = {}
 
 /*!
  * Default template.
  */
 
-var defaultTemplate = join(__dirname, 'public', 'directory.html');
+var defaultTemplate = join(__dirname, 'public', 'directory.html')
 
 /*!
  * Stylesheet.
  */
 
-var defaultStylesheet = join(__dirname, 'public', 'style.css');
+var defaultStylesheet = join(__dirname, 'public', 'style.css')
 
 /**
  * Media types and the map for content negotiation.
@@ -55,13 +55,13 @@ var mediaTypes = [
   'text/html',
   'text/plain',
   'application/json'
-];
+]
 
 var mediaType = {
   'text/html': 'html',
   'text/plain': 'plain',
   'application/json': 'json'
-};
+}
 
 /**
  * Serve directory listings with the given `root` path.
@@ -74,200 +74,202 @@ var mediaType = {
  * @api public
  */
 
-exports = module.exports = function serveIndex(root, options){
-  options = options || {};
+exports = module.exports = function serveIndex (root, options) {
+  options = options || {}
 
   // root required
-  if (!root) throw new TypeError('serveIndex() root path required');
+  if (!root) throw new TypeError('serveIndex() root path required')
 
   // resolve root to absolute and normalize
-  root = resolve(root);
-  root = normalize(root + sep);
+  root = resolve(root)
+  root = normalize(root + sep)
 
-  var hidden = options.hidden
-    , icons = options.icons
-    , view = options.view || 'tiles'
-    , filter = options.filter
-    , template = options.template || defaultTemplate
-    , stylesheet = options.stylesheet || defaultStylesheet
-    , trailingSlashes = options.trailingSlashes || false;
+  var hidden = options.hidden,
+    icons = options.icons,
+    view = options.view || 'tiles',
+    filter = options.filter,
+    template = options.template || defaultTemplate,
+    stylesheet = options.stylesheet || defaultStylesheet,
+    trailingSlashes = options.trailingSlashes || false,
+    project = options.project
 
-  return function serveIndex(req, res, next) {
+  return function serveIndex (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.statusCode = 'OPTIONS' === req.method
         ? 200
-        : 405;
-      res.setHeader('Allow', 'GET, HEAD, OPTIONS');
-      res.end();
-      return;
+        : 405
+      res.setHeader('Allow', 'GET, HEAD, OPTIONS')
+      res.end()
+      return
     }
 
     // parse URLs
-    var url = parseUrl(req);
-    var originalUrl = parseUrl.original(req);
-    var dir = decodeURIComponent(url.pathname);
-    var originalDir = decodeURIComponent(originalUrl.pathname);
+    var url = parseUrl(req)
+    var originalUrl = parseUrl.original(req)
+    var dir = decodeURIComponent(url.pathname)
+    var originalDir = decodeURIComponent(originalUrl.pathname)
 
     // join / normalize from root dir
-    var path = normalize(join(root, dir));
+    var path = normalize(join(root, dir))
 
     // null byte(s), bad request
-    if (~path.indexOf('\0')) return next(createError(400));
+    if (~path.indexOf('\0')) return next(createError(400))
 
     // malicious path
     if ((path + sep).substr(0, root.length) !== root) {
-      debug('malicious path "%s"', path);
-      return next(createError(403));
+      debug('malicious path "%s"', path)
+      return next(createError(403))
     }
 
     // determine ".." display
-    var showUp = normalize(resolve(path) + sep) !== root;
+    var showUp = normalize(resolve(path) + sep) !== root
 
     // check if we have a directory
-    debug('stat "%s"', path);
-    fs.stat(path, function(err, stat){
+    debug('stat "%s"', path)
+    fs.stat(path, function (err, stat) {
       if (err && err.code === 'ENOENT') {
-        return next();
+        return next()
       }
 
       if (err) {
         err.status = err.code === 'ENAMETOOLONG'
           ? 414
-          : 500;
-        return next(err);
+          : 500
+        return next(err)
       }
 
-      if (!stat.isDirectory()) return next();
+      if (!stat.isDirectory()) return next()
 
       // fetch files
-      debug('readdir "%s"', path);
-      fs.readdir(path, function(err, files){
-        if (err) return next(err);
-        if (!hidden) files = removeHidden(files);
-        if (filter) files = files.filter(function(filename, index, list) {
-          return filter(filename, index, list, path);
-        });
-        files.sort();
+      debug('readdir "%s"', path)
+      fs.readdir(path, function (err, files) {
+        if (err) return next(err)
+        if (!hidden) files = removeHidden(files)
+        if (filter) files = files.filter(function (filename, index, list) {
+            return filter(filename, index, list, path)
+          })
+        files.sort()
 
         // content-negotiation
-        var accept = accepts(req);
-        var type = accept.type(mediaTypes);
+        var accept = accepts(req)
+        var type = accept.type(mediaTypes)
 
         // not acceptable
-        if (!type) return next(createError(406));
-        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, trailingSlashes);
-      });
-    });
-  };
-};
+        if (!type) return next(createError(406))
+        exports[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, trailingSlashes, project)
+      })
+    })
+  }
+}
 
 /**
  * Respond with text/html.
  */
 
-exports.html = function(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, trailingSlashes){
-  fs.readFile(template, 'utf8', function(err, str){
-    if (err) return next(err);
-    fs.readFile(stylesheet, 'utf8', function(err, style){
-      if (err) return next(err);
-      stat(path, files, function(err, stats){
-        if (err) return next(err);
-        files = files.map(function(file, i){ return { name: file, stat: stats[i] }; });
-        files.sort(fileSort);
-        if (showUp) files.unshift({ name: '..' });
+exports.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, trailingSlashes, project) {
+  fs.readFile(template, 'utf8', function (err, str) {
+    if (err) return next(err)
+    fs.readFile(stylesheet, 'utf8', function (err, style) {
+      if (err) return next(err)
+      stat(path, files, function (err, stats) {
+        if (err) return next(err)
+        files = files.map(function (file, i) { return { name: file, stat: stats[i]}; })
+        files.sort(fileSort)
+        if (showUp) files.unshift({ name: '..' })
         str = str
           .replace(/\{style\}/g, style.concat(iconStyle(files, icons)))
-          .replace(/\{files\}/g, html(files, dir, icons, view, trailingSlashes))
+          .replace(/\{files\}/g, html(files, dir, icons, view, trailingSlashes, project))
           .replace(/\{directory\}/g, escapeHtml(dir))
-          .replace(/\{linked-path\}/g, htmlPath(dir));
+          .replace(/\{linked-path\}/g, htmlPath(dir))
+          .replace(/\{project-name\}/g, project || '~')
 
-        var buf = new Buffer(str, 'utf8');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Content-Length', buf.length);
-        res.end(buf);
-      });
-    });
-  });
-};
+        var buf = new Buffer(str, 'utf8')
+        res.setHeader('Content-Type', 'text/html; charset=utf-8')
+        res.setHeader('Content-Length', buf.length)
+        res.end(buf)
+      })
+    })
+  })
+}
 
 /**
  * Respond with application/json.
  */
 
-exports.json = function(req, res, files){
-  var body = JSON.stringify(files);
-  var buf = new Buffer(body, 'utf8');
+exports.json = function (req, res, files) {
+  var body = JSON.stringify(files)
+  var buf = new Buffer(body, 'utf8')
 
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
-};
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+  res.setHeader('Content-Length', buf.length)
+  res.end(buf)
+}
 
 /**
  * Respond with text/plain.
  */
 
-exports.plain = function(req, res, files){
-  var body = files.join('\n') + '\n';
-  var buf = new Buffer(body, 'utf8');
+exports.plain = function (req, res, files) {
+  var body = files.join('\n') + '\n'
+  var buf = new Buffer(body, 'utf8')
 
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
-};
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.setHeader('Content-Length', buf.length)
+  res.end(buf)
+}
 
 /**
  * Sort function for with directories first.
  */
 
-function fileSort(a, b) {
+function fileSort (a, b) {
   return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
-    String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
+  String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase())
 }
 
 /**
  * Map html `dir`, returning a linked path.
  */
 
-function htmlPath(dir) {
-  var parts = dir.split('/');
-  var crumb = new Array(parts.length);
+function htmlPath (dir) {
+  var parts = dir.split('/')
+  var crumb = new Array(parts.length)
 
   for (var i = 0; i < parts.length; i++) {
-    var part = parts[i];
+    var part = parts[i]
 
     if (part) {
-      parts[i] = encodeURIComponent(part);
-      crumb[i] = '<a href="' + escapeHtml(parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(part) + '</a>';
+      parts[i] = encodeURIComponent(part)
+      crumb[i] = '<a href="' + escapeHtml(parts.slice(0, i + 1).join('/')) + '">' + escapeHtml(part) + '</a>'
     }
   }
 
-  return crumb.join(' / ');
+  return crumb.join(' / ')
 }
 
 /**
  * Get the icon data for the file name.
  */
 
-function iconLookup(filename) {
-  var ext = extname(filename);
+function iconLookup (filename) {
+  var ext = extname(filename)
 
   // try by extension
   if (icons[ext]) {
     return {
       className: 'icon-' + ext.substring(1),
       fileName: icons[ext]
-    };
+    }
   }
 
-  var mimetype = mime.lookup(ext);
+  var mimetype = mime.lookup(ext)
 
   // default if no mime type
   if (mimetype === false) {
     return {
       className: 'icon-default',
       fileName: icons.default
-    };
+    }
   }
 
   // try by mime type
@@ -275,32 +277,32 @@ function iconLookup(filename) {
     return {
       className: 'icon-' + mimetype.replace('/', '-'),
       fileName: icons[mimetype]
-    };
+    }
   }
 
-  var suffix = mimetype.split('+')[1];
+  var suffix = mimetype.split('+')[1]
 
   if (suffix && icons['+' + suffix]) {
     return {
       className: 'icon-' + suffix,
       fileName: icons['+' + suffix]
-    };
+    }
   }
 
-  var type = mimetype.split('/')[0];
+  var type = mimetype.split('/')[0]
 
   // try by type only
   if (icons[type]) {
     return {
       className: 'icon-' + type,
       fileName: icons[type]
-    };
+    }
   }
 
   return {
     className: 'icon-default',
     fileName: icons.default
-  };
+  }
 }
 
 /**
@@ -308,113 +310,116 @@ function iconLookup(filename) {
  */
 
 function iconStyle (files, useIcons) {
-  if (!useIcons) return '';
-  var className;
-  var i;
-  var iconName;
-  var list = [];
-  var rules = {};
-  var selector;
-  var selectors = {};
-  var style = '';
+  if (!useIcons) return ''
+  var className
+  var i
+  var iconName
+  var list = []
+  var rules = {}
+  var selector
+  var selectors = {}
+  var style = ''
 
   for (i = 0; i < files.length; i++) {
-    var file = files[i];
+    var file = files[i]
 
-    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory());
+    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory())
     var icon = isDir
       ? { className: 'icon-directory', fileName: icons.folder }
-      : iconLookup(file.name);
-    var iconName = icon.fileName;
+      : iconLookup(file.name)
+    var iconName = icon.fileName
 
-    selector = '#files .' + icon.className + ' .name';
+    selector = '#files .' + icon.className + ' .name'
 
     if (!rules[iconName]) {
       rules[iconName] = 'background-image: url(data:image/png;base64,' + load(iconName) + ');'
-      selectors[iconName] = [];
-      list.push(iconName);
+      selectors[iconName] = []
+      list.push(iconName)
     }
 
     if (selectors[iconName].indexOf(selector) === -1) {
-      selectors[iconName].push(selector);
+      selectors[iconName].push(selector)
     }
   }
 
   for (i = 0; i < list.length; i++) {
-    iconName = list[i];
-    style += selectors[iconName].join(',\n') + ' {\n  ' + rules[iconName] + '\n}\n';
+    iconName = list[i]
+    style += selectors[iconName].join(',\n') + ' {\n  ' + rules[iconName] + '\n}\n'
   }
 
-  return style;
+  return style
 }
 
 /**
  * Map html `files`, returning an html unordered list.
  */
 
-function html(files, dir, useIcons, view, trailingSlashes) {
+function html (files, dir, useIcons, view, trailingSlashes, isProject) {
   return '<ul id="files" class="view-' + escapeHtml(view) + '">'
-    + (view == 'details' ? (
-      '<li class="header">'
-      + '<span class="name">Name</span>'
-      + '<span class="size">Size</span>'
-      + '<span class="date">Modified</span>'
-      + '</li>') : '')
-    + files.map(function(file){
-    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory())
-      , classes = []
-      , path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
+  + (view == 'details' ? (
+    '<li class="header">'
+    + '<span class="name">Name</span>'
+    + '<span class="size">Size</span>'
+    + '<span class="date">Modified</span>'
+    + '</li>') : '')
+  + files.map(function (file) {
+    var isDir = '..' == file.name || (file.stat && file.stat.isDirectory()),
+      classes = [],
+      path = dir.split('/').map(function (c) { return encodeURIComponent(c); })
 
     if (useIcons) {
-      classes.push('icon');
+      classes.push('icon')
 
       if (isDir) {
-        classes.push('icon-directory');
+        classes.push('icon-directory')
       } else {
-        var ext = extname(file.name);
-        var icon = iconLookup(file.name);
+        var ext = extname(file.name)
+        var icon = iconLookup(file.name)
 
-        classes.push('icon');
-        classes.push('icon-' + ext.substring(1));
+        classes.push('icon')
+        classes.push('icon-' + ext.substring(1))
 
         if (classes.indexOf(icon.className) === -1) {
-          classes.push(icon.className);
+          classes.push(icon.className)
         }
       }
     }
 
-    path.push(encodeURIComponent(file.name));
+    path.push(encodeURIComponent(file.name))
 
-    var runButtons = '';
-    if( /\.js$/.test(file.name) 
-      && !~file.name.indexOf('bundle') 
-      && !~file.name.indexOf('build') ){
-      runButtons = '<div class="run-buttons" id="run-buttons">'
-        + '<button data-file="'+file.name+'" data-role="dev">run dev</button>'
-        + '<button data-file="'+file.name+'" data-role="test">run test</button></div>';
+    var filePath = path.join('/').replace('//', '/')
+    var runButtons = '<div class="run-buttons" id="run-buttons">'
+    if (file.name === 'package.json' && !isProject) {
+      runButtons += '<button data-file="' + filePath + '" data-role="project">run project</button>'
     }
+    if (/\.js$/.test(file.name) && isProject) {
+      runButtons +=
+        '<button data-file="' + filePath + '" data-role="dev">run dev</button>' +
+        '<button data-file="' + filePath + '" data-role="test">run test</button>'
+    }
+    runButtons += '</div>'
 
     var date = file.stat && file.name !== '..'
       ? file.stat.mtime.toDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
-      : '';
+      : ''
     var size = file.stat && !isDir
       ? file.stat.size
-      : '';
-    
-    var escapedHtml = escapeHtml(normalizeSlashes(normalize(path.join('/'))));
-    return '<li><a href="'
-      + escapedHtml
-      + (escapedHtml !== '/' && trailingSlashes && isDir? '/' : '')
-      + '" class="' + escapeHtml(classes.join(' ')) + '"'
-      + ' title="' + escapeHtml(file.name) + '">'
-      + '<span class="name">' + escapeHtml(file.name) 
-      + runButtons
-      + '</span>'
-      + '<span class="size">' + escapeHtml(size) + '</span>'
-      + '<span class="date">' + escapeHtml(date) + '</span>'
-      + '</a></li>';
+      : ''
 
-  }).join('\n') + '</ul>';
+    var escapedHtml = escapeHtml(normalizeSlashes(normalize(path.join('/'))))
+    return '<li><a href="'
+    + escapedHtml
+    + (escapedHtml !== '/' && trailingSlashes && isDir ? '/' : '')
+    + '" class="' + escapeHtml(classes.join(' ')) + '"'
+    + ' title="' + escapeHtml(file.name) + '">'
+    + '<span class="name">' + escapeHtml(file.name)
+    + runButtons
+    + '</span>'
+    + '<span class="size">' + escapeHtml(size) + '</span>'
+    + '<span class="date">' + escapeHtml(date) + '</span>'
+    + '</a></li>'
+
+  }).join('\n') + '</ul>'
 }
 
 /**
@@ -425,9 +430,9 @@ function html(files, dir, useIcons, view, trailingSlashes) {
  * @api private
  */
 
-function load(icon) {
-  if (cache[icon]) return cache[icon];
-  return cache[icon] = fs.readFileSync(__dirname + '/public/icons/' + icon, 'base64');
+function load (icon) {
+  if (cache[icon]) return cache[icon]
+  return cache[icon] = fs.readFileSync(__dirname + '/public/icons/' + icon, 'base64')
 }
 
 /**
@@ -439,9 +444,9 @@ function load(icon) {
  * @api private
  */
 
-function normalizeSlashes(path) {
-  return path.split(sep).join('/');
-};
+function normalizeSlashes (path) {
+  return path.split(sep).join('/')
+}
 
 /**
  * Filter "hidden" `files`, aka files
@@ -452,10 +457,10 @@ function normalizeSlashes(path) {
  * @api private
  */
 
-function removeHidden(files) {
-  return files.filter(function(file){
-    return '.' != file[0];
-  });
+function removeHidden (files) {
+  return files.filter(function (file) {
+    return '.' != file[0]
+  })
 }
 
 /**
@@ -463,23 +468,23 @@ function removeHidden(files) {
  * in same order.
  */
 
-function stat(dir, files, cb) {
-  var batch = new Batch();
+function stat (dir, files, cb) {
+  var batch = new Batch()
 
-  batch.concurrency(10);
+  batch.concurrency(10)
 
-  files.forEach(function(file){
-    batch.push(function(done){
-      fs.stat(join(dir, file), function(err, stat){
-        if (err && err.code !== 'ENOENT') return done(err);
+  files.forEach(function (file) {
+    batch.push(function (done) {
+      fs.stat(join(dir, file), function (err, stat) {
+        if (err && err.code !== 'ENOENT') return done(err)
 
         // pass ENOENT as null stat, not error
-        done(null, stat || null);
-      });
-    });
-  });
+        done(null, stat || null)
+      })
+    })
+  })
 
-  batch.end(cb);
+  batch.end(cb)
 }
 
 /**
@@ -595,4 +600,4 @@ var icons = {
   '.xcf': 'page_white_picture.png',
   '.xlsx': 'page_white_excel.png',
   '.yaws': 'page_white_code.png'
-};
+}
