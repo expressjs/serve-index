@@ -73,15 +73,21 @@
     </script>
   </head>
   <body class="directory">
-
     <input id="search" type="text" placeholder="Search" autocomplete="off" />
     <div id="wrapper">
-      <h1><a href="/">{project-name}</a>{linked-path}</h1>
+      <h1>
+        <a href="/">{project-name}</a>{linked-path}
+        <button class="run-buttons" id="run-tests" data-file="{dir-path}" data-role="test" style="display:none">run test</button>
+      </h1>
+
       {files}
     </div>
 
     <script type="text/javascript" src="/naked-gaston.js"></script>
     <script>
+    if(window.isProject){
+      document.getElementById('run-tests').style.display = 'inline-block'
+    }
     var handler = function(ev){
         ev.stopPropagation();
         var role = ev.target.dataset.role; 

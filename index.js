@@ -181,6 +181,7 @@ exports.html = function (req, res, files, next, dir, showUp, icons, path, view, 
           .replace(/\{files\}/g, html(files, dir, icons, view, trailingSlashes, project))
           .replace(/\{directory\}/g, escapeHtml(dir))
           .replace(/\{linked-path\}/g, htmlPath(dir))
+          .replace(/\{dir-path\}/g, dir)
           .replace(/\{project-name\}/g, project || '~')
 
         var buf = new Buffer(str, 'utf8')
@@ -420,6 +421,7 @@ function html (files, dir, useIcons, view, trailingSlashes, isProject) {
     + '</a></li>'
 
   }).join('\n') + '</ul>'
+  + '<script type="text/javascript">window.isProject = ' + !!isProject + '</script>'
 }
 
 /**
