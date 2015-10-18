@@ -301,7 +301,7 @@ describe('serveIndex(root)', function () {
       .expect(200, done)
     });
 
-    it('should sort invert sorting when parameter is prefixed with a -', function (done) {
+    it('should invert sorting order when parameter is prefixed with a `-`', function (done) {
       var server = createServer(fixtures, {sorting: '-name'})
 
       request(server)
