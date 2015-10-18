@@ -97,7 +97,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
-  var sorting = opts.sorting || 'name';
+  var sorting = opts.sorting;
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -331,27 +331,18 @@ function createHtmlRender(template) {
  * Sort function for with directories first.
  */
 
-function fileSort(key) {
-  var invertOrder = key.charAt(0) === '-';
-  var flipComparisonIfRequested = function(num) {
-    return invertOrder ? -num : num;
-  };
-  key = key.replace(/^-/, '');
-
-  return function (a, b) {
+function fileSort(sortFn) {
+  return function (a, b) {  
     // sort ".." to the top
     if (a.name === '..' || b.name === '..') {
       return a.name === b.name ? 0
         : a.name === '..' ? -1 : 1;
     }
 
-    return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
-      flipComparisonIfRequested(
-        key === 'name'
-          ? String(a[key]).toLocaleLowerCase().localeCompare(String(b[key]).toLocaleLowerCase())
-          : ((a.stat && a.stat[key]) <= (b.stat && b.stat[key]) ? 1 : -1)
-      );
-  };
+    return sortFn ? sortFn(a, b)
+      : Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
+        String(a).toLocaleLowerCase().localeCompare(String(b).toLocaleLowerCase())
+  }
 }
 
 /**

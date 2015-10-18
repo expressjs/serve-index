@@ -288,7 +288,7 @@ describe('serveIndex(root)', function () {
 
   describe('with "sorting" option', function () {
     it('should sort files on name by default', function (done) {
-      var server = createServer(fixtures)
+      var server = createServer(fixtures);
 
       request(server)
       .get('/')
@@ -298,11 +298,13 @@ describe('serveIndex(root)', function () {
         }
         throw new Error('default sorting is not by name');
       })
-      .expect(200, done)
+      .expect(200, done);
     });
 
-    it('should invert sorting order when parameter is prefixed with a `-`', function (done) {
-      var server = createServer(fixtures, {sorting: '-name'})
+    it('should use options.sorting when being passed a function', function (done) {
+      var server = createServer(fixtures, {sorting: function sortByFilesize(a, b) {
+        return a.stat.size < b.stat.size ? 1 : -1;
+      }});
 
       request(server)
       .get('/')
@@ -310,36 +312,9 @@ describe('serveIndex(root)', function () {
         if (res.text.indexOf('todo.txt') < res.text.indexOf('file #1.txt')){
           return;
         }
-        throw new Error('sorting prefix order not respected');
+        throw new Error('sorting function not applied');
       })
-      .expect(200, done)
-    });
-
-    it('should sort on any key of `fs.Stat`', function (done) {
-      var serverSize = createServer(fixtures, {sorting: 'size'})
-      var serverSizeDesc = createServer(fixtures, {sorting: '-size'})
-      var cb = after(2, done)
-
-      request(serverSize)
-      .get('/')
-      .expect(function (res) {
-        if (res.text.indexOf('nums') > res.text.indexOf('todo.txt')){
-          return;
-        }
-        throw new Error('Not correctly sorting on size');
-      })
-      .expect(200, cb)
-
-      request(serverSizeDesc)
-      .get('/')
-      .expect(function (res) {
-        if (res.text.indexOf('nums') < res.text.indexOf('todo.txt')){
-          return;
-        }
-        throw new Error('Not correctly sorting on size');
-      })
-      .expect(200, cb)
-
+      .expect(200, done);
     });
 
   });
