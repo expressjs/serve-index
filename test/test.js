@@ -286,6 +286,64 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "sorting" option', function () {
+    it('should sort files on name by default', function (done) {
+      var server = createServer(fixtures)
+
+      request(server)
+      .get('/')
+      .expect(function (res) {
+        if (res.text.indexOf('todo.txt') > res.text.indexOf('file #1.txt')){
+          return;
+        }
+        throw new Error('default sorting is not by name');
+      })
+      .expect(200, done)
+    });
+
+    it('should sort invert sorting when parameter is prefixed with a -', function (done) {
+      var server = createServer(fixtures, {sorting: '-name'})
+
+      request(server)
+      .get('/')
+      .expect(function (res) {
+        if (res.text.indexOf('todo.txt') < res.text.indexOf('file #1.txt')){
+          return;
+        }
+        throw new Error('sorting prefix order not respected');
+      })
+      .expect(200, done)
+    });
+
+    it('should sort on any key of `fs.Stat`', function (done) {
+      var serverSize = createServer(fixtures, {sorting: 'size'})
+      var serverSizeDesc = createServer(fixtures, {sorting: '-size'})
+      var cb = after(2, done)
+
+      request(serverSize)
+      .get('/')
+      .expect(function (res) {
+        if (res.text.indexOf('nums') > res.text.indexOf('todo.txt')){
+          return;
+        }
+        throw new Error('Not correctly sorting on size');
+      })
+      .expect(200, cb)
+
+      request(serverSizeDesc)
+      .get('/')
+      .expect(function (res) {
+        if (res.text.indexOf('nums') < res.text.indexOf('todo.txt')){
+          return;
+        }
+        throw new Error('Not correctly sorting on size');
+      })
+      .expect(200, cb)
+
+    });
+
+  });
+
   describe('with "icons" option', function () {
     it('should include icons for html', function (done) {
       var server = createServer(fixtures, {'icons': true})
