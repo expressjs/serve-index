@@ -52,7 +52,7 @@
       }
 
       function search() {
-        var str = $('search').value
+        var str = $('search').value.toLowerCase()
           , links = $('files').all('a');
 
         links.each(function(link){
