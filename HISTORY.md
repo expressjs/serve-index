@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Make inline file search case-insensitive
   * deps: accepts@~1.3.1
     - deps: mime-types@~2.1.9
     - deps: negotiator@0.6.0
