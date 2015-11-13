@@ -91,6 +91,7 @@ function serveIndex(root, options) {
   // resolve root to absolute and normalize
   var rootPath = normalize(resolve(root) + sep);
 
+  var jsonStats = opts.jsonStats || false;
   var filter = opts.filter;
   var hidden = opts.hidden;
   var icons = opts.icons;
@@ -160,7 +161,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, jsonStats);
       });
     });
   };
@@ -222,13 +223,47 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  * Respond with application/json.
  */
 
-serveIndex.json = function _json(req, res, files) {
-  var body = JSON.stringify(files);
-  var buf = new Buffer(body, 'utf8');
+serveIndex.json = function _json(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, jsonStats) {
 
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
+  if (! jsonStats) {
+    //return the simple file list with no stats
+    var body = JSON.stringify(files);
+    var buf = new Buffer(body, 'utf8');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Length', buf.length);
+    res.end(buf);
+  }
+
+  else {
+    // stat all files
+    stat(path, files, function (err, stats) {
+      if (err) return next(err);
+
+      // combine the stats into the file list
+      var filesAndStats = files.map(function (file, i) {
+        var stat = {}; 
+
+        stat["isDirectory"] = stats[i].isDirectory();
+        stat["isFile"] = stats[i].isFile();
+
+        //next select only the safe and non-machine-specific fields from the stat
+        var safeFields = ["size", "atime", "mtime", "ctime", "birthtime"]
+        safeFields.forEach(function (field) {
+          stat[field] = stats[i][field];
+        });
+
+        return { name: file, stat: stat };
+      });
+
+
+      //return the file list with stats
+      var body = JSON.stringify(filesAndStats);
+      var buf = new Buffer(body, 'utf8');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Length', buf.length);
+      res.end(buf);
+    });
+  }
 };
 
 /**
