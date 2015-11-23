@@ -97,7 +97,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
-
+  var sort = opts.sort || fileSort;
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.statusCode = 'OPTIONS' === req.method ? 200 : 405;
@@ -160,7 +160,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, sort);
       });
     });
   };
@@ -170,7 +170,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, sort) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -189,7 +189,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
     });
 
     // sort file list
-    fileList.sort(fileSort);
+    fileList.sort(sort);
 
     // read stylesheet
     fs.readFile(stylesheet, 'utf8', function (err, style) {
