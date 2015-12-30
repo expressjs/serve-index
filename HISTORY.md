@@ -1,3 +1,9 @@
+unreleased
+==========
+
+  * deps: batch@0.5.3
+    - Fix invalid dependency for browserify
+
 1.7.2 / 2015-07-30
 ==================
 
