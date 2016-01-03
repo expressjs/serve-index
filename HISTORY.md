@@ -1,6 +1,8 @@
 unreleased
 ==========
 
+  * deps: accepts@~1.2.13
+    - deps: mime-types@~2.1.6
   * deps: batch@0.5.3
     - Fix invalid dependency for browserify
 
