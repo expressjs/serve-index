@@ -5,6 +5,10 @@ unreleased
     - deps: mime-types@~2.1.6
   * deps: batch@0.5.3
     - Fix invalid dependency for browserify
+  * deps: escape-html@~1.0.3
+    - perf: enable strict mode
+    - perf: optimize string replacement
+    - perf: use faster string coercion
 
 1.7.2 / 2015-07-30
 ==================
