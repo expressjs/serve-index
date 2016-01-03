@@ -9,6 +9,8 @@ unreleased
     - perf: enable strict mode
     - perf: optimize string replacement
     - perf: use faster string coercion
+  * deps: mime-types@~2.1.8
+    - Add new mime types
 
 1.7.2 / 2015-07-30
 ==================
