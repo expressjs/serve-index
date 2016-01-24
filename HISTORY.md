@@ -11,6 +11,8 @@ unreleased
     - perf: use faster string coercion
   * deps: mime-types@~2.1.8
     - Add new mime types
+  * deps: parseurl@~1.3.1
+    - perf: enable strict mode
 
 1.7.2 / 2015-07-30
 ==================
