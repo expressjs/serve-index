@@ -9,7 +9,7 @@ unreleased
     - perf: enable strict mode
     - perf: optimize string replacement
     - perf: use faster string coercion
-  * deps: mime-types@~2.1.8
+  * deps: mime-types@~2.1.9
     - Add new mime types
   * deps: parseurl@~1.3.1
     - perf: enable strict mode
