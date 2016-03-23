@@ -59,6 +59,16 @@ describe('serveIndex(root)', function () {
     .expect(405, done)
   })
 
+  it('should not deny POST requests in case method restriction is disabled', function (done) {
+    var server = createServer(fixtures, {
+      disableMethodRestriction: true
+    })
+
+    request(server)
+    .post('/')
+    .expect(200, done)
+  })
+
   it('should deny path will NULL byte', function (done) {
     var server = createServer()
 

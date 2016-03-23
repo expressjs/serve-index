@@ -99,7 +99,7 @@ function serveIndex(root, options) {
   var view = opts.view || 'tiles';
 
   return function (req, res, next) {
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
+    if (req.method !== 'GET' && req.method !== 'HEAD' && !opts.disableMethodRestriction) {
       res.statusCode = 'OPTIONS' === req.method ? 200 : 405;
       res.setHeader('Allow', 'GET, HEAD, OPTIONS');
       res.setHeader('Content-Length', '0');

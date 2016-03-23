@@ -85,6 +85,10 @@ provided locals:
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
+##### disableMethodRestriction
+
+By default, `serve-index` restricts request methods to GET, HEAD, and OPTIONS by terminating the request via `res.end()`. However, this terminates any following middleware (e.g. a fallback proxy) as well. To prevent this, you can set the option `disableMethodRestriction` to something truthy.
+
 ## Examples
 
 ### Serve directory indexes with vanilla node.js http server
