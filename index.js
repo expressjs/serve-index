@@ -97,6 +97,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
+  var sort=opts.sort;
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -160,7 +161,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet,sort);
       });
     });
   };
@@ -170,7 +171,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet,sort) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -187,9 +188,11 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
     var fileList = files.map(function (file, i) {
       return { name: file, stat: stats[i] };
     });
-
+    
+   
+    sort=sort||serveIndex.fileSortWithName; 
     // sort file list
-    fileList.sort(fileSort);
+    fileList.sort(sort);
 
     // read stylesheet
     fs.readFile(stylesheet, 'utf8', function (err, style) {
@@ -340,6 +343,22 @@ function fileSort(a, b) {
   return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
     String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
 }
+
+/**
+ * Sort function for with directories first.then mtime.
+ */
+function fileSortWithMtime(a,b){
+  if (a.name === '..' || b.name === '..') {
+    return a.name === b.name ? 0
+      : a.name === '..' ? -1 : 1;
+  }
+  var tb=b.stat?b.stat.mtime:0;
+  var ta=a.stat?a.stat.mtime:0;
+
+  return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||(tb-ta);
+};
+serveIndex.fileSortWithName=fileSort;
+serveIndex.fileSortWithMTime=fileSortWithMtime;
 
 /**
  * Map html `dir`, returning a linked path.
