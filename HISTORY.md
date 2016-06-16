@@ -5,6 +5,10 @@ unreleased
   * deps: accepts@~1.3.1
     - deps: mime-types@~2.1.9
     - deps: negotiator@0.6.0
+  * deps: mime-types@~2.1.11
+    - Add new mime types
+    - Update primary extension for `audio/mp4`
+    - deps: mime-db@~1.23.0
 
 1.7.3 / 2016-01-24
 ==================
