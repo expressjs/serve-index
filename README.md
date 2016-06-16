@@ -85,6 +85,10 @@ provided locals:
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
+##### sort
+
+A function to sort directorys and files, default is serveIndex.fileSortWithName,you can use serveIndex.fileSortWithMTime instead,or write one.
+
 ## Examples
 
 ### Serve directory indexes with vanilla node.js http server
