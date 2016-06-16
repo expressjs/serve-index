@@ -6,6 +6,11 @@ unreleased
     - deps: mime-types@~2.1.11
     - deps: negotiator@0.6.1
     - perf: improve header parsing speed
+  * deps: http-errors@~1.5.0
+    - Use `setprototypeof` module to replace `__proto__` setting
+    - deps: inherits@2.0.1
+    - deps: statuses@'>= 1.3.0 < 2'
+    - perf: enable strict mode
   * deps: mime-types@~2.1.11
     - Add new mime types
     - Update primary extension for `audio/mp4`
