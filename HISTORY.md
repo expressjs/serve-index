@@ -2,9 +2,10 @@ unreleased
 ==========
 
   * Make inline file search case-insensitive
-  * deps: accepts@~1.3.1
-    - deps: mime-types@~2.1.9
-    - deps: negotiator@0.6.0
+  * deps: accepts@~1.3.3
+    - deps: mime-types@~2.1.11
+    - deps: negotiator@0.6.1
+    - perf: improve header parsing speed
   * deps: mime-types@~2.1.11
     - Add new mime types
     - Update primary extension for `audio/mp4`
