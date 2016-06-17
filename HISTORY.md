@@ -1,5 +1,5 @@
-unreleased
-==========
+1.8.0 / 2016-06-17
+==================
 
   * Make inline file search case-insensitive
   * deps: accepts@~1.3.3
