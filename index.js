@@ -27,6 +27,7 @@ var Batch = require('batch');
 var mime = require('mime-types');
 var parseUrl = require('parseurl');
 var resolve = require('path').resolve;
+var filesize = require('file-size');
 
 /**
  * Module exports.
@@ -93,6 +94,7 @@ function serveIndex(root, options) {
 
   var filter = opts.filter;
   var hidden = opts.hidden;
+  var humanSize = opts.humanSize;
   var icons = opts.icons;
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
@@ -160,7 +162,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, humanSize, icons, path, view, template, stylesheet);
       });
     });
   };
@@ -170,7 +172,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, humanSize, icons, path, view, template, stylesheet) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -198,6 +200,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
       // create locals for rendering
       var locals = {
         directory: dir,
+        displayHumanSize: Boolean(humanSize),
         displayIcons: Boolean(icons),
         fileList: fileList,
         path: path,
@@ -249,7 +252,7 @@ serveIndex.plain = function _plain(req, res, files) {
  * @private
  */
 
-function createHtmlFileList(files, dir, useIcons, view) {
+function createHtmlFileList(files, dir, useIcons, useHumanSize, view) {
   var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'
     + (view == 'details' ? (
       '<li class="header">'
@@ -287,7 +290,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
       ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
       : '';
     var size = file.stat && !isDir
-      ? file.stat.size
+      ? (useHumanSize ? filesize(file.stat.size).human() : file.stat.size)
       : '';
 
     return '<li><a href="'
@@ -317,7 +320,7 @@ function createHtmlRender(template) {
 
       var body = str
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
-        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
+        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.displayHumanSize, locals.viewName))
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
         .replace(/\{linked-path\}/g, htmlPath(locals.directory));
 

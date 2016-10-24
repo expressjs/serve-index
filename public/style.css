@@ -124,7 +124,7 @@ ul#files li a.highlight {
 }
 #search:focus {
   width: 120px;
-  opacity: 1.0; 
+  opacity: 1.0;
 }
 
 /*views*/
@@ -156,6 +156,7 @@ ul#files.view-details li {
   float: none;
   display: block;
   width: 90%;
+  padding-right: 10px;
 }
 ul#files.view-details li.header {
   height: 25px;
@@ -179,7 +180,6 @@ ul#files.view-details li.header {
 .view-details .size,
 .view-details .date {
   text-align: right;
-  direction: rtl;
 }
 
 /*mobile*/
