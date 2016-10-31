@@ -286,6 +286,17 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "humanSize" option', function () {
+    it('should display human readable file size for html', function (done) {
+      var server = createServer(fixtures, {'humanSize': true})
+
+      request(server)
+      .get('/')
+      .expect(/Bytes/)
+      .expect(200, done)
+    });
+  });
+
   describe('with "icons" option', function () {
     it('should include icons for html', function (done) {
       var server = createServer(fixtures, {'icons': true})
