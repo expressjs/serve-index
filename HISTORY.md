@@ -1,3 +1,10 @@
+unreleased
+==========
+
+  * deps: debug@2.3.3
+    - Fix error when running under React Native
+    - deps: ms@0.7.2
+
 1.8.0 / 2016-06-17
 ==================
 
