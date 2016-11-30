@@ -1,3 +1,17 @@
+unreleased
+==========
+
+  * deps: debug@2.3.3
+    - Fix error when running under React Native
+    - deps: ms@0.7.2
+  * deps: http-errors@~1.5.1
+    - deps: inherits@2.0.3
+    - deps: setprototypeof@1.0.2
+    - deps: statuses@'>= 1.3.1 < 2'
+  * deps: mime-types@~2.1.13
+    - Add new mime types
+    - Add `audio/mp3`
+
 1.8.0 / 2016-06-17
 ==================
 
