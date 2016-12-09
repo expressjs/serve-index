@@ -53,6 +53,12 @@ var defaultTemplate = join(__dirname, 'public', 'directory.html');
 
 var defaultStylesheet = join(__dirname, 'public', 'style.css');
 
+/*!
+ * Javascript.
+ */
+
+var defaultJavascript = join(__dirname, 'public', 'default.js');
+
 /**
  * Media types and the map for content negotiation.
  */
@@ -96,6 +102,7 @@ function serveIndex(root, options) {
   var icons = opts.icons;
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
+  var javascript = opts.javascript || defaultJavascript;
   var view = opts.view || 'tiles';
 
   return function (req, res, next) {
@@ -160,7 +167,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, javascript);
       });
     });
   };
@@ -170,7 +177,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, javascript) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -195,24 +202,30 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
     fs.readFile(stylesheet, 'utf8', function (err, style) {
       if (err) return next(err);
 
-      // create locals for rendering
-      var locals = {
-        directory: dir,
-        displayIcons: Boolean(icons),
-        fileList: fileList,
-        path: path,
-        style: style,
-        viewName: view
-      };
-
-      // render html
-      render(locals, function (err, body) {
+      // read javascript
+      fs.readFile(javascript, 'utf8', function (err, js) {
         if (err) return next(err);
 
-        var buf = new Buffer(body, 'utf8');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Content-Length', buf.length);
-        res.end(buf);
+        // create locals for rendering
+        var locals = {
+          directory: dir,
+          displayIcons: Boolean(icons),
+          fileList: fileList,
+          path: path,
+          style: style,
+          javascript: js,
+          viewName: view
+        };
+
+        // render html
+        render(locals, function (err, body) {
+          if (err) return next(err);
+
+          var buf = new Buffer(body, 'utf8');
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.setHeader('Content-Length', buf.length);
+          res.end(buf);
+        });
       });
     });
   });
