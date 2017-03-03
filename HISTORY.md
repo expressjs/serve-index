@@ -11,7 +11,7 @@ unreleased
     - deps: inherits@2.0.3
     - deps: setprototypeof@1.0.2
     - deps: statuses@'>= 1.3.1 < 2'
-  * deps: mime-types@~2.1.13
+  * deps: mime-types@~2.1.14
     - Add new mime types
     - Add `audio/mp3`
 
