@@ -7,9 +7,10 @@ unreleased
     - Fix error when running under React Native
     - Use same color for same namespace
     - deps: ms@0.7.2
-  * deps: http-errors@~1.5.1
+  * deps: http-errors@~1.6.1
+    - Make `message` property enumerable for `HttpError`s
     - deps: inherits@2.0.3
-    - deps: setprototypeof@1.0.2
+    - deps: setprototypeof@1.0.3
     - deps: statuses@'>= 1.3.1 < 2'
   * deps: mime-types@~2.1.14
     - Add new mime types
