@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * deps: batch@0.6.0
   * deps: debug@2.6.3
     - Allow colors in workers
     - Deprecated `DEBUG_FD` environment variable set to `3` or higher
