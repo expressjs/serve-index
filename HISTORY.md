@@ -1,9 +1,10 @@
 unreleased
 ==========
 
-  * deps: debug@2.6.1
+  * deps: debug@2.6.3
     - Allow colors in workers
     - Deprecated `DEBUG_FD` environment variable set to `3` or higher
+    - Fix `DEBUG_MAX_ARRAY_LENGTH`
     - Fix error when running under React Native
     - Use same color for same namespace
     - deps: ms@0.7.2
