@@ -119,6 +119,12 @@ function serveIndex(root, options) {
     // null byte(s), bad request
     if (~path.indexOf('\0')) return next(createError(400));
 
+    var isWin = ~process.platform.indexOf('win');
+    if(isWin){
+      path = path.toLowerCase();
+      root = root.toLowerCase();
+    }
+
     // malicious path
     if ((path + sep).substr(0, rootPath.length) !== rootPath) {
       debug('malicious path "%s"', path);
