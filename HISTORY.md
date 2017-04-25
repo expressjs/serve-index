@@ -2,13 +2,13 @@ unreleased
 ==========
 
   * deps: batch@0.6.0
-  * deps: debug@2.6.3
+  * deps: debug@2.6.4
     - Allow colors in workers
     - Deprecated `DEBUG_FD` environment variable set to `3` or higher
     - Fix `DEBUG_MAX_ARRAY_LENGTH`
     - Fix error when running under React Native
     - Use same color for same namespace
-    - deps: ms@0.7.2
+    - deps: ms@0.7.3
   * deps: http-errors@~1.6.1
     - Make `message` property enumerable for `HttpError`s
     - deps: inherits@2.0.3
