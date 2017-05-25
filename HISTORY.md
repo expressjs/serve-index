@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Set `X-Content-Type-Options: nosniff` header
   * deps: batch@0.6.1
   * deps: debug@2.6.8
     - Allow colors in workers

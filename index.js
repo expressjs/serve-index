@@ -495,8 +495,14 @@ function removeHidden(files) {
  */
 
 function send (res, type, body) {
+  // security header for content sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+
+  // standard headers
   res.setHeader('Content-Type', type + '; charset=utf-8')
   res.setHeader('Content-Length', Buffer.byteLength(body, 'utf8'))
+
+  // body
   res.end(body, 'utf8')
 }
 

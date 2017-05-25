@@ -26,6 +26,15 @@ describe('serveIndex(root)', function () {
     .expect(200, done)
   })
 
+  it('should include security header', function (done) {
+    var server = createServer()
+
+    request(server)
+    .get('/')
+    .expect('X-Content-Type-Options', 'nosniff')
+    .expect(200, done)
+  })
+
   it('should serve a directory index', function (done) {
     var server = createServer()
 
@@ -117,6 +126,16 @@ describe('serveIndex(root)', function () {
         .expect(/さくら\.txt/)
         .expect(200, done)
       });
+
+      it('should include security header', function (done) {
+        var server = createServer()
+
+        request(server)
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect('X-Content-Type-Options', 'nosniff')
+        .expect(200, done)
+      })
     });
 
     describe('when Accept: text/html is given', function () {
@@ -135,6 +154,16 @@ describe('serveIndex(root)', function () {
         .expect(/<a href="\/%E3%81%95%E3%81%8F%E3%82%89\.txt"/)
         .end(done);
       });
+
+      it('should include security header', function (done) {
+        var server = createServer()
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/html')
+        .expect('X-Content-Type-Options', 'nosniff')
+        .expect(200, done)
+      })
 
       it('should property escape file names', function (done) {
         var server = createServer()
@@ -194,6 +223,16 @@ describe('serveIndex(root)', function () {
         .expect(/さくら\.txt/)
         .end(done);
       });
+
+      it('should include security header', function (done) {
+        var server = createServer()
+
+        request(server)
+        .get('/')
+        .set('Accept', 'text/plain')
+        .expect('X-Content-Type-Options', 'nosniff')
+        .expect(200, done)
+      })
     });
 
     describe('when Accept: application/x-bogus is given', function () {
