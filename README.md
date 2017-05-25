@@ -38,6 +38,7 @@ the express example).
 
 Serve index accepts these properties in the options object.
 
+
 ##### filter
 
 Apply this filter function to files. Defaults to `false`. The `filter` function
@@ -53,6 +54,17 @@ Display hidden (dot) files. Defaults to `false`.
 ##### icons
 
 Display icons. Defaults to `false`.
+
+##### jsonStats
+
+Enables detailed information to be served via JSON when the request header includes `Accept: application/json`. Defaults to `false`.
+
+When this flag is disabled, JSON requests will return a simple array of filenames. With this flag enabled, JSON requests will return an array of objects, each containing objects with the following properties:
+
+  - `name` is the relative name for the file.
+  - `stat` is subset of the `fs.Stats` object for the file.
+
+The following "safe" properties will be present as file stats: `isFile`,`isDirectory`,`size`, `atime`, `mtime`, `ctime` and `birthtime`.
 
 ##### stylesheet
 

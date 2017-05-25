@@ -677,6 +677,74 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('when Accept: application/json is given', function () {
+    describe('when requesting file stats via JSON', function() {
+      it('should correctly identify files and directories', function (done) {
+
+        var server = createServer(fixtures, {'jsonStats': true});
+
+        request(server)
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(hasTodoStats)
+        .expect(hasUserStats)
+        .expect(200, done);
+
+        function hasTodoStats(res) {
+          //check the todo.txt record
+          var todo = res.body.find(function(value) {
+            return value.name == "todo.txt";
+          })
+
+          if (! todo.stat.size == 11)
+            throw new Error("'todo.txt' size should be 11");
+          if (! todo.stat.isFile)
+            throw new Error("'todo.txt' isFile should be true");
+          if (todo.stat.isDirectory)
+            throw new Error("'todo.txt' isDirectory should be false");
+        }
+
+        function hasUserStats(res) {         
+          //check the users record 
+          var users = res.body.find(function(value) {
+            return value.name == "users";
+          });
+
+          if (users.stat.isFile)
+            throw new Error("'users' isFile should be false");
+          if (!users.stat.isDirectory)
+            throw new Error("'users' isDirectory should be true");
+        }
+      });
+
+      it('should not return unsafe stats', function (done) {
+
+        var server = createServer(fixtures, {'jsonStats': true});
+
+        request(server)
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(noUnsafeStats)
+        .expect(200, done);
+
+        function noUnsafeStats(res) {          
+          var safeFields = ["isFile","isDirectory","size", "atime", "mtime", "ctime", "birthtime"];
+
+          res.body.forEach(function (item) {
+            safeFields.forEach(function (field) {
+              delete item.stat[field];
+            });
+
+            if (Object.keys(item.stat).length>0)
+              throw new Error("stats contains unsafe keys");
+          });
+        }
+      });
+
+    });
+  });
   describe('when set with trailing slash', function () {
     var server;
     before(function () {
