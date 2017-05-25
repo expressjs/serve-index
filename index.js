@@ -208,11 +208,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
       // render html
       render(locals, function (err, body) {
         if (err) return next(err);
-
-        var buf = new Buffer(body, 'utf8');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Content-Length', buf.length);
-        res.end(buf);
+        send(res, 'text/html', body)
       });
     });
   });
@@ -223,12 +219,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  */
 
 serveIndex.json = function _json(req, res, files) {
-  var body = JSON.stringify(files);
-  var buf = new Buffer(body, 'utf8');
-
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
+  send(res, 'application/json', JSON.stringify(files))
 };
 
 /**
@@ -236,12 +227,7 @@ serveIndex.json = function _json(req, res, files) {
  */
 
 serveIndex.plain = function _plain(req, res, files) {
-  var body = files.join('\n') + '\n';
-  var buf = new Buffer(body, 'utf8');
-
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Content-Length', buf.length);
-  res.end(buf);
+  send(res, 'text/plain', (files.join('\n') + '\n'))
 };
 
 /**
@@ -501,6 +487,17 @@ function removeHidden(files) {
   return files.filter(function(file){
     return '.' != file[0];
   });
+}
+
+/**
+ * Send a response.
+ * @private
+ */
+
+function send (res, type, body) {
+  res.setHeader('Content-Type', type + '; charset=utf-8')
+  res.setHeader('Content-Length', Buffer.byteLength(body, 'utf8'))
+  res.end(body, 'utf8')
 }
 
 /**
