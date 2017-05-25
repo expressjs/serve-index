@@ -1,5 +1,5 @@
-unreleased
-==========
+1.9.0 / 2017-05-25
+==================
 
   * Set `X-Content-Type-Options: nosniff` header
   * deps: batch@0.6.1
