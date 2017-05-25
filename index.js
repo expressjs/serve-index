@@ -425,9 +425,7 @@ function iconLookup(filename) {
 
 function iconStyle(files, useIcons) {
   if (!useIcons) return '';
-  var className;
   var i;
-  var iconName;
   var list = [];
   var rules = {};
   var selector;
