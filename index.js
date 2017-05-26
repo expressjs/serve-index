@@ -97,6 +97,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
+  var sorting = opts.sorting;
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -160,7 +161,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, sorting);
       });
     });
   };
@@ -170,7 +171,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, sorting) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -189,7 +190,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
     });
 
     // sort file list
-    fileList.sort(fileSort);
+    fileList.sort(fileSort(sorting));
 
     // read stylesheet
     fs.readFile(stylesheet, 'utf8', function (err, style) {
@@ -316,15 +317,18 @@ function createHtmlRender(template) {
  * Sort function for with directories first.
  */
 
-function fileSort(a, b) {
-  // sort ".." to the top
-  if (a.name === '..' || b.name === '..') {
-    return a.name === b.name ? 0
-      : a.name === '..' ? -1 : 1;
-  }
+function fileSort(sortFn) {
+  return function (a, b) {  
+    // sort ".." to the top
+    if (a.name === '..' || b.name === '..') {
+      return a.name === b.name ? 0
+        : a.name === '..' ? -1 : 1;
+    }
 
-  return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
-    String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
+    return sortFn ? sortFn(a, b)
+      : Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
+        String(a).toLocaleLowerCase().localeCompare(String(b).toLocaleLowerCase())
+  }
 }
 
 /**

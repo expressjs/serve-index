@@ -325,6 +325,39 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "sorting" option', function () {
+    it('should sort files on name by default', function (done) {
+      var server = createServer(fixtures);
+
+      request(server)
+      .get('/')
+      .expect(function (res) {
+        if (res.text.indexOf('todo.txt') > res.text.indexOf('file #1.txt')){
+          return;
+        }
+        throw new Error('default sorting is not by name');
+      })
+      .expect(200, done);
+    });
+
+    it('should use options.sorting when being passed a function', function (done) {
+      var server = createServer(fixtures, {sorting: function sortByFilesize(a, b) {
+        return a.stat.size < b.stat.size ? 1 : -1;
+      }});
+
+      request(server)
+      .get('/')
+      .expect(function (res) {
+        if (res.text.indexOf('todo.txt') < res.text.indexOf('file #1.txt')){
+          return;
+        }
+        throw new Error('sorting function not applied');
+      })
+      .expect(200, done);
+    });
+
+  });
+
   describe('with "icons" option', function () {
     it('should include icons for html', function (done) {
       var server = createServer(fixtures, {'icons': true})

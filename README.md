@@ -84,10 +84,15 @@ provided locals:
   * `path` is the full filesystem path to `directory`.
   * `style` is the default stylesheet or the contents of the `stylesheet` option.
   * `viewName` is the view name provided by the `view` option.
+  * `sorting` is the function to be used for custom sorting, provided by the `sorting` option
 
 ##### view
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
+
+##### sorting
+
+Optional sorting of the files in the listing. To apply custom sorting pass a function for handling the sorting. If nothing is passed, files will be sortted on name.
 
 ## Examples
 
