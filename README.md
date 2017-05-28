@@ -50,6 +50,10 @@ the directory the listing is for).
 
 Display hidden (dot) files. Defaults to `false`.
 
+##### humanSize
+
+Display human readable file size. Defaults to `false`.
+
 ##### icons
 
 Display icons. Defaults to `false`.

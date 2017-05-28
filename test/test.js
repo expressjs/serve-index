@@ -325,6 +325,17 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "humanSize" option', function () {
+    it('should display human readable file size for html', function (done) {
+      var server = createServer(fixtures, {'humanSize': true})
+
+      request(server)
+      .get('/')
+      .expect(/Bytes/)
+      .expect(200, done)
+    });
+  });
+
   describe('with "icons" option', function () {
     it('should include icons for html', function (done) {
       var server = createServer(fixtures, {'icons': true})
@@ -535,7 +546,7 @@ describe('serveIndex(root)', function () {
       it('should get template path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, files, next, dir, showUp, humanSize, icons, path, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(template)))
         }
@@ -549,7 +560,7 @@ describe('serveIndex(root)', function () {
       it('should get template with tokens', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, files, next, dir, showUp, humanSize, icons, path, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(fs.readFileSync(template, 'utf8'))
         }
@@ -567,7 +578,7 @@ describe('serveIndex(root)', function () {
       it('should get stylesheet path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+        serveIndex.html = function (req, res, files, next, dir, showUp, humanSize, icons, path, view, template, stylesheet) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(stylesheet)))
         }
