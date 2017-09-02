@@ -5,6 +5,9 @@ unreleased
     - deps: mime-types@~2.1.16
   * deps: http-errors@~1.6.2
     - deps: depd@1.1.1
+  * deps: mime-types@~2.1.17
+    - Add new mime types
+    - deps: mime-db@~1.30.0
 
 1.9.0 / 2017-05-25
 ==================
