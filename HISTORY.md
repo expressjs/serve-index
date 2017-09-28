@@ -3,6 +3,7 @@ unreleased
 
   * deps: accepts@~1.3.4
     - deps: mime-types@~2.1.16
+  * deps: debug@2.6.9
   * deps: http-errors@~1.6.2
     - deps: depd@1.1.1
   * deps: mime-types@~2.1.17
