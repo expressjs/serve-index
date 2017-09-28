@@ -1,5 +1,3 @@
-1.9.1 / 2017-09-28
-==================
 
   * deps: debug@2.6.9
     - remove ReDoS regexp in %o formatter
