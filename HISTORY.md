@@ -2,7 +2,6 @@ unreleased
 ==========
 
   * deps: debug@2.6.9
-    - remove ReDoS regexp in %o formatter
 
 1.9.0 / 2017-05-25
 ==================
