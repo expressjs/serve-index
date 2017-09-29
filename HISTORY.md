@@ -9,6 +9,9 @@ unreleased
   * deps: mime-types@~2.1.17
     - Add new mime types
     - deps: mime-db@~1.30.0
+  * deps: parseurl@~1.3.2
+    - perf: reduce overhead for full URLs
+    - perf: unroll the "fast-path" `RegExp`
 
 1.9.0 / 2017-05-25
 ==================
