@@ -2,5 +2,6 @@ root: true
 
 rules:
   eol-last: error
+  eqeqeq: [error, allow-null]
   indent: [error, 2, { SwitchCase: 1 }]
   no-trailing-spaces: error

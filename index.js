@@ -237,7 +237,7 @@ serveIndex.plain = function _plain(req, res, files) {
 
 function createHtmlFileList(files, dir, useIcons, view) {
   var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'
-    + (view == 'details' ? (
+    + (view === 'details' ? (
       '<li class="header">'
       + '<span class="name">Name</span>'
       + '<span class="size">Size</span>'
@@ -485,7 +485,7 @@ function normalizeSlashes(path) {
 
 function removeHidden(files) {
   return files.filter(function(file){
-    return '.' != file[0];
+    return file[0] !== '.'
   });
 }
 
