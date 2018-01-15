@@ -89,6 +89,14 @@ provided locals:
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
+##### fs
+
+Optional custom implementation of the [Node.js `fs` interface](https://nodejs.org/api/fs.html).
+Defaults to the standard Node.js file system ("fs").
+
+The supplied file system will be used for collecting the directory contents only. It will not be used to read static
+files like a stylesheet provided by the stylesheet option or for module internal file system operations.
+
 ## Examples
 
 ### Serve directory indexes with vanilla node.js http server
