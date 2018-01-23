@@ -278,7 +278,8 @@ function createHtmlFileList(files, dir, useIcons, view, prefix) {
     var size = file.stat && !isDir
       ? file.stat.size
       : '';
-    var href = `${(prefix || '')}${normalizeSlashes(normalize(path.join('/')))}`;
+    
+    var href = (prefix || '') + normalizeSlashes(normalize(path.join('/')));
 
     return '<li><a href="'
       + escapeHtml(href)
