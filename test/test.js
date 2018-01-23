@@ -483,6 +483,33 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "prefix" options', function () {
+    it('should add the prefix to file link', function (done) {
+      var server = createServer(fixtures, { prefix: '/artifacts' });
+
+      request(server)
+      .get('/')
+      .end(function (err, res) {
+        if (err) return done(err);
+        var body = res.text.split('</h1>')[1];
+        var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
+
+        assert.deepEqual(urls, [
+          '/artifacts/%23directory',
+          '/artifacts/collect',
+          '/artifacts/g%23%20%253%20o%20%26%20%252525%20%2537%20dir',
+          '/artifacts/users',
+          '/artifacts/file%20%231.txt',
+          '/artifacts/foo%20%26%20bar',
+          '/artifacts/nums',
+          '/artifacts/todo.txt',
+          '/artifacts/%E3%81%95%E3%81%8F%E3%82%89.txt'
+        ]);
+        done();
+      });
+    });
+  });
+
   describe('when using custom handler', function () {
     describe('exports.html', function () {
       alterProperty(serveIndex, 'html', serveIndex.html)
