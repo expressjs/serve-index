@@ -483,6 +483,47 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "fs" option', function () {
+    alterProperty(serveIndex, 'fs', serveIndex.fs)
+
+    it('provided fs functions should get called', function (done) {
+      var nativeFs = require("fs");
+      var fsCalls = {
+        stat: 0,
+        readdir: 0
+      };
+
+      var server = createServer(fixtures, {
+        fs: {
+          stat: function() {
+            fsCalls.stat++;
+            return nativeFs.stat.apply(fs, arguments);
+          },
+          readdir: function() {
+            fsCalls.readdir++;
+            return nativeFs.readdir.apply(fs, arguments);
+          }
+        }
+      });
+
+      request(server)
+      .get('/%23directory/')
+      .set('Accept', 'text/html')
+      .expect(200)
+      .expect('Content-Type', 'text/html; charset=utf-8')
+      .expect(/<a href="\/%23directory"/)
+      .expect(/<a href="\/%23directory\/index.html"/)
+      .end(function (err, res) {
+        if (err) return done(err);
+        assert.deepEqual(fsCalls, {
+          stat: 3, // (initial check for directory)  + (one stat for directory) + (one stat for file)
+          readdir: 1 // One directory
+        });
+        done();
+      });
+    });
+  });
+
   describe('when using custom handler', function () {
     describe('exports.html', function () {
       alterProperty(serveIndex, 'html', serveIndex.html)
