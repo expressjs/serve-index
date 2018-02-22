@@ -208,7 +208,9 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
       // render html
       render(locals, function (err, body) {
         if (err) return next(err);
-        send(res, 'text/html', body)
+        if (res._header === null) {
+          send(res, 'text/html', body)
+        }
       });
     });
   });
