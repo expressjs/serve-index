@@ -1,3 +1,10 @@
+unreleased
+==========
+
+  * deps: mime-types@~2.1.18
+    - Add new mime types
+    - deps: mime-db@~1.33.0
+
 1.9.1 / 2017-09-28
 ==================
 
