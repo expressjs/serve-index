@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Show font icon for more font types
   * deps: mime-types@~2.1.18
     - Add new mime types
     - deps: mime-db@~1.33.0
