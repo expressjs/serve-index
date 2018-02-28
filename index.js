@@ -519,8 +519,12 @@ function stat(dir, files, cb) {
   files.forEach(function(file){
     batch.push(function(done){
       fs.stat(join(dir, file), function(err, stat){
-        if (err && err.code !== 'ENOENT') return done(err);
-
+        if (err &&
+          err.code !== 'ENOENT' &&
+          err.code !== 'EPERM' &&
+          err.code !== 'EBUSY' ){
+          return done(err);
+        }
         // pass ENOENT as null stat, not error
         done(null, stat || null);
       });
