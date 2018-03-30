@@ -97,9 +97,14 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
+  var fallthrough = opts.fallthrough !== false;
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
+      if (fallthrough) {
+        return next();
+      }
+      
       res.statusCode = 'OPTIONS' === req.method ? 200 : 405;
       res.setHeader('Allow', 'GET, HEAD, OPTIONS');
       res.setHeader('Content-Length', '0');
