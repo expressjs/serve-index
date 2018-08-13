@@ -537,9 +537,9 @@ describe('serveIndex(root)', function () {
       it('should get template path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, directory, files, next, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, directory, files, next, options) {
           res.setHeader('Content-Type', 'text/html')
-          res.end(String(fs.existsSync(template)))
+          res.end(String(fs.existsSync(options.template)))
         }
 
         request(server)
@@ -551,9 +551,9 @@ describe('serveIndex(root)', function () {
       it('should get template with tokens', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, directory, files, next, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, directory, files, next, options) {
           res.setHeader('Content-Type', 'text/html')
-          res.end(fs.readFileSync(template, 'utf8'))
+          res.end(fs.readFileSync(options.template, 'utf8'))
         }
 
         request(server)
@@ -569,9 +569,9 @@ describe('serveIndex(root)', function () {
       it('should get stylesheet path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, directory, files, next, showUp, icons, path, view, template, stylesheet) {
+        serveIndex.html = function (req, res, directory, files, next, options) {
           res.setHeader('Content-Type', 'text/html')
-          res.end(String(fs.existsSync(stylesheet)))
+          res.end(String(fs.existsSync(options.stylesheet)))
         }
 
         request(server)

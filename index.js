@@ -197,7 +197,20 @@ function serveIndex(root, options) {
             }
           })
 
-          serveIndex[mediaType[type]](req, res, directory, nodes, next, showUp, icons, path, view, template, stylesheet)
+          serveIndex[mediaType[type]](req, res, directory, nodes, next, {
+            // whether '..' should be shown
+            hasParent: showUp,
+            // whether to show icons
+            icons: icons,
+            // actual fs path
+            path: path,
+            // tiles or details
+            view: view,
+            // path to template
+            template: template,
+            // path to stylesheet
+            stylesheet: stylesheet
+          })
         });
       });
     });
@@ -208,7 +221,13 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, directory, files, next, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, directory, files, next, options) {
+  var showUp = options.hasParant
+  var icons = options.icons
+  var path = options.path
+  var view = options.view
+  var template = options.template
+  var stylesheet = options.stylesheet
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
