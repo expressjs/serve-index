@@ -20,7 +20,7 @@ $ npm install serve-index
 
 ## API
 
-```js
+```javascript
 var serveIndex = require('serve-index')
 ```
 
@@ -62,7 +62,7 @@ Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
 Apply this sort function to files. Optional. The `sort` function is 
 called for each file tuple with the signature `sort(file1, file2)`.
 An example for sorting files by date of modification (descending) is:
-```js
+```javascript
 function(file1, file2) {
   // sort ".." to the top
   if (file1.name === '..' || file2.name === '..') {
@@ -110,7 +110,7 @@ Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
 ### Serve directory indexes with vanilla node.js http server
 
-```js
+```javascript
 var finalhandler = require('finalhandler')
 var http = require('http')
 var serveIndex = require('serve-index')
@@ -137,7 +137,7 @@ server.listen(3000)
 
 ### Serve directory indexes with express
 
-```js
+```javascript
 var express    = require('express')
 var serveIndex = require('serve-index')
 
