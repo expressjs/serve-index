@@ -108,13 +108,6 @@ function serveIndex(root, options) {
       return;
     }
 
-    // content-negotiation
-    var accept = accepts(req);
-    var type = accept.type(mediaTypes);
-
-    // not acceptable
-    if (!type) return next(createError(406));
-
     // parse URLs
     var url = parseUrl(req);
     var originalUrl = parseUrl.original(req);
@@ -151,6 +144,13 @@ function serveIndex(root, options) {
       }
 
       if (!stat.isDirectory()) return next();
+
+      // content-negotiation
+      var accept = accepts(req);
+      var type = accept.type(mediaTypes);
+
+      // not acceptable
+      if (!type) return next(createError(406));
 
       // fetch files
       debug('readdir "%s"', path);
