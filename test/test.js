@@ -436,7 +436,9 @@ describe('serveIndex(root)', function () {
       it('should provide "fileList" local', function (done) {
         var server = createServer(fixtures, {'template': function (locals, callback) {
           callback(null, JSON.stringify(locals.fileList.map(function (file) {
-            file.stat = file.stat instanceof fs.Stats;
+            file.lastModified = file.lastModified instanceof Date
+            file.size = file.size >= 0
+            file.type = /\//.test(file.type)
             return file;
           })));
         }});
@@ -444,7 +446,7 @@ describe('serveIndex(root)', function () {
         request(server)
         .get('/users/')
         .set('Accept', 'text/html')
-        .expect('[{"name":"..","stat":true},{"name":"#dir","stat":true},{"name":"index.html","stat":true},{"name":"tobi.txt","stat":true}]')
+        .expect('[{"name":"..","type":true,"size":true,"lastModified":true},{"name":"#dir","type":true,"size":true,"lastModified":true},{"name":"index.html","type":true,"size":true,"lastModified":true},{"name":"tobi.txt","type":true,"size":true,"lastModified":true}]')
         .expect(200, done);
       });
 

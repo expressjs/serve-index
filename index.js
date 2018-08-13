@@ -181,10 +181,23 @@ function serveIndex(root, options) {
           // make similar to file object (with stat)
           var directory = {
             name: originalDir,
-            stat: stat
+            type: 'inode/directory',
+            size: stat.size,
+            lastModified: stat.mtime
           }
 
-          serveIndex[mediaType[type]](req, res, directory, fileList, next, showUp, icons, path, view, template, stylesheet);
+          var nodes = fileList.map(function (file) {
+            var ext = extname(file.name)
+            var mimetype = mime.lookup(ext)
+            return {
+              name: file.name,
+              type: file.stat.isDirectory() ? 'inode/directory' : mimetype,
+              size: file.stat.size,
+              lastModified: file.stat.mtime
+            }
+          })
+
+          serveIndex[mediaType[type]](req, res, directory, nodes, next, showUp, icons, path, view, template, stylesheet)
         });
       });
     });
@@ -256,7 +269,7 @@ function createHtmlFileList(files, dirname, useIcons, view) {
 
   html += files.map(function (file) {
     var classes = [];
-    var isDir = file.stat && file.stat.isDirectory();
+    var isDir = 'inode/directory' === file.type
     var path = dirname.split('/').map(function (c) { return encodeURIComponent(c); });
 
     if (useIcons) {
@@ -279,11 +292,11 @@ function createHtmlFileList(files, dirname, useIcons, view) {
 
     path.push(encodeURIComponent(file.name));
 
-    var date = file.stat && file.name !== '..'
-      ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
+    var date = file.lastModified && file.name !== '..'
+      ? file.lastModified.toLocaleDateString() + ' ' + file.lastModified.toLocaleTimeString()
       : '';
-    var size = file.stat && !isDir
-      ? file.stat.size
+    var size = file.size && !isDir
+      ? file.size
       : '';
 
     return '<li><a href="'
@@ -431,7 +444,7 @@ function iconStyle(files, useIcons) {
   for (i = 0; i < files.length; i++) {
     var file = files[i];
 
-    var isDir = file.stat && file.stat.isDirectory();
+    var isDir = 'inode/directory' === file.type
     var icon = isDir
       ? { className: 'icon-directory', fileName: icons.folder }
       : iconLookup(file.name);
