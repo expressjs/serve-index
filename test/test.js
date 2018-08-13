@@ -504,9 +504,9 @@ describe('serveIndex(root)', function () {
       it('should get file list', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files) {
+        serveIndex.html = function (req, res, directory, files) {
           var text = files
-            .filter(function (f) { return /\.txt$/.test(f) })
+            .filter(function (f) { return /\.txt$/.test(f.name) })
             .sort()
           res.setHeader('Content-Type', 'text/html')
           res.end('<b>' + text.length + ' text files</b>')
@@ -521,9 +521,9 @@ describe('serveIndex(root)', function () {
       it('should get dir name', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir) {
+        serveIndex.html = function (req, res, directory, files, next) {
           res.setHeader('Content-Type', 'text/html')
-          res.end('<b>' + dir + '</b>')
+          res.end('<b>' + directory.name + '</b>')
         }
 
         request(server)
@@ -535,7 +535,7 @@ describe('serveIndex(root)', function () {
       it('should get template path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, directory, files, next, showUp, icons, path, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(template)))
         }
@@ -549,7 +549,7 @@ describe('serveIndex(root)', function () {
       it('should get template with tokens', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, directory, files, next, showUp, icons, path, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(fs.readFileSync(template, 'utf8'))
         }
@@ -567,7 +567,7 @@ describe('serveIndex(root)', function () {
       it('should get stylesheet path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+        serveIndex.html = function (req, res, directory, files, next, showUp, icons, path, view, template, stylesheet) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(stylesheet)))
         }
@@ -585,7 +585,7 @@ describe('serveIndex(root)', function () {
       it('should get called with Accept: text/plain', function (done) {
         var server = createServer()
 
-        serveIndex.plain = function (req, res, files) {
+        serveIndex.plain = function (req, res, directory, files) {
           res.setHeader('Content-Type', 'text/plain');
           res.end('called');
         }
@@ -603,7 +603,7 @@ describe('serveIndex(root)', function () {
       it('should get called with Accept: application/json', function (done) {
         var server = createServer()
 
-        serveIndex.json = function (req, res, files) {
+        serveIndex.json = function (req, res, directory, files) {
           res.setHeader('Content-Type', 'application/json');
           res.end('"called"');
         }
