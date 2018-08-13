@@ -23,7 +23,6 @@ var fs = require('fs')
   , sep = path.sep
   , extname = path.extname
   , join = path.join;
-var Batch = require('batch');
 var mime = require('mime-types');
 var parseUrl = require('parseurl');
 var resolve = require('path').resolve;
@@ -170,10 +169,11 @@ function serveIndex(root, options) {
         fstat(path, files, function (err, stats) {
           if (err) return next(err);
 
-          // combine the stats into the file list
+          // combine the stats into the file list,
+          // ignoring ENOENT / null stat objects
           var fileList = files.map(function (file, i) {
             return { name: file, stat: stats[i] };
-          });
+          }).filter(function (file) { return file.stat });
 
           // sort file list
           fileList.sort(fileSort);
@@ -563,22 +563,48 @@ function hsize(size) {
  */
 
 function fstat(dir, files, cb) {
-  var batch = new Batch();
+  // batch fstats
+  var i = 0
+  var concurrent = 0
+  var max = 10
+  var results = []
+  var queue
+  var total
 
-  batch.concurrency(10);
+  // check base condition
+  function done(err, stat) {
+    if (err) return cb(err)
+    concurrent -= 1
+    debug('-concurrent:', concurrent)
+    if (!concurrent && !queue.length) return cb(null, results)
+    next()
+  }
 
-  files.forEach(function(file){
-    batch.push(function(done){
+  // run up to max
+  function next() {
+    if (!queue.length || concurrent >= max) return
+    var fn = queue.shift()
+    concurrent += 1
+    fn(i, done)
+    i += 1
+    next()
+  }
+
+  total = files.length
+  queue = files.map(function(file){
+    return function(j, done){
+      debug('+concurrent:', concurrent)
       fs.stat(join(dir, file), function(err, stat){
+        results[j] = stat
         if (err && err.code !== 'ENOENT') return done(err);
 
         // pass ENOENT as null stat, not error
         done(null, stat || null);
       });
-    });
+    }
   });
 
-  batch.end(cb);
+  next();
 }
 
 /**
