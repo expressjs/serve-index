@@ -283,7 +283,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
   html += files.map(function (file) {
     var classes = [];
     var isDir = file.stat && file.stat.isDirectory();
-    var path = dir.name.split('/').map(function (c) { return encodeURIComponent(c); });
+    var path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
 
     if (useIcons) {
       classes.push('icon');
