@@ -240,7 +240,7 @@ serveIndex.html = function _html(req, res, directory, files, next, showUp, icons
  */
 
 serveIndex.json = function _json(req, res, directory, nodes) {
-  var files = nodes.map(function (file) { return file.name })
+  var files = nodes.map(function (file) { return file })
   send(res, 'application/json', JSON.stringify(files))
 }
 
