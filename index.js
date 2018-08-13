@@ -154,13 +154,51 @@ function serveIndex(root, options) {
         });
         files.sort();
 
+        // add parent directory as first
+        if (showUp) {
+          files.unshift('..');
+        }
+
         // content-negotiation
         var accept = accepts(req);
         var type = accept.type(mediaTypes);
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+
+        // stat all files
+        fstat(path, files, function (err, stats) {
+          if (err) return next(err);
+
+          // combine the stats into the file list
+          var fileList = files.map(function (file, i) {
+            return { name: file, stat: stats[i] };
+          });
+
+          // sort file list
+          fileList.sort(fileSort);
+
+          // make similar to file object (with stat)
+          var directory = {
+            name: originalDir,
+            type: 'inode/directory',
+            size: stat.size,
+            lastModified: stat.mtime
+          }
+
+          var nodes = fileList.map(function (file) {
+            var ext = extname(file.name)
+            var mimetype = mime.lookup(ext)
+            return {
+              name: file.name,
+              type: file.stat.isDirectory() ? 'inode/directory' : mimetype,
+              size: file.stat.size,
+              lastModified: file.stat.mtime
+            }
+          })
+
+          serveIndex[mediaType[type]](req, res, directory, nodes, next, showUp, icons, path, view, template, stylesheet)
+        });
       });
     });
   };
@@ -170,46 +208,29 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, directory, files, next, showUp, icons, path, view, template, stylesheet) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
 
-  if (showUp) {
-    files.unshift('..');
-  }
-
-  // stat all files
-  stat(path, files, function (err, stats) {
+  // read stylesheet
+  fs.readFile(stylesheet, 'utf8', function (err, style) {
     if (err) return next(err);
 
-    // combine the stats into the file list
-    var fileList = files.map(function (file, i) {
-      return { name: file, stat: stats[i] };
-    });
+    // create locals for rendering
+    var locals = {
+      directory: directory.name,
+      displayIcons: Boolean(icons),
+      fileList: files,
+      path: path,
+      style: style,
+      viewName: view
+    };
 
-    // sort file list
-    fileList.sort(fileSort);
-
-    // read stylesheet
-    fs.readFile(stylesheet, 'utf8', function (err, style) {
+    // render html
+    render(locals, function (err, body) {
       if (err) return next(err);
-
-      // create locals for rendering
-      var locals = {
-        directory: dir,
-        displayIcons: Boolean(icons),
-        fileList: fileList,
-        path: path,
-        style: style,
-        viewName: view
-      };
-
-      // render html
-      render(locals, function (err, body) {
-        if (err) return next(err);
-        send(res, 'text/html', body)
-      });
+      send(res, 'text/html', body)
     });
   });
 };
@@ -218,24 +239,26 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  * Respond with application/json.
  */
 
-serveIndex.json = function _json(req, res, files) {
+serveIndex.json = function _json(req, res, directory, nodes) {
+  var files = nodes.map(function (file) { return file.name })
   send(res, 'application/json', JSON.stringify(files))
-};
+}
 
 /**
  * Respond with text/plain.
  */
 
-serveIndex.plain = function _plain(req, res, files) {
+serveIndex.plain = function _plain(req, res, directory, nodes) {
+  var files = nodes.map(function (file) { return file.name })
   send(res, 'text/plain', (files.join('\n') + '\n'))
-};
+}
 
 /**
  * Map html `files`, returning an html unordered list.
  * @private
  */
 
-function createHtmlFileList(files, dir, useIcons, view) {
+function createHtmlFileList(files, dirname, useIcons, view) {
   var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'
     + (view === 'details' ? (
       '<li class="header">'
@@ -246,8 +269,8 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
   html += files.map(function (file) {
     var classes = [];
-    var isDir = file.stat && file.stat.isDirectory();
-    var path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
+    var isDir = 'inode/directory' === file.type
+    var path = dirname.split('/').map(function (c) { return encodeURIComponent(c); });
 
     if (useIcons) {
       classes.push('icon');
@@ -269,11 +292,11 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
     path.push(encodeURIComponent(file.name));
 
-    var date = file.stat && file.name !== '..'
-      ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
+    var date = file.lastModified && file.name !== '..'
+      ? file.lastModified.toLocaleDateString() + ' ' + file.lastModified.toLocaleTimeString()
       : '';
-    var size = file.stat && !isDir
-      ? file.stat.size
+    var size = file.size && !isDir
+      ? file.size
       : '';
 
     return '<li><a href="'
@@ -421,7 +444,7 @@ function iconStyle(files, useIcons) {
   for (i = 0; i < files.length; i++) {
     var file = files[i];
 
-    var isDir = file.stat && file.stat.isDirectory();
+    var isDir = 'inode/directory' === file.type
     var icon = isDir
       ? { className: 'icon-directory', fileName: icons.folder }
       : iconLookup(file.name);
@@ -511,7 +534,7 @@ function send (res, type, body) {
  * in same order.
  */
 
-function stat(dir, files, cb) {
+function fstat(dir, files, cb) {
   var batch = new Batch();
 
   batch.concurrency(10);
