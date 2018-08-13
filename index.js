@@ -170,10 +170,11 @@ function serveIndex(root, options) {
         fstat(path, files, function (err, stats) {
           if (err) return next(err);
 
-          // combine the stats into the file list
+          // combine the stats into the file list,
+          // ignoring ENOENT / null stat objects
           var fileList = files.map(function (file, i) {
             return { name: file, stat: stats[i] };
-          });
+          }).filter(function (file) { return file.stat });
 
           // sort file list
           fileList.sort(fileSort);
@@ -570,7 +571,16 @@ function fstat(dir, files, cb) {
   files.forEach(function(file){
     batch.push(function(done){
       fs.stat(join(dir, file), function(err, stat){
-        if (err && err.code !== 'ENOENT') return done(err);
+        // communicate errors via fake stat
+        if (err && err.code !== 'ENOENT') {
+          stat = {
+            size: 0,
+            mtime: new Date(0),
+            error: err.toString(),
+            code: err.code,
+            isDirectory: function () { return false }
+          }
+        }
 
         // pass ENOENT as null stat, not error
         done(null, stat || null);
