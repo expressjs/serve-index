@@ -63,7 +63,7 @@ Apply this sort function to files. Optional. The `sort` function is
 called for each file tuple with the signature `sort(file1, file2)`.
 An example for sorting files by date of modification (descending) is:
 ```javascript
-function(file1, file2) {
+function sortbyModifiedDate(file1, file2) {
   // sort ".." to the top
   if (file1.name === '..' || file2.name === '..') {
     return file1.name === file2.name ? 0
