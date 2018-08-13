@@ -107,6 +107,13 @@ function serveIndex(root, options) {
       return;
     }
 
+    // content-negotiation
+    var accept = accepts(req);
+    var type = accept.type(mediaTypes);
+
+    // not acceptable
+    if (!type) return next(createError(406));
+
     // parse URLs
     var url = parseUrl(req);
     var originalUrl = parseUrl.original(req);
@@ -154,13 +161,26 @@ function serveIndex(root, options) {
         });
         files.sort();
 
-        // content-negotiation
-        var accept = accepts(req);
-        var type = accept.type(mediaTypes);
+        // add parent directory as first
+        if (showUp) {
+          files.unshift('..');
+        }
 
-        // not acceptable
-        if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        // stat all files
+        fstat(path, files, function (err, stats) {
+          if (err) return next(err);
+
+          // combine the stats into the file list
+          var fileList = files.map(function (file, i) {
+            return { name: file, stat: stats[i] };
+          });
+
+          // sort file list
+          fileList.sort(fileSort);
+
+          var dir = { name: originalDir, stat: stat };
+          serveIndex[mediaType[type]](req, res, dir, fileList, next, showUp, icons, path, view, template, stylesheet);
+        });
       });
     });
   };
@@ -170,46 +190,29 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, dir, files, next, showUp, icons, path, view, template, stylesheet) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
 
-  if (showUp) {
-    files.unshift('..');
-  }
-
-  // stat all files
-  stat(path, files, function (err, stats) {
+  // read stylesheet
+  fs.readFile(stylesheet, 'utf8', function (err, style) {
     if (err) return next(err);
 
-    // combine the stats into the file list
-    var fileList = files.map(function (file, i) {
-      return { name: file, stat: stats[i] };
-    });
+    // create locals for rendering
+    var locals = {
+      directory: dir.name,
+      displayIcons: Boolean(icons),
+      fileList: files,
+      path: path,
+      style: style,
+      viewName: view
+    };
 
-    // sort file list
-    fileList.sort(fileSort);
-
-    // read stylesheet
-    fs.readFile(stylesheet, 'utf8', function (err, style) {
+    // render html
+    render(locals, function (err, body) {
       if (err) return next(err);
-
-      // create locals for rendering
-      var locals = {
-        directory: dir,
-        displayIcons: Boolean(icons),
-        fileList: fileList,
-        path: path,
-        style: style,
-        viewName: view
-      };
-
-      // render html
-      render(locals, function (err, body) {
-        if (err) return next(err);
-        send(res, 'text/html', body)
-      });
+      send(res, 'text/html', body)
     });
   });
 };
@@ -218,16 +221,49 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  * Respond with application/json.
  */
 
-serveIndex.json = function _json(req, res, files) {
-  send(res, 'application/json', JSON.stringify(files))
+serveIndex.json = function _json(req, res, dir, files) {
+  var directory = {
+    name: dir.name,
+    type: 'inode/directory',
+    size: dir.stat.size,
+    lastModified: dir.stat.mtime.toISOString()
+  }
+
+  // similar to W3 FileAPI Object
+  var nodes = files.map(function (file) {
+    var ext = extname(file.name)
+    var mimetype = mime.lookup(ext)
+    return {
+      name: file.name,
+      type: file.stat.isDirectory() ? 'inode/directory' : mimetype,
+      size: file.stat.size,
+      lastModified: file.stat.mtime.toISOString()
+    }
+  })
+  send(res, 'application/json', JSON.stringify({ directory: directory, nodes: nodes }))
 };
 
 /**
  * Respond with text/plain.
  */
 
-serveIndex.plain = function _plain(req, res, files) {
-  send(res, 'text/plain', (files.join('\n') + '\n'))
+serveIndex.plain = function _plain(req, res, dir, files) {
+  var directory = {
+    name: dir.name.replace(/\/$/, '\/')
+  };
+
+  // include size and date
+  var nodes = files.map(function (file) {
+    // human readable
+    var size = hsize(file.stat.size)
+
+    return [
+      file.stat.mtime.toISOString(),
+      size,
+      file.name + (file.stat.isDirectory() ? '/' : '')
+    ].join('\t')
+  })
+  send(res, 'text/plain', (directory.name + '\n' + nodes.join('\n') + '\n'))
 };
 
 /**
@@ -247,7 +283,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
   html += files.map(function (file) {
     var classes = [];
     var isDir = file.stat && file.stat.isDirectory();
-    var path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
+    var path = dir.name.split('/').map(function (c) { return encodeURIComponent(c); });
 
     if (useIcons) {
       classes.push('icon');
@@ -507,11 +543,26 @@ function send (res, type, body) {
 }
 
 /**
+ * Convert size to human-readable size
+ */
+
+var SIZES = [ 'B', 'K', 'M', 'G', 'T', 'P', 'E' ]
+function hsize(size) {
+  var i = 0
+  while (size > 1024 && i < SIZES.length) {
+    size = Math.floor(size/1024)
+    i += 1
+  }
+  return size + SIZES[i]
+}
+
+
+/**
  * Stat all files and return array of stat
  * in same order.
  */
 
-function stat(dir, files, cb) {
+function fstat(dir, files, cb) {
   var batch = new Batch();
 
   batch.concurrency(10);
