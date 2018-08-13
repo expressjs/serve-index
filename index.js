@@ -249,7 +249,7 @@ serveIndex.json = function _json(req, res, directory, nodes) {
 
 serveIndex.plain = function _plain(req, res, dir, files) {
   var directory = {
-    name: dir.name.replace(/\/$/, '\/')
+    name: dir.name.replace(/\/?$/, '/')
   };
 
   // include size and date
