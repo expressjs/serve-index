@@ -569,7 +569,6 @@ function fstat(dir, files, cb) {
   var max = 10
   var results = []
   var queue
-  var total
 
   // check base condition
   function done(err, stat) {
@@ -590,7 +589,6 @@ function fstat(dir, files, cb) {
     next()
   }
 
-  total = files.length
   queue = files.map(function(file){
     return function(j, done){
       debug('+concurrent:', concurrent)
