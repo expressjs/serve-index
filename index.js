@@ -14,6 +14,7 @@
  */
 
 var accepts = require('accepts');
+var bytes = require('bytes');
 var createError = require('http-errors');
 var debug = require('debug')('serve-index');
 var escapeHtml = require('escape-html');
@@ -267,9 +268,26 @@ serveIndex.json = function _json(req, res, directory, nodes) {
  * Respond with text/plain.
  */
 
-serveIndex.plain = function _plain(req, res, directory, nodes) {
-  var files = nodes.map(function (file) { return file.name })
-  send(res, 'text/plain', (files.join('\n') + '\n'))
+serveIndex.plain = function _plain(req, res, directory, nodes, next, options) {
+
+  function detailsView() {
+    return 'Directory listing for ' + directory.name.replace(/\/?$/, '/') + '\n\n' +
+      nodes.map(function (file) {
+
+        // human readable
+        var size = bytes.format(file.size, { decimalPlaces: 0 })
+
+        // organized by fixed-width for readability
+        return [ file.lastModified.toISOString(), size, file.name + ('inode/directory' === file.type ? '/' : '') ].join('\t')
+
+      }).join('\n') + '\n'
+  }
+
+  function tileView() {
+    return nodes.map(function (file) { return file.name }).join('\n') + '\n'
+  }
+
+  send(res, 'text/plain', ('details' === options.view) ? detailsView() : tileView())
 }
 
 /**
