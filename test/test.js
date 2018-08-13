@@ -436,7 +436,9 @@ describe('serveIndex(root)', function () {
       it('should provide "fileList" local', function (done) {
         var server = createServer(fixtures, {'template': function (locals, callback) {
           callback(null, JSON.stringify(locals.fileList.map(function (file) {
-            file.stat = file.stat instanceof fs.Stats;
+            file.type = -1 !== file.type.indexOf('/')
+            file.size = file.size >= 0
+            file.lastModified = file.lastModified instanceof Date
             return file;
           })));
         }});
@@ -444,7 +446,7 @@ describe('serveIndex(root)', function () {
         request(server)
         .get('/users/')
         .set('Accept', 'text/html')
-        .expect('[{"name":"..","stat":true},{"name":"#dir","stat":true},{"name":"index.html","stat":true},{"name":"tobi.txt","stat":true}]')
+        .expect('[{"name":"..","type":true,"size":true,"lastModified":true},{"name":"#dir","type":true,"size":true,"lastModified":true},{"name":"index.html","type":true,"size":true,"lastModified":true},{"name":"tobi.txt","type":true,"size":true,"lastModified":true}]')
         .expect(200, done);
       });
 
@@ -504,9 +506,9 @@ describe('serveIndex(root)', function () {
       it('should get file list', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files) {
+        serveIndex.html = function (req, res, dir, files) {
           var text = files
-            .filter(function (f) { return /\.txt$/.test(f) })
+            .filter(function (f) { return /\.txt$/.test(f.name) })
             .sort()
           res.setHeader('Content-Type', 'text/html')
           res.end('<b>' + text.length + ' text files</b>')
@@ -521,9 +523,9 @@ describe('serveIndex(root)', function () {
       it('should get dir name', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir) {
+        serveIndex.html = function (req, res, dir, files, next) {
           res.setHeader('Content-Type', 'text/html')
-          res.end('<b>' + dir + '</b>')
+          res.end('<b>' + dir.name + '</b>')
         }
 
         request(server)
@@ -535,7 +537,7 @@ describe('serveIndex(root)', function () {
       it('should get template path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, dir, files, next, showUp, icons, path, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(template)))
         }
@@ -549,7 +551,7 @@ describe('serveIndex(root)', function () {
       it('should get template with tokens', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, dir, files, next, showUp, icons, path, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(fs.readFileSync(template, 'utf8'))
         }
@@ -567,7 +569,7 @@ describe('serveIndex(root)', function () {
       it('should get stylesheet path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+        serveIndex.html = function (req, res, dir, files, next, showUp, icons, path, view, template, stylesheet) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(stylesheet)))
         }
