@@ -14,6 +14,7 @@
  */
 
 var accepts = require('accepts');
+var bytes = require('bytes')
 var createError = require('http-errors');
 var debug = require('debug')('serve-index');
 var escapeHtml = require('escape-html');
@@ -255,7 +256,7 @@ serveIndex.plain = function _plain(req, res, dir, files) {
   // include size and date
   var nodes = files.map(function (file) {
     // human readable
-    var size = hsize(file.size)
+    var size = bytes(file.size)
 
     return [
       file.lastModified.toISOString(),
@@ -541,21 +542,6 @@ function send (res, type, body) {
   // body
   res.end(body, 'utf8')
 }
-
-/**
- * Convert size to human-readable size
- */
-
-var SIZES = [ 'B', 'K', 'M', 'G', 'T', 'P', 'E' ]
-function hsize(size) {
-  var i = 0
-  while (size > 1024 && i < SIZES.length) {
-    size = Math.floor(size/1024)
-    i += 1
-  }
-  return size + SIZES[i]
-}
-
 
 /**
  * Stat all files and return array of stat
