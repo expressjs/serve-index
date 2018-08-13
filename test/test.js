@@ -343,10 +343,10 @@ describe('serveIndex(root)', function () {
     });
   });
 
-   describe('with "sort" option', function () {
+  describe('with "sort" option', function () {
     it('should include icons for html', function (done) {
       var server = createServer(fixtures, {'sort': function (a, b) {
-           return String(b.name).toLocaleLowerCase().localeCompare(String(a.name).toLocaleLowerCase());
+        return String(b.name).toLocaleLowerCase().localeCompare(String(a.name).toLocaleLowerCase());
       }});
 
       request(server)
