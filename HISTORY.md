@@ -2,6 +2,12 @@ unreleased
 ==========
 
   * Show font icon for more font types
+  * deps: accepts@~1.3.5
+    - deps: mime-types@~2.1.18
+  * deps: http-errors@~1.6.3
+    - deps: depd@~1.1.2
+    - deps: setprototypeof@1.1.0
+    - deps: statuses@'>= 1.4.0 < 2'
   * deps: mime-types@~2.1.18
     - Add new mime types
     - deps: mime-db@~1.33.0
