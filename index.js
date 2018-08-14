@@ -46,6 +46,21 @@ var cache = {};
  */
 
 var defaultTemplate = join(__dirname, 'public', 'directory.html');
+var templates = {
+  html: {
+    list: '<ul id="files" class="view-{view}">{header}{items}</ul>',
+    header: '<li class="header">'
+      + '<span class="name">Name</span>'
+      + '<span class="size">Size</span>'
+      + '<span class="date">Modified</span>'
+      + '</li>',
+    item: '<li><a href="{path}" class="{classes}" title="{file.name}">'
+      + '<span class="name">{file.name}</span>'
+      + '<span class="size">{file.size}</span>'
+      + '<span class="date">{file.lastModified}</span>'
+      + '</a></li>'
+  }
+}
 
 /*!
  * Stylesheet.
@@ -259,15 +274,11 @@ serveIndex.plain = function _plain(req, res, directory, nodes) {
  */
 
 function createHtmlFileList(files, dirname, useIcons, view) {
-  var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'
-    + (view === 'details' ? (
-      '<li class="header">'
-      + '<span class="name">Name</span>'
-      + '<span class="size">Size</span>'
-      + '<span class="date">Modified</span>'
-      + '</li>') : '');
+  var html = templates.html.list
+    .replace(/{view}/g, view)
+    .replace(/{header}/g, view === 'details' ? templates.html.header : '')
 
-  html += files.map(function (file) {
+  var items = files.map(function (file) {
     var classes = [];
     var isDir = 'inode/directory' === file.type
     var path = dirname.split('/').map(function (c) { return encodeURIComponent(c); });
@@ -299,19 +310,15 @@ function createHtmlFileList(files, dirname, useIcons, view) {
       ? file.size
       : '';
 
-    return '<li><a href="'
-      + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
-      + '" class="' + escapeHtml(classes.join(' ')) + '"'
-      + ' title="' + escapeHtml(file.name) + '">'
-      + '<span class="name">' + escapeHtml(file.name) + '</span>'
-      + '<span class="size">' + escapeHtml(size) + '</span>'
-      + '<span class="date">' + escapeHtml(date) + '</span>'
-      + '</a></li>';
+    return templates.html.item
+      .replace(/{path}/g, escapeHtml(normalizeSlashes(normalize(path.join('/')))))
+      .replace(/{classes}/g, escapeHtml(classes.join(' ')))
+      .replace(/{file\.name}/g, escapeHtml(file.name))
+      .replace(/{file\.size}/g, escapeHtml(size))
+      .replace(/{file\.lastModified/g, escapeHtml(date))
   }).join('\n');
 
-  html += '</ul>';
-
-  return html;
+  return html.replace(/{items}/g, items)
 }
 
 /**
@@ -325,10 +332,10 @@ function createHtmlRender(template) {
       if (err) return callback(err);
 
       var body = str
-        .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
-        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
-        .replace(/\{directory\}/g, escapeHtml(locals.directory))
-        .replace(/\{linked-path\}/g, htmlPath(locals.directory));
+        .replace(/{style}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
+        .replace(/{files}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
+        .replace(/{directory}/g, escapeHtml(locals.directory))
+        .replace(/{linked-path}/g, htmlPath(locals.directory))
 
       callback(null, body);
     });
