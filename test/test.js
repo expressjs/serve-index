@@ -76,6 +76,14 @@ describe('serveIndex(root)', function () {
     .expect(400, done)
   })
 
+  it('should deny path that does not decode', function (done) {
+    var server = createServer()
+
+    request(server)
+      .head('/%FF')
+      .expect(400, done)
+  })
+
   it('should deny path outside root', function (done) {
     var server = createServer()
 

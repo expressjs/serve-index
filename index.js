@@ -107,10 +107,14 @@ function serveIndex(root, options) {
       return;
     }
 
+    // get dir
+    var dir = getRequestedDir(req)
+
+    // bad request
+    if (dir === null) return next(createError(400))
+
     // parse URLs
-    var url = parseUrl(req);
     var originalUrl = parseUrl.original(req);
-    var dir = decodeURIComponent(url.pathname);
     var originalDir = decodeURIComponent(originalUrl.pathname);
 
     // join / normalize from root dir
@@ -325,6 +329,22 @@ function fileSort(a, b) {
 
   return Number(b.stat && b.stat.isDirectory()) - Number(a.stat && a.stat.isDirectory()) ||
     String(a.name).toLocaleLowerCase().localeCompare(String(b.name).toLocaleLowerCase());
+}
+
+/**
+ * Get the requested directory from request.
+ *
+ * @param req
+ * @return {string}
+ * @api private
+ */
+
+function getRequestedDir (req) {
+  try {
+    return decodeURIComponent(parseUrl(req).pathname)
+  } catch (e) {
+    return null
+  }
 }
 
 /**
