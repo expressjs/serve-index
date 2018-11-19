@@ -94,6 +94,7 @@ function serveIndex(root, options) {
   var filter = opts.filter;
   var hidden = opts.hidden;
   var icons = opts.icons;
+  var relativepath = opts.relativepath;
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
@@ -160,7 +161,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, relativepath);
       });
     });
   };
@@ -170,7 +171,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, relativepath) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -202,7 +203,8 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
         fileList: fileList,
         path: path,
         style: style,
-        viewName: view
+        viewName: view,
+        displayRelativePath: Boolean(relativepath)
       };
 
       // render html
@@ -305,7 +307,8 @@ function createHtmlRender(template) {
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
         .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
-        .replace(/\{linked-path\}/g, htmlPath(locals.directory));
+        .replace(/\{linked-path\}/g, htmlPath(locals.directory))
+        .replace(/\{relative-path\}/g, htmlRelativePath(locals.path, locals.displayRelativePath));
 
       callback(null, body);
     });
@@ -345,6 +348,15 @@ function htmlPath(dir) {
   }
 
   return crumb.join(' / ');
+}
+
+
+function htmlRelativePath(path, show) {
+  var html = '';
+  if(show) {
+    html = '<p>' + path + '</p>';
+  }
+  return html;
 }
 
 /**

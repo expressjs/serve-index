@@ -53,6 +53,10 @@ Display hidden (dot) files. Defaults to `false`.
 
 Display icons. Defaults to `false`.
 
+##### relativepath
+
+Displays the relative directory path. Defaults to `false`.
+
 ##### stylesheet
 
 Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
