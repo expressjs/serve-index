@@ -351,9 +351,9 @@ function htmlPath(dir) {
 }
 
 
-function htmlRelativePath(path, show) {
+function htmlRelativePath(path, displayPath) {
   var html = '';
-  if(show) {
+  if(displayPath) {
     html = '<p>' + escapeHtml(path) + '</p>';
   }
   return html;
