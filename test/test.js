@@ -735,6 +735,32 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "relativepath" option', function () {
+    it('should not show relative path by default', function (done) {
+      var server = createServer();
+      request(server)
+        .get('/')
+        .expect(bodyDoesNotContain('/#relativePath/'))
+        .expect(200, done);
+    });
+
+    it('should not show relative path', function (done) {
+      var server = createServer('test/fixtures', {'relativepath': false})
+      request(server)
+        .get('/')
+        .expect(bodyDoesNotContain('/#relativePath/'))
+        .expect(200, done);
+    });
+
+
+    it('should show relative path', function (done) {
+      var server = createServer('test/fixtures', {'relativepath': true})
+      request(server)
+        .get('/')
+        .expect(200, /#relativePath/, done);
+    });
+  });
+
   (skipRelative ? describe.skip : describe)('when set to \'.\'', function () {
     var server;
     before(function () {
