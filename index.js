@@ -351,10 +351,10 @@ function htmlPath(dir) {
 }
 
 
-function htmlRelativePath(path, displayPath) {
+function htmlRelativePath(path, show) {
   var html = '';
-  if(displayPath) {
-    html = '<p>' + escapeHtml(path) + '</p>';
+  if(show) {
+    html = '<p>' + path + '</p>';
   }
   return html;
 }
