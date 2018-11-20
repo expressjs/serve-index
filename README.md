@@ -72,6 +72,7 @@ following tokens are replaced in templates:
   * `{directory}` with the name of the directory.
   * `{files}` with the HTML of an unordered list of file links.
   * `{linked-path}` with the HTML of a link to the directory.
+  * `{relative-path}` with the readonly HTML of the relative path.
   * `{style}` with the specified stylesheet and embedded images.
 
 When given as a function, the function is called as `template(locals, callback)`
