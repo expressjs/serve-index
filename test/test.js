@@ -736,28 +736,32 @@ describe('serveIndex(root)', function () {
   });
 
   describe('with "relativepath" option', function () {
+    var relativePathIdentifier = "id=\"relativePath\"";
     it('should not show relative path by default', function (done) {
       var server = createServer();
       request(server)
         .get('/')
-        .expect(bodyDoesNotContain('/#relativePath/'))
+        .expect(bodyDoesNotContain(relativePathIdentifier))
         .expect(200, done);
     });
 
     it('should not show relative path', function (done) {
-      var server = createServer('test/fixtures', {'relativepath': false})
+      var server = createServer('test/fixtures', {'relativepath': false});
       request(server)
         .get('/')
-        .expect(bodyDoesNotContain('/#relativePath/'))
+        .expect(bodyDoesNotContain(relativePathIdentifier))
         .expect(200, done);
     });
 
 
     it('should show relative path', function (done) {
-      var server = createServer('test/fixtures', {'relativepath': true})
+      var server = createServer('test/fixtures', {'relativepath': true});
       request(server)
         .get('/')
-        .expect(200, /#relativePath/, done);
+        .expect(function (res) {
+          assert.notEqual(res.text.indexOf(relativePathIdentifier), -1)
+        })
+        .expect(200, done);
     });
   });
 
@@ -816,6 +820,7 @@ function createServer(dir, opts) {
 
 function bodyDoesNotContain(text) {
   return function (res) {
+    console.log(res.text);
     assert.equal(res.text.indexOf(text), -1)
   }
 }
