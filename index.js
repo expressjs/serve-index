@@ -354,7 +354,7 @@ function htmlPath(dir) {
 function htmlRelativePath(path, show) {
   var html = '';
   if(show) {
-    html = '<p>' + path + '</p>';
+    html = '<p>' + escapeHtml(path) + '</p>';
   }
   return html;
 }
