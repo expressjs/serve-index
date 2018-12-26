@@ -8,9 +8,9 @@ unreleased
     - deps: depd@~1.1.2
     - deps: setprototypeof@1.1.0
     - deps: statuses@'>= 1.4.0 < 2'
-  * deps: mime-types@~2.1.18
+  * deps: mime-types@~2.1.21
     - Add new mime types
-    - deps: mime-db@~1.33.0
+    - deps: mime-db@~1.37.0
 
 1.9.1 / 2017-09-28
 ==================
