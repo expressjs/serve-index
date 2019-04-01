@@ -4,10 +4,10 @@ unreleased
   * Show font icon for more font types
   * deps: accepts@~1.3.5
     - deps: mime-types@~2.1.18
-  * deps: http-errors@~1.7.1
+  * deps: http-errors@~1.7.2
     - Set constructor name when possible
     - deps: depd@~1.1.2
-    - deps: setprototypeof@1.1.0
+    - deps: setprototypeof@1.1.1
     - deps: statuses@'>= 1.5.0 < 2'
   * deps: mime-types@~2.1.22
     - Add new mime types
