@@ -13,6 +13,7 @@ unreleased
   * deps: mime-types@~2.1.24
     - Add new mime types
     - deps: mime-db@~1.40.0
+  * deps: parseurl@~1.3.3
 
 1.9.1 / 2017-09-28
 ==================
