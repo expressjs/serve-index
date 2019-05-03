@@ -184,13 +184,8 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
   }
 
   // stat all files
-  stat(path, files, function (err, stats) {
+  stat(path, files, function (err, fileList) {
     if (err) return next(err);
-
-    // combine the stats into the file list
-    var fileList = files.map(function (file, i) {
-      return { name: file, stat: stats[i] };
-    });
 
     // sort file list
     fileList.sort(fileSort);
@@ -222,16 +217,42 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  * Respond with application/json.
  */
 
-serveIndex.json = function _json(req, res, files) {
-  send(res, 'application/json', JSON.stringify(files))
+serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, path) {
+  // stat all files
+  stat(path, files, function (err, fileList) {
+    if (err) return next(err)
+
+    // sort file list
+    fileList.sort(fileSort)
+
+    // serialize
+    var body = JSON.stringify(fileList.map(function (file) {
+      return file.name
+    }))
+
+    send(res, 'application/json', body)
+  })
 };
 
 /**
  * Respond with text/plain.
  */
 
-serveIndex.plain = function _plain(req, res, files) {
-  send(res, 'text/plain', (files.join('\n') + '\n'))
+serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, path) {
+  // stat all files
+  stat(path, files, function (err, fileList) {
+    if (err) return next(err)
+
+    // sort file list
+    fileList.sort(fileSort)
+
+    // serialize
+    var body = fileList.map(function (file) {
+      return file.name
+    }).join('\n') + '\n'
+
+    send(res, 'text/plain', body)
+  })
 };
 
 /**
@@ -527,8 +548,12 @@ function send (res, type, body) {
 }
 
 /**
- * Stat all files and return array of stat
- * in same order.
+ * Stat all files and return array of objects in the form
+ * `{ name, stat }`.
+ *
+ * @param {Array} files
+ * @return {Array}
+ * @api private
  */
 
 function stat(dir, files, cb) {
@@ -542,7 +567,10 @@ function stat(dir, files, cb) {
         if (err && err.code !== 'ENOENT') return done(err);
 
         // pass ENOENT as null stat, not error
-        done(null, stat || null);
+        done(null, {
+          name: file,
+          stat: stat || null
+        })
       });
     });
   });

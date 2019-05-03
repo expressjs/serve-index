@@ -1,6 +1,7 @@
 unreleased
 ==========
 
+  * Fix text and json responses to match html sorting
   * Show font icon for more font types
   * Use 400 error on URI decode failure instead of 500
   * deps: accepts@~1.3.7
