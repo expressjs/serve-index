@@ -211,27 +211,27 @@ describe('serveIndex(root)', function () {
         var server = createServer()
 
         request(server)
-        .get('/')
-        .set('Accept', 'text/html')
-        .expect(200)
-        .expect('Content-Type', 'text/html; charset=utf-8')
-        .end(function (err, res) {
-          if (err) done(err);
-          var body = res.text.split('</h1>')[1];
-          var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
-          assert.deepEqual(urls, [
-            '/%23directory',
-            '/collect',
-            '/g%23%20%253%20o%20%26%20%252525%20%2537%20dir',
-            '/users',
-            '/file%20%231.txt',
-            '/foo%20%26%20bar',
-            '/nums',
-            '/todo.txt',
-            '/%E3%81%95%E3%81%8F%E3%82%89.txt'
-          ]);
-          done();
-        });
+          .get('/')
+          .set('Accept', 'text/html')
+          .expect(200)
+          .expect('Content-Type', 'text/html; charset=utf-8')
+          .expect(function (res) {
+            var urls = res.text
+              .split('</h1>')[1]
+              .split(/<a href="([^"]*)"/).filter(function (s, i) { return i % 2 })
+            assert.deepEqual(urls, [
+              '/%23directory',
+              '/collect',
+              '/g%23%20%253%20o%20%26%20%252525%20%2537%20dir',
+              '/users',
+              '/file%20%231.txt',
+              '/foo%20%26%20bar',
+              '/nums',
+              '/todo.txt',
+              '/%E3%81%95%E3%81%8F%E3%82%89.txt'
+            ])
+          })
+          .end(done)
       });
     });
 
@@ -683,19 +683,20 @@ describe('serveIndex(root)', function () {
       var server = createServer()
 
       request(server)
-      .get('/users')
-      .end(function (err, res) {
-        if (err) return done(err);
-        var body = res.text.split('</h1>')[1];
-        var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
-        assert.deepEqual(urls, [
-          '/',
-          '/users/%23dir',
-          '/users/index.html',
-          '/users/tobi.txt'
-        ]);
-        done();
-      });
+        .get('/users')
+        .expect(200)
+        .expect(function (res) {
+          var urls = res.text
+            .split('</h1>')[1]
+            .split(/<a href="([^"]*)"/).filter(function (s, i) { return i % 2 })
+          assert.deepEqual(urls, [
+            '/',
+            '/users/%23dir',
+            '/users/index.html',
+            '/users/tobi.txt'
+          ])
+        })
+        .end(done)
     });
 
     it('should work for directory with #', function (done) {
