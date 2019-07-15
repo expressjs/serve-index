@@ -30,7 +30,7 @@ install:
       if ([int]$env:nodejs_version.split(".")[0] -eq 0 -and [int]$env:nodejs_version.split(".")[1] -lt 10) {
         npm config set strict-ssl false
       }
-  # Setup Node.js version-specific dependencies
+  # Remove all non-test dependencies
   - ps: |
       # Remove coverage dependency
       npm rm --silent --save-dev istanbul
@@ -38,6 +38,13 @@ install:
       cmd.exe /c "node -pe `"Object.keys(require('./package').devDependencies).join('\n')`"" | `
         sls "^eslint(-|$)" | `
         %{ npm rm --silent --save-dev $_ }
+  # Setup Node.js version-specific dependencies
+  - ps: |
+      # mocha for testing
+      # - use 2.x for Node.js < 0.10
+      if ([int]$env:nodejs_version.split(".")[0] -eq 0 -and [int]$env:nodejs_version.split(".")[1] -lt 10) {
+        npm install --silent --save-dev mocha@2.5.3
+      }
   # Update Node.js modules
   - ps: |
       # Prune & rebuild node_modules
