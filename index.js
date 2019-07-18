@@ -164,7 +164,6 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        console.log('sort at top', sort)
         serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, sort, view, template, stylesheet);
       });
     });
@@ -219,12 +218,9 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  */
 
 serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, path, sort) {
-  console.log('sort at top of json', sort)
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
-
-    console.log('sort from json', sort)
 
     // sort file list
     fileList.sort(sort)
