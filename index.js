@@ -217,13 +217,13 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  * Respond with application/json.
  */
 
-serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, path) {
+serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, path, sort) {
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
 
     // sort file list
-    fileList.sort(fileSort)
+    fileList.sort(sort)
 
     // serialize
     var body = JSON.stringify(fileList.map(function (file) {
@@ -238,13 +238,13 @@ serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, pat
  * Respond with text/plain.
  */
 
-serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, path) {
+serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, path, sort) {
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
 
     // sort file list
-    fileList.sort(fileSort)
+    fileList.sort(sort)
 
     // serialize
     var body = fileList.map(function (file) {
