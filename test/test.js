@@ -76,6 +76,14 @@ describe('serveIndex(root)', function () {
     .expect(400, done)
   })
 
+  it('should deny path that does not decode', function (done) {
+    var server = createServer()
+
+    request(server)
+      .head('/%FF')
+      .expect(400, done)
+  })
+
   it('should deny path outside root', function (done) {
     var server = createServer()
 
@@ -93,11 +101,11 @@ describe('serveIndex(root)', function () {
   })
 
   it('should treat an ENAMETOOLONG as a 414', function (done) {
-    var path = Array(11000).join('foobar')
-    var server = createServer()
+    var dir = path.join(fixtures, Array(10000).join('/foobar'))
+    var server = createServer(dir)
 
     request(server)
-    .get('/' + path)
+    .get('/')
     .expect(414, done)
   })
 
@@ -135,6 +143,26 @@ describe('serveIndex(root)', function () {
         .set('Accept', 'application/json')
         .expect('X-Content-Type-Options', 'nosniff')
         .expect(200, done)
+      })
+
+      it('should sort folders first', function (done) {
+        request(createServer())
+          .get('/')
+          .set('Accept', 'application/json')
+          .expect(200)
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect([
+            '#directory',
+            'collect',
+            'g# %3 o & %2525 %37 dir',
+            'users',
+            'file #1.txt',
+            'foo & bar',
+            'nums',
+            'todo.txt',
+            'さくら.txt'
+          ])
+          .end(done)
       })
     });
 
@@ -232,6 +260,27 @@ describe('serveIndex(root)', function () {
         .set('Accept', 'text/plain')
         .expect('X-Content-Type-Options', 'nosniff')
         .expect(200, done)
+      })
+
+      it('should sort folders first', function (done) {
+        request(createServer())
+          .get('/')
+          .set('Accept', 'text/plain')
+          .expect(200)
+          .expect('Content-Type', 'text/plain; charset=utf-8')
+          .expect([
+            '#directory',
+            'collect',
+            'g# %3 o & %2525 %37 dir',
+            'users',
+            'file #1.txt',
+            'foo & bar',
+            'nums',
+            'todo.txt',
+            'さくら.txt',
+            ''
+          ].join('\n'))
+          .end(done)
       })
     });
 
