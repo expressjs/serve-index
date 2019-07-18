@@ -69,7 +69,7 @@ function sortbyModifiedDate(file1, file2) {
     return file1.name === file2.name ? 0
       : file1.name === '..' ? -1 : 1;
   }
-  // sort directories first then files by date of modification
+  // sort directories first then sort files by date of modification
   return Number(file2.stat && file2.stat.isDirectory()) - Number(file1.stat && file1.stat.isDirectory()) ||
     new Date(file2.stat.mtime) - new Date(file1.stat.mtime);
 }
