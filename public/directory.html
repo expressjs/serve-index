@@ -1,9 +1,23 @@
+<!-- 
+  Author: SUMANTH S
+-->
+
 <!DOCTYPE html>
-<html>
+<body id="body" class="light-mode">
+<mat-button style="cursor: pointer" type="button" name="dark_light" onclick="toggleDarkLight()" title="Only for reading content">Dark / Light</mat-button>
+
+<div class="div-flex">
+      <h5 class="build-tittle">
+          Smart Data Link <mar class="history">V 1.0</mar>
+          <p class="build-tittle-tag">Esay to download, watch and maintaine files.</p>
+        </h5>
+</div>
+<html >
   <head>
-    <meta charset='utf-8'> 
+
+    <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>listing directory {directory}</title>
+    <title>Smart Data Link {directory}</title>
     <style>{style}</style>
     <script>
       function $(id){
@@ -72,11 +86,30 @@
       });
     </script>
   </head>
-  <body class="directory">
-    <input id="search" type="text" placeholder="Search" autocomplete="off" />
-    <div id="wrapper">
-      <h1><a href="/">~</a>{linked-path}</h1>
-      {files}
-    </div>
-  </body>
+
+</div>
+      <body class="directory">
+          <input id="search" type="text" placeholder="Search" autocomplete="off" />
+          <div id="wrapper">
+            <h1><a href="/" style="color:#6C63FF">root</a>{linked-path}</h1>
+            {files}
+        </body>
 </html>
+<!-- Footer -->
+    <body>
+        <div class="footer">
+          <p class="octicon octicon-code" >©️ 2019 C4T Brilliant Thoughts</p>
+          <p> Founder by Sumanth.Sanathi</p>
+		  <p>Credits : dougwilson</p>
+          
+    </div>
+<script>function toggleDarkLight() {
+    var body = document.getElementById("body");
+    var currentClass = body.className;
+    body.className = currentClass == "dark-mode" ? "light-mode" : "dark-mode";
+  }</script>
+    
+    </body>
+   
+  
+      
