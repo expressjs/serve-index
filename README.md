@@ -134,6 +134,22 @@ app.use('/ftp', express.static('public/ftp'), serveIndex('public/ftp', {'icons':
 app.listen(3000)
 ```
 
+### Use with Reverse Proxy
+
+To use `serve-index` with a reverse proxy, first set "X-Original-URL" in your
+proxy server. Then add an `originalUrl` property to the request. For example,
+with express.
+
+```javascript
+app.use(function(req, res, next) {
+  if ('x-original-url' in req.headers) {
+    req.originalUrl = req.headers['x-original-url']
+  }
+
+  next()
+})
+```
+
 ## License
 
 [MIT](LICENSE). The [Silk](http://www.famfamfam.com/lab/icons/silk/) icons
