@@ -48,7 +48,9 @@ describe('serveIndex(root)', function () {
 
     request(server)
       .head('/')
-      .expect(200, '', done)
+      .expect(200)
+      .expect(shouldNotHaveBody())
+      .end(done)
   })
 
   it('should work with OPTIONS requests', function (done) {
@@ -841,5 +843,11 @@ function createServer(dir, opts) {
 function bodyDoesNotContain(text) {
   return function (res) {
     assert.equal(res.text.indexOf(text), -1)
+  }
+}
+
+function shouldNotHaveBody () {
+  return function (res) {
+    assert.ok(res.text === '' || res.text === undefined)
   }
 }
