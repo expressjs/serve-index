@@ -19,7 +19,7 @@
     "eslint": "6.1.0",
     "eslint-plugin-markdown": "1.0.0",
     "istanbul": "0.4.5",
-    "mocha": "5.2.0",
+    "mocha": "6.2.0",
     "supertest": "3.4.2"
   },
   "files": [
