@@ -7,11 +7,11 @@ unreleased
   * deps: accepts@~1.3.7
     - deps: mime-types@~2.1.24
     - deps: negotiator@0.6.2
-  * deps: http-errors@~1.7.3
+  * deps: http-errors@~1.8.0
     - Set constructor name when possible
     - deps: depd@~1.1.2
     - deps: inherits@2.0.4
-    - deps: setprototypeof@1.1.1
+    - deps: setprototypeof@1.2.0
     - deps: statuses@'>= 1.5.0 < 2'
   * deps: mime-types@~2.1.27
     - Add new mime types
