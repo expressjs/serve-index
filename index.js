@@ -247,7 +247,7 @@ serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, p
     fileList.sort(fileSort)
 
     // serialize
-    var body = fileList.map(function (file) {
+    var body = fileList.filter(function(c) { return c }).map(function (file) {
       return file.name
     }).join('\n') + '\n'
 
@@ -564,7 +564,8 @@ function stat(dir, files, cb) {
   files.forEach(function(file){
     batch.push(function(done){
       fs.stat(join(dir, file), function(err, stat){
-        if (err && err.code !== 'ENOENT') return done(err);
+        //hide files that fail to stat
+        if (err && err.code !== 'ENOENT') return done();
 
         // pass ENOENT as null stat, not error
         done(null, {
