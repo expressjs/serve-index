@@ -386,6 +386,7 @@ describe('serveIndex(root)', function () {
         .expect(/icon-default/)
         .expect(/icon-directory/)
         .expect(/icon-image/)
+        .expect(/icon-image-svg_xml/)
         .expect(/icon-txt/)
         .expect(/icon-application-pdf/)
         .expect(/icon-video/)
