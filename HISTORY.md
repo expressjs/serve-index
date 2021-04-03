@@ -14,9 +14,9 @@ unreleased
     - deps: inherits@2.0.4
     - deps: setprototypeof@1.2.0
     - deps: statuses@'>= 1.5.0 < 2'
-  * deps: mime-types@~2.1.29
+  * deps: mime-types@~2.1.30
     - Add new mime types
-    - deps: mime-db@~1.46.0
+    - deps: mime-db@~1.47.0
   * deps: parseurl@~1.3.3
 
 1.9.1 / 2017-09-28
