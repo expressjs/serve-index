@@ -57,6 +57,24 @@ Display icons. Defaults to `false`.
 
 Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.
 
+##### sort
+
+Apply this sort function to files. Optional. The `sort` function is 
+called for each file tuple with the signature `sort(file1, file2)`.
+An example for sorting files by date of modification (descending) is:
+```js
+function sortbyModifiedDate(file1, file2) {
+  // sort ".." to the top
+  if (file1.name === '..' || file2.name === '..') {
+    return file1.name === file2.name ? 0
+      : file1.name === '..' ? -1 : 1;
+  }
+  // sort directories first then sort files by date of modification
+  return Number(file2.stat && file2.stat.isDirectory()) - Number(file1.stat && file1.stat.isDirectory()) ||
+    new Date(file2.stat.mtime) - new Date(file1.stat.mtime);
+}
+```
+
 ##### template
 
 Optional path to an HTML template or a function that will render a HTML
