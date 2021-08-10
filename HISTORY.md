@@ -1,20 +1,22 @@
 unreleased
 ==========
 
+  * Fix icons for MIME types with `+`
   * Fix text and json responses to match html sorting
   * Show font icon for more font types
   * Use 400 error on URI decode failure instead of 500
   * deps: accepts@~1.3.7
     - deps: mime-types@~2.1.24
     - deps: negotiator@0.6.2
-  * deps: http-errors@~1.7.2
+  * deps: http-errors@~1.8.0
     - Set constructor name when possible
     - deps: depd@~1.1.2
-    - deps: setprototypeof@1.1.1
+    - deps: inherits@2.0.4
+    - deps: setprototypeof@1.2.0
     - deps: statuses@'>= 1.5.0 < 2'
-  * deps: mime-types@~2.1.24
+  * deps: mime-types@~2.1.30
     - Add new mime types
-    - deps: mime-db@~1.40.0
+    - deps: mime-db@~1.47.0
   * deps: parseurl@~1.3.3
 
 1.9.1 / 2017-09-28
