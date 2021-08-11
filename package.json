@@ -1,7 +1,7 @@
 {
   "name": "fastx-serve-index",
   "description": "Serve directory listings",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "author": "Douglas Christopher Wilson <doug@somethingdoug.com>",
   "license": "MIT",
   "repository": "expressjs/serve-index",
