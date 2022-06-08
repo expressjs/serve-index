@@ -332,7 +332,7 @@ function createHtmlRender(template) {
         .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
         .replace(/\{linked-path\}/g, htmlPath(locals.directory))
-        .replace(/\{base\}/g, htmlPath(locals.base);
+        .replace(/\{base\}/g, htmlPath(locals.base));
 
       callback(null, body);
     });
