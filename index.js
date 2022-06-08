@@ -201,7 +201,8 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
         fileList: fileList,
         path: path,
         style: style,
-        viewName: view
+        viewName: view,
+        base: req.base || '',
       };
 
       // render html
@@ -330,7 +331,8 @@ function createHtmlRender(template) {
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
         .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
-        .replace(/\{linked-path\}/g, htmlPath(locals.directory));
+        .replace(/\{linked-path\}/g, htmlPath(locals.directory))
+        .replace(/\{base\}/g, htmlPath(locals.base);
 
       callback(null, body);
     });
