@@ -51,7 +51,7 @@ var defaultTemplate = join(__dirname, 'public', 'directory.html');
  * Stylesheet.
  */
 
-var defaultStylesheet = join(__dirname, 'public', 'style.css');
+var defaultStylesheet = join(__dirname, 'public', 'mocha.css');
 
 /**
  * Media types and the map for content negotiation.
@@ -94,7 +94,7 @@ function serveIndex(root, options) {
   var filter = opts.filter;
   var hidden = opts.hidden;
   var icons = opts.icons;
-  var stylesheet = opts.stylesheet || defaultStylesheet;
+  var stylesheet = opts.stylesheet ? join(__dirname,"public", opts.stylesheet + ".css") : defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
 
