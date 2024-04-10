@@ -76,6 +76,9 @@ var mediaType = {
  *
  * @param {String} root
  * @param {Object} options
+ * @param options.brief if true, will skip the fs.stat() on individual entries in a directory.
+ *        When set to true, details such as mtime, size, etc., will not be available, but the
+ *        response time is much faster if the directory has more than a few dozen entries.
  * @return {Function} middleware
  * @public
  */
@@ -97,6 +100,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
+  let brief = opts.brief || false;
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -164,7 +168,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, brief);
       });
     });
   };
@@ -174,7 +178,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, brief) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -210,7 +214,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
         send(res, 'text/html', body)
       });
     });
-  });
+  }, brief);
 };
 
 /**
@@ -294,7 +298,7 @@ function createHtmlFileList(files, dir, useIcons, view) {
 
     path.push(encodeURIComponent(file.name));
 
-    var date = file.stat && file.name !== '..'
+    var date = file.stat?.mtime && file.name !== '..'
       ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
       : '';
     var size = file.stat && !isDir
@@ -552,11 +556,23 @@ function send (res, type, body) {
  * `{ name, stat }`.
  *
  * @param {Array} files
+ * @param brief when set to true, will skip fs.stat() on indiviual entries in the directory
+ *        and use the brief info available from fs.stat() on the directory itself.
  * @return {Array}
  * @api private
  */
+function stat(dir, files, cb, brief) {
+  return brief? stat_brief(dir, files, cb):  stat_full(dir, files, cb);
+}
 
-function stat(dir, files, cb) {
+
+/**
+ * This is the original stat() function came with serve-index. See description for stat().
+ * @param dir
+ * @param files
+ * @param cb
+ */
+function stat_full(dir, files, cb) {
   var batch = new Batch();
 
   batch.concurrency(10);
@@ -576,6 +592,25 @@ function stat(dir, files, cb) {
   });
 
   batch.end(cb);
+}
+
+/**
+ * Get the directory entries info without doing fs.stat() on each entry
+ * @param dir the directory path
+ * @param files the files in the given directory that should be included in the results
+ * @param cb the callback function that takes two parameters, (error, stats), where
+ *        stats is the corresponding stat info from each file in the given files.
+ */
+function stat_brief(dir, files, cb) {
+  let listings = fs.readdirSync(dir, {withFileTypes: true})
+    .reduce((acc, dirEnt) => {
+      acc[dirEnt.name] = dirEnt;
+      return acc;
+    }, {});
+  // The special directory '..' was added to "files" before this stat() is called
+  listings['..'] = {name: '..', isDirectory: () => true};
+
+  cb(null, files.map(f => ({name: f, stat: listings[f] || null})));
 }
 
 /**
