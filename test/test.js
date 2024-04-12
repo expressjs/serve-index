@@ -814,6 +814,32 @@ describe('serveIndex(root)', function () {
         .expect(403, done)
     });
   });
+
+  describe('options.brief', function () {
+    it('should return valid stats with dates by default', function (done) {
+      serveIndex._stat_fn(fixtures, ['todo.txt', 'collect'], (err, entries) => {
+        assert.ok(entries[0]?.stat?.mtime);
+        assert.ok(entries[1].stat.isDirectory());
+        done();
+      });
+    });
+
+    it('should return valid stats with dates when options.brief=false', function (done) {
+      serveIndex._stat_fn(fixtures, ['todo.txt', 'collect'], (err, entries) => {
+        assert.ok(entries[0]?.stat?.mtime);
+        assert.ok(entries[1].stat.isDirectory());
+        done();
+      }, false);
+    });
+
+    it('should return valid stats without dates when options.brief=true', function (done) {
+      serveIndex._stat_fn(fixtures, ['todo.txt', 'collect'], (err, entries) => {
+        assert.ok(entries[0]?.stat && !entries[0].stat.mtime);
+        assert.ok(entries[1].stat.isDirectory());
+        done();
+      }, true);
+    });
+  });
 });
 
 function alterProperty(obj, prop, val) {

@@ -564,7 +564,7 @@ function send (res, type, body) {
 function stat(dir, files, cb, brief) {
   return brief? stat_brief(dir, files, cb):  stat_full(dir, files, cb);
 }
-
+serveIndex._stat_fn = stat; // expose for test use.
 
 /**
  * This is the original stat() function came with serve-index. See description for stat().
