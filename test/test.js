@@ -395,6 +395,35 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "sort" option', function () {
+    it('should include icons for html', function (done) {
+      var server = createServer(fixtures, {'sort': function (a, b) {
+        return String(b.name).toLocaleLowerCase().localeCompare(String(a.name).toLocaleLowerCase());
+      }});
+
+      request(server)
+      .get('/')
+      .expect(200)
+      .end(function (err, res) {
+        if (err) done(err);
+        var body = res.text.split('</h1>')[1];
+        var urls = body.split(/<a href="([^"]*)"/).filter(function(s, i){ return i%2; });
+        assert.deepEqual(urls, [
+          '/%E3%81%95%E3%81%8F%E3%82%89.txt',
+          '/users',
+          '/todo.txt',
+          '/nums',
+          '/g%23%20%253%20o%20%26%20%252525%20%2537%20dir',
+          '/foo%20%26%20bar',
+          '/file%20%231.txt',
+          '/collect',
+          '/%23directory'
+        ]);
+        done();
+      });
+    });
+  });
+
   describe('with "template" option', function () {
     describe('when setting a custom template file', function () {
       var server;
@@ -587,7 +616,7 @@ describe('serveIndex(root)', function () {
       it('should get template path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, sort, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(template)))
         }
@@ -601,7 +630,7 @@ describe('serveIndex(root)', function () {
       it('should get template with tokens', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template) {
+        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, sort, view, template) {
           res.setHeader('Content-Type', 'text/html')
           res.end(fs.readFileSync(template, 'utf8'))
         }
@@ -619,7 +648,7 @@ describe('serveIndex(root)', function () {
       it('should get stylesheet path', function (done) {
         var server = createServer()
 
-        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+        serveIndex.html = function (req, res, files, next, dir, showUp, icons, path, sort, view, template, stylesheet) {
           res.setHeader('Content-Type', 'text/html')
           res.end(String(fs.existsSync(stylesheet)))
         }
