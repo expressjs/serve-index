@@ -1,3 +1,5 @@
+Given that serve-index is no longer actively maintained, we are maintaining a new version here to meet other requirements.
+
 # serve-index
 
 [![NPM Version][npm-image]][npm-url]
@@ -87,6 +89,15 @@ provided locals:
 ##### view
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
+
+##### sort
+
+Optional. Specifies how files are sorted. Can be one of the following:
+
+  * `name` Sorts files alphabetically by name (default).
+  * `modified-date` Sorts files by modified date, with the most recent files first.
+  * Custom comparison function: You can also provide a custom comparison function that accepts two `fs.Stats` objects and return a negative number if the first object should come before the second, 0 if they are equal, and a positive number if the first object should come after the second.
+
 
 ## Examples
 

@@ -97,6 +97,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
+  var sort = opts.sort || fileSort
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -164,7 +165,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, sort);
       });
     });
   };
@@ -174,7 +175,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, sort) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -188,7 +189,14 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
     if (err) return next(err);
 
     // sort file list
-    fileList.sort(fileSort);
+    if (sort === 'modified-date') {
+      fileList.sort((a, b) => b.stat.mtime.getTime() - a.stat.mtime.getTime());
+    } else if (typeof sort === 'function') {
+      fileList.sort(sort);
+    } else {
+      fileList.sort(fileSort);
+    }
+    
 
     // read stylesheet
     fs.readFile(stylesheet, 'utf8', function (err, style) {
@@ -223,7 +231,13 @@ serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, pat
     if (err) return next(err)
 
     // sort file list
-    fileList.sort(fileSort)
+    if (sort === 'modified-date') {
+      fileList.sort((a, b) => b.stat.mtime.getTime() - a.stat.mtime.getTime());
+    } else if (typeof sort === 'function') {
+      fileList.sort(sort);
+    } else {
+      fileList.sort(fileSort);
+    }
 
     // serialize
     var body = JSON.stringify(fileList.map(function (file) {
@@ -244,7 +258,13 @@ serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, p
     if (err) return next(err)
 
     // sort file list
-    fileList.sort(fileSort)
+    if (sort === 'modified-date') {
+      fileList.sort((a, b) => b.stat.mtime.getTime() - a.stat.mtime.getTime());
+    } else if (typeof sort === 'function') {
+      fileList.sort(sort);
+    } else {
+      fileList.sort(fileSort);
+    }
 
     // serialize
     var body = fileList.map(function (file) {
