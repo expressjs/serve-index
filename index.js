@@ -305,7 +305,7 @@ function createHtmlFileList(files, dir, useIcons, view, simplifyFileSize) {
 
     if(simplifyFileSize && size !== ''){
       
-      const fileSizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+      var fileSizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
       var index = 0
       if (size !== 0){
         index = Math.floor(Math.log(size)/Math.log(1000))
