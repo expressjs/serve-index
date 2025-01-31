@@ -88,6 +88,16 @@ provided locals:
 
 Display mode. `tiles` and `details` are available. Defaults to `tiles`.
 
+##### simplifyFileSize
+
+Configures the unit in the size. Defaults to `false`.
+
+By default, the size is display only in bytes. 
+
+Set it to `true` and it will automatically simplify the size to the highest size 
+from the following 
+- KB, MB, GB, TB PB
+
 ## Examples
 
 ### Serve directory indexes with vanilla node.js http server
