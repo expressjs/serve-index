@@ -94,9 +94,9 @@ Configures the unit in the size. Defaults to `false`.
 
 By default, the size is display only in bytes. 
 
-Set it to `true` and it will automatically simplify the size to the highest size 
-from the following 
-- KB, MB, GB, TB PB
+Set it to `true` and it will try to automatically simplify the size to 
+the highest possible unit from the following to two decimal places.
+- KB, MB, GB, TB, PB
 
 ## Examples
 
