@@ -161,14 +161,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name OpenSSL npm
-      run: npm install -g npm@latest
-
     - name: Npm version fixes
       if: ${{matrix.npm-version != ''}}
       run: npm install -g ${{ matrix.npm-version }}
 
     - name: Configure npm
+      shell: bash -eo pipefail -l {0}
       run: |
         if [[ "${{ matrix.node-version }}" == 0.* && "$(cut -d. -f2 <<< "${{ matrix.node-version }}")" -lt 10 ]]; then
           npm config set strict-ssl false
