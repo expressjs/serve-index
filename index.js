@@ -27,6 +27,7 @@ var Batch = require('batch');
 var mime = require('mime-types');
 var parseUrl = require('parseurl');
 var resolve = require('path').resolve;
+var bytes = require('bytes');
 
 /**
  * Module exports.
@@ -304,17 +305,7 @@ function createHtmlFileList(files, dir, useIcons, view, simplifyFileSize) {
       : '';
 
     if(simplifyFileSize && size !== ''){
-      
-      var fileSizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
-      var index = 0
-      if (size !== 0){
-        index = Math.floor(Math.log(size)/Math.log(1000))
-        if ( index > size.length - 1){
-          index = 5
-        }
-      }
-
-      size = size / Math.pow(1000,index) + ' ' + fileSizes[index]
+      size = bytes(size, {unitSeparator: ' '})
     }
 
     return '<li><a href="'
