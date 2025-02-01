@@ -3,7 +3,6 @@
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Linux Build Status][ci-image]][ci-url]
-[![Windows Build][appveyor-image]][appveyor-url]
 [![Coverage Status][coveralls-image]][coveralls-url]
 
   Serves pages that contain directory listings for a given path.
@@ -139,8 +138,6 @@ app.listen(3000)
 [MIT](LICENSE). The [Silk](http://www.famfamfam.com/lab/icons/silk/) icons
 are created by/copyright of [FAMFAMFAM](http://www.famfamfam.com/).
 
-[appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/serve-index/master.svg?label=windows
-[appveyor-url]: https://ci.appveyor.com/project/dougwilson/serve-index
 [ci-image]: https://badgen.net/github/checks/expressjs/serve-index/master?label=ci
 [ci-url]: https://github.com/expressjs/serve-index/actions/workflows/ci.yml
 [coveralls-image]: https://img.shields.io/coveralls/expressjs/serve-index/master.svg
