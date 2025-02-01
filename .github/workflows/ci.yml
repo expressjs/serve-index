@@ -42,9 +42,6 @@ jobs:
         - Node.js 0.8
         - Node.js 0.10
         - Node.js 0.12
-        - io.js 1.x
-        - io.js 2.x
-        - io.js 3.x
         - Node.js 4.x
         - Node.js 5.x
         - Node.js 6.x
@@ -164,12 +161,18 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name OpenSSL npm
+      run: npm install -g npm@latest
+
     - name: Npm version fixes
       if: ${{matrix.npm-version != ''}}
       run: npm install -g ${{ matrix.npm-version }}
 
     - name: Configure npm
       run: |
+        if [[ "${{ matrix.node-version }}" == 0.* && "$(cut -d. -f2 <<< "${{ matrix.node-version }}")" -lt 10 ]]; then
+          npm config set strict-ssl false
+        fi
         npm config set package-lock false
 
     - name: Remove npm module(s) ${{ matrix.npm-rm }}
@@ -213,39 +216,20 @@ jobs:
           npm test
         fi
 
-    - name: Upload code coverage
+    - name: Collect code coverage
+      uses: coverallsapp/github-action@master
       if: steps.list_env.outputs.nyc != ''
-      uses: actions/upload-artifact@v4
       with:
-        name: coverage-node-${{ matrix.node-version }}
-        path: ./coverage/lcov.info
-        retention-days: 1
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: run-${{ matrix.test_number }}
+        parallel: true
 
   coverage:
     needs: test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Install lcov
-      shell: bash
-      run: sudo apt-get -y install lcov
-
-    - name: Collect coverage reports
-      uses: actions/download-artifact@v4
-      with:
-        path: ./coverage
-        pattern: coverage-node-*
-
-    - name: Merge coverage reports
-      shell: bash
-      run: find ./coverage -name lcov.info -exec printf '-a %q\n' {} \; | xargs lcov -o ./lcov.info
-
-    - name: Upload coverage report
-      uses: coverallsapp/github-action@v2
+    - name: Upload code coverage
+      uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./lcov.info
+        parallel-finished: true
