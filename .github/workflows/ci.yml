@@ -80,18 +80,6 @@ jobs:
           node-version: "0.12"
           npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
 
-        - name: io.js 1.x
-          node-version: "1.8"
-          npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
-
-        - name: io.js 2.x
-          node-version: "2.5"
-          npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
-
-        - name: io.js 3.x
-          node-version: "3.3"
-          npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
-
         - name: Node.js 4.x
           node-version: "4.9"
           npm-i: mocha@5.2.0 nyc@11.9.0 supertest@3.4.2
