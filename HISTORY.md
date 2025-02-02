@@ -1,6 +1,7 @@
 unreleased
 ==========
-
+  * Added `simplifyFileSize` option
+  * deps: bytes": "~3.1.2
   * Fix icons for MIME types with `+`
   * Fix text and json responses to match html sorting
   * Show font icon for more font types
