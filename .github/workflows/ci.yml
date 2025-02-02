@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-latest]
+        os: [ubuntu-latest, windows-latest]
         name:
         - Node.js 0.8
         - Node.js 0.10
@@ -166,7 +166,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Setup Node.js 0.8
-      if: ${{ matrix.node-version == '0.8' && matrix.os == 'ubuntu-20.04' }}
+      if: ${{ matrix.node-version == '0.8' && matrix.os == 'ubuntu-latest' }}
       shell: bash -eo pipefail -l {0}
       run: |
         nvm install --default ${{ matrix.node-version }}
