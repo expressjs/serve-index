@@ -1,4 +1,4 @@
-name: iojs-ci
+name: macos-ci
 
 on:
   push:
@@ -137,6 +137,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install nvm
+      shell: bash -eo pipefail -l {0}
+      run: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
     - name: Install Node.js ${{ matrix.node-version }}
       shell: bash -eo pipefail -l {0}
       run: |
@@ -147,8 +151,6 @@ jobs:
           if [[ "$(npm -v)" == 1.1.* ]]; then
             nvm exec npm npm install -g npm@1.1
             ln -fs "$(which npm)" "$(dirname "$(nvm which npm)")/npm"
-          else
-            sed -i '1s;^.*$;'"$(printf '#!%q' "$(nvm which npm)")"';' "$(readlink -f "$(which npm)")"
           fi
           npm config set strict-ssl false
         fi
