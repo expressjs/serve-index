@@ -160,20 +160,36 @@ jobs:
         persist-credentials: false
 
     - name: Setup Node.js ${{ matrix.node-version }}
+      if: ${{ matrix.node-version != '0.8' }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Setup Node.js 0.8
+      if: ${{ matrix.node-version == '0.8' && matrix.os == 'ubuntu-20.04' }}
+      shell: bash -eo pipefail -l {0}
+      run: |
+        nvm install --default ${{ matrix.node-version }}
+        nvm install --alias=npm 0.10
+        nvm use ${{ matrix.node-version }}
+        if [[ "$(npm -v)" == 1.1.* ]]; then
+          nvm exec npm npm install -g npm@1.1
+          ln -fs "$(which npm)" "$(dirname "$(nvm which npm)")/npm"
+        else
+          sed -i '1s;^.*$;'"$(printf '#!%q' "$(nvm which npm)")"';' "$(readlink -f "$(which npm)")"
+        fi
+        npm config set strict-ssl false
+        dirname "$(nvm which ${{ matrix.node-version }})" >> "$GITHUB_PATH"
+
     - name: Npm version fixes
       if: ${{matrix.npm-version != ''}}
-      run: npm install -g ${{ matrix.npm-version }}
+      shell: bash -eo pipefail -l {0}
+      run: |
+        npm install -g ${{ matrix.npm-version }}
 
     - name: Configure npm
       shell: bash -eo pipefail -l {0}
       run: |
-        if [[ "${{ matrix.node-version }}" == 0.* && "$(cut -d. -f2 <<< "${{ matrix.node-version }}")" -lt 10 ]]; then
-          npm config set strict-ssl false
-        fi
         npm config set package-lock false
 
     - name: Remove npm module(s) ${{ matrix.npm-rm }}
