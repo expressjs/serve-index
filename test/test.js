@@ -412,6 +412,14 @@ describe('serveIndex(root)', function () {
         .expect(/1186/)
         .expect(200, done)
     });
+    it('should not simplify file sizes by default', function (done) {
+      var server = createServer(fixtures)
+
+      request(server)
+        .get('/collect')
+        .expect(/1186/)
+        .expect(200, done)
+    });
   });
 
   describe('with "template" option', function () {
