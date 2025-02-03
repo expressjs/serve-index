@@ -401,7 +401,7 @@ describe('serveIndex(root)', function () {
 
       request(server)
         .get('/collect')
-        .expect(/1\.16 KB/)
+        .expect(/1\.06 KB/)
         .expect(200, done)
     });
     it('should not simplify file sizes', function (done) {
