@@ -401,7 +401,7 @@ describe('serveIndex(root)', function () {
 
       request(server)
         .get('/collect')
-        .expect(/1\.06 KB/)
+        .expect(/1\.07 KB/)
         .expect(200, done)
     });
     it('should not simplify file sizes', function (done) {
@@ -409,7 +409,7 @@ describe('serveIndex(root)', function () {
 
       request(server)
         .get('/collect')
-        .expect(/1186/)
+        .expect(/1100/)
         .expect(200, done)
     });
     it('should not simplify file sizes by default', function (done) {
@@ -417,7 +417,7 @@ describe('serveIndex(root)', function () {
 
       request(server)
         .get('/collect')
-        .expect(/1186/)
+        .expect(/1100/)
         .expect(200, done)
     });
   });
