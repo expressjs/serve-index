@@ -1,21 +1,47 @@
 name: ci
 
 on:
-- pull_request
-- push
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '*.md'
+  pull_request:
+    paths-ignore:
+      - '*.md'
+
+# Cancel in progress workflows
+# in the scenario where we already had a run going for that PR/branch/tag but then triggered a new run
+concurrency:
+  group: "${{ github.workflow }} ✨ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --only=dev
+
+      - name: Run lint
+        run: npm run lint
+
   test:
-    runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         name:
         - Node.js 0.8
         - Node.js 0.10
         - Node.js 0.12
-        - io.js 1.x
-        - io.js 2.x
-        - io.js 3.x
         - Node.js 4.x
         - Node.js 5.x
         - Node.js 6.x
@@ -35,6 +61,7 @@ jobs:
         - Node.js 20.x
         - Node.js 21.x
         - Node.js 22.x
+        - Node.js 23.x
 
         include:
         - name: Node.js 0.8
@@ -45,22 +72,12 @@ jobs:
         - name: Node.js 0.10
           node-version: "0.10"
           npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
+          npm-version: "npm@2.15.1"
 
         - name: Node.js 0.12
           node-version: "0.12"
           npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
-
-        - name: io.js 1.x
-          node-version: "1.8"
-          npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
-
-        - name: io.js 2.x
-          node-version: "2.5"
-          npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
-
-        - name: io.js 3.x
-          node-version: "3.3"
-          npm-i: mocha@3.5.3 nyc@10.3.2 supertest@2.0.1
+          npm-version: "npm@2.15.1"
 
         - name: Node.js 4.x
           node-version: "4.9"
@@ -69,6 +86,7 @@ jobs:
         - name: Node.js 5.x
           node-version: "5.12"
           npm-i: mocha@5.2.0 nyc@11.9.0 supertest@3.4.2
+          npm-version: npm@3.10.10
 
         - name: Node.js 6.x
           node-version: "6.17"
@@ -107,59 +125,72 @@ jobs:
           npm-i: supertest@6.1.3
 
         - name: Node.js 15.x
-          node-version: "15.14"
+          node-version: "15"
           npm-i: supertest@6.1.3
 
         - name: Node.js 16.x
-          node-version: "16.20"
+          node-version: "16"
           npm-i: supertest@6.1.3
 
         - name: Node.js 17.x
-          node-version: "17.9"
+          node-version: "17"
           npm-i: supertest@6.1.3
 
         - name: Node.js 18.x
-          node-version: "18.18"
+          node-version: "18"
 
         - name: Node.js 19.x
-          node-version: "19.9"
+          node-version: "19"
 
         - name: Node.js 20.x
-          node-version: "20.9"
+          node-version: "20"
 
         - name: Node.js 21.x
-          node-version: "21.1"
+          node-version: "21"
 
         - name: Node.js 22.x
-          node-version: "22.0"
+          node-version: "22"
 
+        - name: Node.js 23.x
+          node-version: "23"
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
 
-    - name: Install Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js ${{ matrix.node-version }}
+      if: ${{ matrix.node-version != '0.8' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Setup Node.js 0.8
+      if: ${{ matrix.node-version == '0.8' && matrix.os == 'ubuntu-latest' }}
       shell: bash -eo pipefail -l {0}
       run: |
         nvm install --default ${{ matrix.node-version }}
-        if [[ "${{ matrix.node-version }}" == 0.* && "$(cut -d. -f2 <<< "${{ matrix.node-version }}")" -lt 10 ]]; then
-          nvm install --alias=npm 0.10
-          nvm use ${{ matrix.node-version }}
-          if [[ "$(npm -v)" == 1.1.* ]]; then
-            nvm exec npm npm install -g npm@1.1
-            ln -fs "$(which npm)" "$(dirname "$(nvm which npm)")/npm"
-          else
-            sed -i '1s;^.*$;'"$(printf '#!%q' "$(nvm which npm)")"';' "$(readlink -f "$(which npm)")"
-          fi
-          npm config set strict-ssl false
+        nvm install --alias=npm 0.10
+        nvm use ${{ matrix.node-version }}
+        if [[ "$(npm -v)" == 1.1.* ]]; then
+          nvm exec npm npm install -g npm@1.1
+          ln -fs "$(which npm)" "$(dirname "$(nvm which npm)")/npm"
+        else
+          sed -i '1s;^.*$;'"$(printf '#!%q' "$(nvm which npm)")"';' "$(readlink -f "$(which npm)")"
         fi
+        npm config set strict-ssl false
         dirname "$(nvm which ${{ matrix.node-version }})" >> "$GITHUB_PATH"
 
-    - name: Configure npm
+    - name: Npm version fixes
+      if: ${{matrix.npm-version != ''}}
+      shell: bash -eo pipefail -l {0}
       run: |
-        if [[ "$(npm config get package-lock)" == "true" ]]; then
-          npm config set package-lock false
-        else
-          npm config set shrinkwrap false
-        fi
+        npm install -g ${{ matrix.npm-version }}
+
+    - name: Configure npm
+      shell: bash -eo pipefail -l {0}
+      run: |
+        npm config set package-lock false
 
     - name: Remove npm module(s) ${{ matrix.npm-rm }}
       if: matrix.npm-rm != ''
@@ -201,10 +232,6 @@ jobs:
         else
           npm test
         fi
-
-    - name: Lint code
-      if: steps.list_env.outputs.eslint != ''
-      run: npm run lint
 
     - name: Collect code coverage
       uses: coverallsapp/github-action@master
