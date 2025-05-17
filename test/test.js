@@ -11,7 +11,7 @@ var fixtures = path.join(__dirname, '/fixtures');
 var relative = path.relative(process.cwd(), fixtures);
 
 var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relative;
-var NODE_BASE_VERSION = 8;
+var NODE_BASE_VERSION = 16;
 var major = process.versions.node.split('.')?.map(Number)?.[0] || NODE_BASE_VERSION;
 
 describe('serveIndex(root)', function () {
@@ -90,7 +90,7 @@ describe('serveIndex(root)', function () {
 
   if (major < NODE_BASE_VERSION) {
     /**
-     * For Node versions lower than 8. To keep retrocompatibility
+     * For Node versions lower than 10. To keep retrocompatibility
      *
      * Inside serveIndex function, it uses path.normalize()
      * When it receives the path '/../' the normalize function resolves it to '/'
@@ -757,7 +757,7 @@ describe('serveIndex(root)', function () {
 
     if (major < NODE_BASE_VERSION) {
     /**
-     * For Node versions lower than 8. To keep retrocompatibility
+     * For Node versions lower than 10. To keep retrocompatibility
      *
      * Inside serveIndex function, it uses path.normalize()
      * When it receives the path '/../support/' the normalize function resolves it to '/support/'
@@ -833,7 +833,7 @@ describe('serveIndex(root)', function () {
 
     if (major < NODE_BASE_VERSION) {
       /**
-       * For Node versions lower than 8. To keep retrocompatibility
+       * For Node versions lower than 10. To keep retrocompatibility
        *
        * Inside serveIndex function, it uses path.normalize()
        * When it receives the path '/../' the normalize function resolves it to '/'
