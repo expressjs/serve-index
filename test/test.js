@@ -11,6 +11,8 @@ var fixtures = path.join(__dirname, '/fixtures');
 var relative = path.relative(process.cwd(), fixtures);
 
 var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relative;
+var NODE_BASE_VERSION = 8;
+var major = process.versions.node.split('.')?.map(Number)?.[0] || NODE_BASE_VERSION;
 
 describe('serveIndex(root)', function () {
   it('should require root', function () {
@@ -86,21 +88,24 @@ describe('serveIndex(root)', function () {
       .expect(400, done)
   })
 
-  /**
-   * @deprecated 
-   * Inside serveIndex function, it uses path.normalize() 
-   * When it receives the path '/../' the normalize function resolves it to '/'
-   * Therefore, this test will pass
-   * 
-   * @see https://nodejs.org/download/release/v18.16.0/docs/api/path.html#pathnormalizepath
-   */
-  it.skip('should deny path outside root', function (done) {
-    var server = createServer()
-    
-    request(server)
-      .get('/../')
-      .expect(403, done)
-  })
+  if (major < NODE_BASE_VERSION) {
+    /**
+     * For Node versions lower than 8. To keep retrocompatibility
+     *
+     * Inside serveIndex function, it uses path.normalize()
+     * When it receives the path '/../' the normalize function resolves it to '/'
+     * Therefore, this test will pass
+     *
+     * @see https://nodejs.org/download/release/v18.16.0/docs/api/path.html#pathnormalizepath
+     */
+    it('should deny path outside root', function (done) {
+      var server = createServer()
+
+      request(server)
+        .get('/../')
+        .expect(403, done)
+    })
+  }
 
   it('should skip non-existent paths', function (done) {
     var server = createServer()
@@ -750,22 +755,25 @@ describe('serveIndex(root)', function () {
         .end(done)
     });
 
+    if (major < NODE_BASE_VERSION) {
     /**
-     * @deprecated 
-     * Inside serveIndex function, it uses path.normalize() 
+     * For Node versions lower than 8. To keep retrocompatibility
+     *
+     * Inside serveIndex function, it uses path.normalize()
      * When it receives the path '/../support/' the normalize function resolves it to '/support/'
      * Therefore, this test will pass
-     * 
+     *
      * @see https://nodejs.org/download/release/v18.16.0/docs/api/path.html#pathnormalizepath
      */
-    it.skip('should not work for outside root', function (done) {
-      var server = createServer()
+      it('should not work for outside root', function (done) {
+        var server = createServer()
 
-      request(server)
-        .get('/../support/')
-        .set('Accept', 'text/html')
-        .expect(403, done)
-    });
+        request(server)
+          .get('/../support/')
+          .set('Accept', 'text/html')
+          .expect(403, done)
+      });
+    }
   });
 
   describe('when setting a custom stylesheet', function () {
@@ -823,20 +831,23 @@ describe('serveIndex(root)', function () {
         .expect(200, done)
     });
 
-    /**
-       * @deprecated 
-       * Inside serveIndex function, it uses path.normalize() 
+    if (major < NODE_BASE_VERSION) {
+      /**
+       * For Node versions lower than 8. To keep retrocompatibility
+       *
+       * Inside serveIndex function, it uses path.normalize()
        * When it receives the path '/../' the normalize function resolves it to '/'
        * Therefore, this test will pass
-       * 
+       *
        * @see https://nodejs.org/download/release/v18.16.0/docs/api/path.html#pathnormalizepath
        */
-    it.skip('should not allow serving outside root', function (done) {
-      request(server)
-        .get('/../')
-        .set('Accept', 'text/html')
-        .expect(403, done)
-    });
+      it('should not allow serving outside root', function (done) {
+        request(server)
+          .get('/../')
+          .set('Accept', 'text/html')
+          .expect(403, done)
+      });
+    }
   });
 });
 
