@@ -20,7 +20,7 @@
     "eslint-plugin-markdown": "2.0.0",
     "mocha": "10.4.0",
     "nyc": "15.1.0",
-    "supertest": "7.0.0"
+    "supertest": "7.1.1"
   },
   "files": [
     "public/",
