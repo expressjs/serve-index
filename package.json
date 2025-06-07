@@ -17,7 +17,7 @@
   "devDependencies": {
     "after": "0.8.2",
     "eslint": "7.23.0",
-    "eslint-plugin-markdown": "2.0.0",
+    "eslint-plugin-markdown": "2.2.1",
     "mocha": "10.4.0",
     "nyc": "15.1.0",
     "supertest": "7.0.0"
