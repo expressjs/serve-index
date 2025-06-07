@@ -201,7 +201,8 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
         fileList: fileList,
         path: path,
         style: style,
-        viewName: view
+        viewName: view,
+        base: req.base || '',
       };
 
       // render html
@@ -247,7 +248,7 @@ serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, p
     fileList.sort(fileSort)
 
     // serialize
-    var body = fileList.map(function (file) {
+    var body = fileList.filter(function(c) { return c }).map(function (file) {
       return file.name
     }).join('\n') + '\n'
 
@@ -330,7 +331,8 @@ function createHtmlRender(template) {
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
         .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
-        .replace(/\{linked-path\}/g, htmlPath(locals.directory));
+        .replace(/\{linked-path\}/g, htmlPath(locals.directory))
+        .replace(/\{base\}/g, locals.base);
 
       callback(null, body);
     });
@@ -564,7 +566,8 @@ function stat(dir, files, cb) {
   files.forEach(function(file){
     batch.push(function(done){
       fs.stat(join(dir, file), function(err, stat){
-        if (err && err.code !== 'ENOENT') return done(err);
+        //hide files that fail to stat
+        if (err && err.code !== 'ENOENT') return done();
 
         // pass ENOENT as null stat, not error
         done(null, {
