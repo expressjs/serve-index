@@ -27,6 +27,7 @@ var Batch = require('batch');
 var mime = require('mime-types');
 var parseUrl = require('parseurl');
 var resolve = require('path').resolve;
+var bytes = require('bytes');
 
 /**
  * Module exports.
@@ -97,6 +98,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
+  var simplifyFileSize = opts.simplifyFileSize;
 
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -164,7 +166,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, simplifyFileSize);
       });
     });
   };
@@ -174,7 +176,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, simplifyFileSize) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -201,7 +203,8 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
         fileList: fileList,
         path: path,
         style: style,
-        viewName: view
+        viewName: view,
+        simplifyFileSize:Boolean(simplifyFileSize)
       };
 
       // render html
@@ -260,7 +263,7 @@ serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, p
  * @private
  */
 
-function createHtmlFileList(files, dir, useIcons, view) {
+function createHtmlFileList(files, dir, useIcons, view, simplifyFileSize) {
   var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'
     + (view === 'details' ? (
       '<li class="header">'
@@ -301,6 +304,10 @@ function createHtmlFileList(files, dir, useIcons, view) {
       ? file.stat.size
       : '';
 
+    if(simplifyFileSize && size !== ''){
+      size = bytes(size, {unitSeparator: ' '})
+    }
+
     return '<li><a href="'
       + escapeHtml(normalizeSlashes(normalize(path.join('/'))))
       + '" class="' + escapeHtml(classes.join(' ')) + '"'
@@ -328,7 +335,7 @@ function createHtmlRender(template) {
 
       var body = str
         .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
-        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
+        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName, locals.simplifyFileSize))
         .replace(/\{directory\}/g, escapeHtml(locals.directory))
         .replace(/\{linked-path\}/g, htmlPath(locals.directory));
 

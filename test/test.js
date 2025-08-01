@@ -395,6 +395,33 @@ describe('serveIndex(root)', function () {
     });
   });
 
+  describe('with "simplifyFileSize" option', function () {
+    it('should simplify file sizes', function (done) {
+      var server = createServer(fixtures, {'simplifyFileSize': true})
+
+      request(server)
+        .get('/collect')
+        .expect(/1\.07 KB/)
+        .expect(200, done)
+    });
+    it('should not simplify file sizes', function (done) {
+      var server = createServer(fixtures, {'simplifyFileSize': false})
+
+      request(server)
+        .get('/collect')
+        .expect(/1100/)
+        .expect(200, done)
+    });
+    it('should not simplify file sizes by default', function (done) {
+      var server = createServer(fixtures)
+
+      request(server)
+        .get('/collect')
+        .expect(/1100/)
+        .expect(200, done)
+    });
+  });
+
   describe('with "template" option', function () {
     describe('when setting a custom template file', function () {
       var server;
