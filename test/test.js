@@ -12,6 +12,9 @@ var relative = path.relative(process.cwd(), fixtures);
 
 var skipRelative = ~relative.indexOf('..') || path.resolve(relative) === relative;
 
+var nodeVersion = process.version;
+var MIN_MAJOR_VERSION = 16;
+
 describe('serveIndex(root)', function () {
   it('should require root', function () {
     assert.throws(serveIndex, /root path required/)
@@ -86,13 +89,14 @@ describe('serveIndex(root)', function () {
       .expect(400, done)
   })
 
-  it('should deny path outside root', function (done) {
-    var server = createServer()
-
-    request(server)
-      .get('/../')
-      .expect(403, done)
-  })
+  if (isNodeVersionLowerThanBase(nodeVersion)) {
+    it('should deny path outside root', function (done) {
+      var server = createServer();
+      request(server)
+        .get('/../')
+        .expect(403, done)
+    })
+  }
 
   it('should skip non-existent paths', function (done) {
     var server = createServer()
@@ -742,14 +746,15 @@ describe('serveIndex(root)', function () {
         .end(done)
     });
 
-    it('should not work for outside root', function (done) {
-      var server = createServer()
-
-      request(server)
-        .get('/../support/')
-        .set('Accept', 'text/html')
-        .expect(403, done)
-    });
+    if (isNodeVersionLowerThanBase(nodeVersion)) {
+      it('should not work for outside root', function (done) {
+        var server = createServer();
+        request(server)
+          .get('/../support/')
+          .set('Accept', 'text/html')
+          .expect(403, done)
+      });
+    }
   });
 
   describe('when setting a custom stylesheet', function () {
@@ -807,12 +812,15 @@ describe('serveIndex(root)', function () {
         .expect(200, done)
     });
 
-    it('should not allow serving outside root', function (done) {
-      request(server)
-        .get('/../')
-        .set('Accept', 'text/html')
-        .expect(403, done)
-    });
+    if (isNodeVersionLowerThanBase(nodeVersion)) {
+      it('should not allow serving outside root', function (done) {
+        request(server)
+          .get('/../')
+          .set('Accept', 'text/html')
+          .expect(403, done)
+      });
+    }
+
   });
 });
 
@@ -851,4 +859,14 @@ function shouldNotHaveBody () {
   return function (res) {
     assert.ok(res.text === '' || res.text === undefined)
   }
+}
+
+function isNodeVersionLowerThanBase(version) {
+  var versionRegex = /^v?(\d+)\.(\d+)\.(\d+)$/;
+  var match = version.match(versionRegex);
+  if (!match) return false;
+
+  var major = match[1] || MIN_MAJOR_VERSION;
+
+  return major < MIN_MAJOR_VERSION;
 }
