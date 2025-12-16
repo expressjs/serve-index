@@ -29,7 +29,7 @@
   "files": [
     "public/",
     "LICENSE",
-    "HISTORY.md",
+    "README.md",
     "index.js"
   ],
   "engines": {
