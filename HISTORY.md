@@ -1,23 +1,40 @@
-unreleased
+## 1.9.2
 ==========
 
-  * Fix icons for MIME types with `+`
-  * Fix text and json responses to match html sorting
-  * Show font icon for more font types
-  * Use 400 error on URI decode failure instead of 500
-  * deps: accepts@~1.3.8
-    - deps: mime-types@~2.1.24
-    - deps: negotiator@0.6.3
-  * deps: http-errors@~1.8.0
-    - Set constructor name when possible
-    - deps: depd@~1.1.2
-    - deps: inherits@2.0.4
-    - deps: setprototypeof@1.2.0
-    - deps: statuses@'>= 1.5.0 < 2'
-  * deps: mime-types@~2.1.35
-    - Add new mime types
-    - deps: mime-db@~1.52.0
-  * deps: parseurl@~1.3.3
+### 🐞 Bug fixes
+
+- Icons for MIME types containing "+" were not displayed correctly - by [@dougwilson](https://github.com/dougwilson) in [4e7785c](https://github.com/expressjs/serve-index/commit/4e7785c6207e2c1504333f50c69e41bb491d2740)
+
+    fixed where file icons with MIME types containing the "+" character (such as image/svg+xml) were not displayed correctly. The bug occurred during the conversion of the MIME type to a CSS class name, since the "+" symbol is not valid in class names.
+
+- Improved error handling for malformed URIs by [@rjoonas](https://github.com/rjoonas) in [#85](https://github.com/expressjs/serve-index/pull/85)
+
+    The HTTP response status code has been fixed for cases where the server receives a URI that cannot be properly decoded. It now returns a 400 (Bad Request) error instead of a 500 (Internal Server Error), more accurately reflecting that the issue is with the client’s request rather than the server itself.
+
+
+### 🚀 Improvements
+
+- Sorting in `text/plain` and `application/json` responses by [@dougwilson](https://github.com/dougwilson) in [002a251](https://github.com/expressjs/serve-index/commit/002a25112259f32d5d38f0b82857ab81260d8126)
+
+- Show font icon for more font types - by [@dougwilson](https://github.com/dougwilson) in [9d29665](https://github.com/expressjs/serve-index/commit/9d29665ce342f11b079c148f7c3ebe169fbe8945)
+
+    Support has been expanded to display the font icon in directory listings. Now all font file formats will automatically show the corresponding icon, instead of only a few specific formats as before.
+
+### Dependencies
+
+* deps: accepts@~1.3.8 by [@dougwilson](https://github.com/dougwilson) and [@bjohansebas](https://github.com/bjohansebas)
+  - deps: mime-types@~2.1.24
+  - deps: negotiator@0.6.2
+* deps: http-errors@~1.8.0 by [@dougwilson](https://github.com/dougwilson)
+  - Set constructor name when possible
+  - deps: depd@~1.1.2
+  - deps: inherits@2.0.4
+  - deps: setprototypeof@1.2.0
+  - deps: statuses@'>= 1.5.0 < 2'
+* deps: mime-types@~2.1.35 by [@dougwilson](https://github.com/dougwilson) and [@bjohansebas](https://github.com/bjohansebas)
+  - Add new mime types
+  - deps: mime-db@~1.47.0
+* deps: parseurl@~1.3.3 by [@dougwilson](https://github.com/dougwilson)
 
 1.9.1 / 2017-09-28
 ==================
