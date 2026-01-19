@@ -6,6 +6,8 @@
     <title>listing directory {directory}</title>
     <style>{style}</style>
     <script>
+      // @license magnet:?xt=urn:btih:da39a3ee5e6b4b0d3255bfef95601890afd80709&dn=expat.txt Expat
+
       function $(id){
         var el = 'string' == typeof id
           ? document.getElementById(id)
@@ -70,6 +72,8 @@
       $(window).on('content loaded', function(){
         $('search').on('keyup', search);
       });
+
+      // @license-end
     </script>
   </head>
   <body class="directory">
