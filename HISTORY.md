@@ -1,4 +1,4 @@
-unreleased
+## 1.9.2
 ==========
 
   * Fix icons for MIME types with `+`
