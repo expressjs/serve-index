@@ -599,7 +599,7 @@ var icons = {
   '+zip': 'box.png',
 
   // specific mime type icons
-  'application/javascript': 'page_white_code_red.png',
+  'text/javascript': 'page_white_code_red.png',
   'application/json': 'page_white_code.png',
   'application/msword': 'page_white_word.png',
   'application/pdf': 'page_white_acrobat.png',
