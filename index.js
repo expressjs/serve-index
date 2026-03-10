@@ -269,10 +269,12 @@ function createHtmlFileList(files, dir, useIcons, view) {
       + '<span class="date">Modified</span>'
       + '</li>') : '');
 
+  var encodedDirParts = dir.split('/').map(function (c) { return encodeURIComponent(c); });
+
   html += files.map(function (file) {
     var classes = [];
     var isDir = file.stat && file.stat.isDirectory();
-    var path = dir.split('/').map(function (c) { return encodeURIComponent(c); });
+    var path = encodedDirParts.concat(encodeURIComponent(file.name));
 
     if (useIcons) {
       classes.push('icon');
@@ -291,8 +293,6 @@ function createHtmlFileList(files, dir, useIcons, view) {
         }
       }
     }
-
-    path.push(encodeURIComponent(file.name));
 
     var date = file.stat && file.name !== '..'
       ? file.stat.mtime.toLocaleDateString() + ' ' + file.stat.mtime.toLocaleTimeString()
