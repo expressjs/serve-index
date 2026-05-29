@@ -136,8 +136,8 @@ app.listen(3000)
 
 ## License
 
-[MIT](LICENSE). The [Silk](http://www.famfamfam.com/lab/icons/silk/) icons
-are created by/copyright of [FAMFAMFAM](http://www.famfamfam.com/).
+[MIT](LICENSE). The [Silk](https://web.archive.org/web/20230105212205/http://www.famfamfam.com/lab/icons/silk/) icons
+are created by/copyright of [FAMFAMFAM](https://web.archive.org/web/20230109095739/http://www.famfamfam.com/).
 
 [appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/serve-index/master.svg?label=windows
 [appveyor-url]: https://ci.appveyor.com/project/dougwilson/serve-index
