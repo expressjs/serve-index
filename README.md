@@ -53,6 +53,12 @@ Display hidden (dot) files. Defaults to `false`.
 
 Display icons. Defaults to `false`.
 
+##### locals
+
+Additional locals to provide to function templates. If the request has a
+`req.locals` object, those locals are merged after `options.locals`. The
+required locals listed below are merged last.
+
 ##### stylesheet
 
 Optional path to a CSS stylesheet. Defaults to a built-in stylesheet.

@@ -94,6 +94,7 @@ function serveIndex(root, options) {
   var filter = opts.filter;
   var hidden = opts.hidden;
   var icons = opts.icons;
+  var locals = opts.locals;
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
@@ -164,7 +165,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet, locals);
       });
     });
   };
@@ -174,7 +175,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet, templateLocals) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -195,20 +196,20 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
       if (err) return next(err);
 
       // create locals for rendering
-      var locals = {
-        directory: dir,
-        displayIcons: Boolean(icons),
-        fileList: fileList,
-        path: path,
-        style: style,
-        viewName: view
-      };
+      var renderLocals = createLocals(templateLocals, req.locals)
+
+      renderLocals.directory = dir
+      renderLocals.displayIcons = Boolean(icons)
+      renderLocals.fileList = fileList
+      renderLocals.path = path
+      renderLocals.style = style
+      renderLocals.viewName = view
 
       // render html
-      render(locals, function (err, body) {
+      render(renderLocals, function (err, body) {
         if (err) return next(err);
         send(res, 'text/html', body)
-      }, req, res);
+      });
     });
   });
 };
@@ -259,6 +260,28 @@ serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, p
  * Map html `files`, returning an html unordered list.
  * @private
  */
+
+function createLocals() {
+  var locals = {}
+
+  for (var i = 0; i < arguments.length; i++) {
+    mergeLocals(locals, arguments[i])
+  }
+
+  return locals
+}
+
+function mergeLocals(target, source) {
+  if (!source || typeof source !== 'object') return target
+
+  for (var prop in source) {
+    if (Object.prototype.hasOwnProperty.call(source, prop)) {
+      target[prop] = source[prop]
+    }
+  }
+
+  return target
+}
 
 function createHtmlFileList(files, dir, useIcons, view) {
   var html = '<ul id="files" class="view-' + escapeHtml(view) + '">'

@@ -452,25 +452,63 @@ describe('serveIndex(root)', function () {
           .expect(200, 'This is a template.', done)
       });
 
-      it('should provide request and response arguments', function (done) {
-        var templateReq
-        var templateRes
-        var server = createServer(fixtures, {'template': function (locals, callback, req, res) {
-          templateReq = req
-          templateRes = res
-          callback(null, 'This is a template.')
-        }})
+      it('should provide "locals" option values', function (done) {
+        var server = createServer(fixtures, {
+          'locals': {'username': 'static-user'},
+          'template': function (locals, callback) {
+            callback(null, JSON.stringify(locals.username))
+          }
+        })
 
         request(server)
           .get('/users/')
           .set('Accept', 'text/html')
-          .expect(200, 'This is a template.')
-          .expect(function () {
-            assert.strictEqual(templateReq.method, 'GET')
-            assert.strictEqual(templateReq.url, '/users/')
-            assert.strictEqual(typeof templateRes.setHeader, 'function')
-          })
-          .end(done)
+          .expect(200, '"static-user"', done)
+      })
+
+      it('should provide request locals', function (done) {
+        var server = createServer(fixtures, {'template': function (locals, callback) {
+          callback(null, JSON.stringify(locals.username))
+        }}, function (req) {
+          req.locals = {'username': 'request-user'}
+        })
+
+        request(server)
+          .get('/users/')
+          .set('Accept', 'text/html')
+          .expect(200, '"request-user"', done)
+      })
+
+      it('should prefer request locals to "locals" option values', function (done) {
+        var server = createServer(fixtures, {
+          'locals': {'username': 'static-user'},
+          'template': function (locals, callback) {
+            callback(null, JSON.stringify(locals.username))
+          }
+        }, function (req) {
+          req.locals = {'username': 'request-user'}
+        })
+
+        request(server)
+          .get('/users/')
+          .set('Accept', 'text/html')
+          .expect(200, '"request-user"', done)
+      })
+
+      it('should prefer required locals to custom locals', function (done) {
+        var server = createServer(fixtures, {
+          'locals': {'directory': 'custom-directory'},
+          'template': function (locals, callback) {
+            callback(null, JSON.stringify(locals.directory))
+          }
+        }, function (req) {
+          req.locals = {'directory': 'request-directory'}
+        })
+
+        request(server)
+          .get('/users/')
+          .set('Accept', 'text/html')
+          .expect(200, '"/users/"', done)
       })
 
       it('should handle render errors', function (done) {
@@ -849,12 +887,14 @@ function alterProperty(obj, prop, val) {
   })
 }
 
-function createServer(dir, opts) {
+function createServer(dir, opts, setup) {
   dir = dir || fixtures
 
   var _serveIndex = serveIndex(dir, opts)
 
   return http.createServer(function (req, res) {
+    if (setup) setup(req, res)
+
     _serveIndex(req, res, function (err) {
       res.statusCode = err ? (err.status || 500) : 404
       res.end(err ? err.message : 'Not Found')
