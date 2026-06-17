@@ -208,7 +208,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
       render(locals, function (err, body) {
         if (err) return next(err);
         send(res, 'text/html', body)
-      });
+      }, req, res);
     });
   });
 };
