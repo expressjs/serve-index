@@ -97,7 +97,7 @@ function serveIndex(root, options) {
   var stylesheet = opts.stylesheet || defaultStylesheet;
   var template = opts.template || defaultTemplate;
   var view = opts.view || 'tiles';
-
+  var sort = opts.sort || fileSort;
   return function (req, res, next) {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.statusCode = 'OPTIONS' === req.method ? 200 : 405;
@@ -164,7 +164,7 @@ function serveIndex(root, options) {
 
         // not acceptable
         if (!type) return next(createError(406));
-        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, view, template, stylesheet);
+        serveIndex[mediaType[type]](req, res, files, next, originalDir, showUp, icons, path, sort, view, template, stylesheet);
       });
     });
   };
@@ -174,7 +174,7 @@ function serveIndex(root, options) {
  * Respond with text/html.
  */
 
-serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, view, template, stylesheet) {
+serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path, sort, view, template, stylesheet) {
   var render = typeof template !== 'function'
     ? createHtmlRender(template)
     : template
@@ -188,7 +188,7 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
     if (err) return next(err);
 
     // sort file list
-    fileList.sort(fileSort);
+    fileList.sort(sort);
 
     // read stylesheet
     fs.readFile(stylesheet, 'utf8', function (err, style) {
@@ -217,13 +217,13 @@ serveIndex.html = function _html(req, res, files, next, dir, showUp, icons, path
  * Respond with application/json.
  */
 
-serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, path) {
+serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, path, sort) {
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
 
     // sort file list
-    fileList.sort(fileSort)
+    fileList.sort(sort)
 
     // serialize
     var body = JSON.stringify(fileList.map(function (file) {
@@ -238,13 +238,13 @@ serveIndex.json = function _json (req, res, files, next, dir, showUp, icons, pat
  * Respond with text/plain.
  */
 
-serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, path) {
+serveIndex.plain = function _plain (req, res, files, next, dir, showUp, icons, path, sort) {
   // stat all files
   stat(path, files, function (err, fileList) {
     if (err) return next(err)
 
     // sort file list
-    fileList.sort(fileSort)
+    fileList.sort(sort)
 
     // serialize
     var body = fileList.map(function (file) {
