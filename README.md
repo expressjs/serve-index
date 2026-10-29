@@ -134,6 +134,36 @@ app.use('/ftp', express.static('public/ftp'), serveIndex('public/ftp', {'icons':
 app.listen(3000)
 ```
 
+### Serve directory indexes behind a reverse proxy
+
+If a reverse proxy removes a URL prefix, restore the original request URI in
+`req.originalUrl` before the directory middleware runs. For example, a request
+for `/files/ftp/` may reach Express as `/ftp/`. `serve-index` uses `req.url` to
+find the directory and `req.originalUrl` to generate links, so the latter must
+include `/files` for those links to work through the proxy.
+
+Configure the proxy to send the original request URI in an `X-Original-URL`
+header. For example, in the nginx location that proxies requests:
+
+```nginx
+proxy_set_header X-Original-URL $request_uri;
+```
+
+Then add this middleware before `app.use('/ftp', ...)` in the Express example
+above:
+
+```js
+app.use(function (req, res, next) {
+  if (req.headers['x-original-url']) {
+    req.originalUrl = req.headers['x-original-url']
+  }
+  next()
+})
+```
+
+The backend must receive this header from a trusted proxy that overwrites any
+client-supplied value. Keep `req.url` as the rewritten path for filesystem lookups.
+
 ## License
 
 [MIT](LICENSE). The [Silk](https://web.archive.org/web/20230105212205/http://www.famfamfam.com/lab/icons/silk/) icons
