@@ -326,11 +326,18 @@ function createHtmlRender(template) {
     fs.readFile(template, 'utf8', function (err, str) {
       if (err) return callback(err);
 
-      var body = str
-        .replace(/\{style\}/g, locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)))
-        .replace(/\{files\}/g, createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName))
-        .replace(/\{directory\}/g, escapeHtml(locals.directory))
-        .replace(/\{linked-path\}/g, htmlPath(locals.directory));
+      var values = {
+        'style': locals.style.concat(iconStyle(locals.fileList, locals.displayIcons)),
+        'files': createHtmlFileList(locals.fileList, locals.directory, locals.displayIcons, locals.viewName),
+        'directory': escapeHtml(locals.directory),
+        'linked-path': htmlPath(locals.directory)
+      };
+
+      // replace in a single pass with a function, so "$" patterns and
+      // placeholders inside the inserted values are not interpreted
+      var body = str.replace(/\{(style|files|directory|linked-path)\}/g, function (match, name) {
+        return values[name];
+      });
 
       callback(null, body);
     });
