@@ -742,6 +742,30 @@ describe('serveIndex(root)', function () {
         .end(done)
     });
 
+    it('should not expand replacement patterns in file names', function (done) {
+      var server = createServer()
+
+      request(server)
+        .get('/g%23%20%253%20o%20%26%20%252525%20%2537%20dir/')
+        .set('Accept', 'text/html')
+        .expect(200)
+        .expect('Content-Type', 'text/html; charset=utf-8')
+        .expect(/<span class="name">\$\$ \$&amp; \$` \$&#39;\.txt<\/span>/)
+        .end(done)
+    });
+
+    it('should not replace template placeholders in file names', function (done) {
+      var server = createServer()
+
+      request(server)
+        .get('/g%23%20%253%20o%20%26%20%252525%20%2537%20dir/')
+        .set('Accept', 'text/html')
+        .expect(200)
+        .expect('Content-Type', 'text/html; charset=utf-8')
+        .expect(/<span class="name">\{directory\}\.txt<\/span>/)
+        .end(done)
+    });
+
     it('should not work for outside root', function (done) {
       var server = createServer()
 
